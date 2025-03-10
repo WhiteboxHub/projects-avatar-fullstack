@@ -1,0 +1,454 @@
+/* Base font settings for consistency */
+.custom-grid-container {
+    height: 600px;
+    width: 90%;
+    max-width: 1200px;
+    position: relative;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    margin-top: 12px;
+    /* left :100px */
+  }
+  
+  /* Header box styling */
+  .header-box {
+    background-color: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #d0d0d0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  /* Title styling */
+  .header-title {
+    margin: 0;
+    font-size: 24px;
+    color: #2c3e50;
+    font-weight: bold;
+  }
+  
+  /* Header controls styling */
+  .header-controls {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Dropdown styling */
+  .page-dropdown {
+    padding: 8px 12px;
+    border: 1px solid #bdc3c7;
+    background-color: #ffffff;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    position: relative;
+    z-index: 10;
+     /* Ensure it’s above the buttons */
+  }
+  
+  /* Action buttons container styling */
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between buttons */
+    position: absolute;
+    left: 40px; /* Align to the left side */
+    top: 570px; /* Position above the pagination controls */
+    background-color: transparent; /* Transparent background */
+    z-index: 100; /* Ensure it’s above other content */
+    
+  }
+  
+  /* Individual action button styling */
+  .action-button {
+    border: none;
+    background-color: transparent; /* Transparent background */
+    color: #3498db; /* Blue icon color */
+    padding: 5px; /* Smaller padding for icons */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer;
+    transition: color 0.3s ease, background-color 0.3s ease; /* Smooth color transition */
+    font-size: 14px; /* Smaller icon size */
+    position: relative; /* Ensure tooltip positioning */
+  }
+  
+  /* Action button hover effect */
+  .action-button:hover {
+    color: #2980b9; /* Darker blue on hover */
+    background-color: rgba(0, 0, 0, 0.1); /* Slightly shaded background on hover */
+  }
+  
+  /* Action button tooltip styling */
+  .action-button::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    color: #ffffff; /* White text */
+    padding: 4px; /* Smaller padding for tooltip */
+    border-radius: 4px; /* Rounded corners */
+    white-space: nowrap; /* Prevent text wrapping */
+    font-size: 10px; /* Smaller font size for tooltip */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth transition */
+  }
+  
+  /* Show tooltip on hover */
+  .action-button:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: 120%; /* Position slightly above the button */
+  }
+  
+  /* AG Grid theme styling */
+  .ag-theme-alpine {
+    height: calc(100% - 70px);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* Header styling */
+  .ag-theme-alpine .ag-header {
+    background-color: #3498db;
+    border-bottom: 2px solid #2980b9;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  /* Header cell styling */
+  .ag-theme-alpine .ag-header-cell {
+    font-weight: bold;
+    color: #ffffff;
+  }
+  
+  /* Cell styling */
+  .ag-theme-alpine .ag-cell {
+    padding: 10px;
+    border-bottom: 1px solid #d0d0d0;
+  }
+  
+  /* Zebra striping for rows */
+  .ag-theme-alpine .ag-row:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  
+  .ag-theme-alpine .ag-row:nth-child(even) {
+    background-color: #ffffff;
+  }
+  
+  /* Row hover effect */
+  .ag-theme-alpine .ag-row:hover {
+    background-color: #ecf0f1;
+  }
+  
+  /* Pagination styling */
+  .ag-theme-alpine .ag-pagination {
+    border-top: 1px solid #d0d0d0;
+    background-color: #ffffff;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+  }
+  
+  /* Pagination controls styling */
+  .ag-theme-alpine .ag-paging-page-summary-panel {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    position: relative;
+  }
+  
+  /* Pagination panel background color */
+  .ag-paging-panel.ag-unselectable.ag-focus-managed {
+    background-color: #ffffff; /* White background */
+  }
+  
+  /* Adjusting positioning of action buttons relative to the page size selector */
+  .ag-paging-panel .ag-page-size {
+    display: flex;
+    align-items: center;
+  }
+  
+  .ag-paging-panel .ag-page-size::before {
+    content: "";
+    display: flex;
+    align-items: center;
+    margin-right: 10px; /* Space between icons and page size */
+  }
+  
+  .ag-paging-panel .action-buttons {
+    margin-right: 10px; /* Space between action buttons and page size */
+  }
+  
+  /* Modal overlay */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+      z-index: 1000; /* Ensure the modal is above other content */
+  
+  }
+  
+  /* Modal content */
+  .modal-content {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 25%; /* Adjust width for a smaller size */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px; /* Adjust padding as needed */
+    overflow-y: auto;
+    max-height: 70vh; /* Adjust max height for better visibility */
+    z-index: 1000; /* Ensure modal content is above the overlay */
+    color: black;
+  }
+  
+  /* Modal header */
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .modal-title {
+    margin: 0;
+    font-size: 18px; /* Adjust font size for a smaller header */
+    color: #2c3e50;
+  }
+  
+  .modal-close-button {
+    background: transparent;
+    border: none;
+    font-size: 18px; /* Adjust font size for close button */
+    cursor: pointer;
+    color: #3498db;
+  }
+  
+  /* Modal body */
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-field {
+    margin-bottom: 10px; /* Adjust margin for smaller fields */
+  }
+  
+  .modal-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .modal-field input,
+  .modal-field textarea {
+    width: 100%;
+    padding: 6px; /* Adjust padding for smaller input fields */
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+  }
+  
+  /* Modal actions */
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+  }
+  
+  .modal-actions button {
+    padding: 8px 16px; /* Adjust padding for smaller buttons */
+    margin-left: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modal-actions .save-button {
+    background-color: #3498db;
+    color: #fff;
+  }
+  
+  .modal-actions .save-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .modal-actions .cancel-button {
+    background-color: #e0e0e0;
+  }
+  
+  .modal-actions .cancel-button:hover {
+    background-color: #bdc3c7;
+  }
+  
+  
+  
+  
+  
+  /* Modal overlay for view details */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+  
+  /* Modal content styling for view details */
+  .modal-content {
+    width: 40%; /* Adjust width as needed */
+    max-width: 600px; /* Set a maximum width for larger screens */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  
+  }
+  
+  /* Modal header styling */
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .modal-title {
+    margin: 0;
+    font-size: 20px; /* Slightly larger font size */
+    color: #2c3e50;
+  }
+  
+  .modal-close-button {
+    background: transparent;
+    border: none;
+    font-size: 20px; /* Larger font size for close button */
+    cursor: pointer;
+    color: #3498db;
+  }
+  
+  /* Modal body styling */
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-field {
+    margin-bottom: 10px;
+  }
+  
+  .modal-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .modal-field p {
+    margin: 0;
+    padding: 8px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+  }
+  
+  /* Modal actions */
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+  }
+  
+  .modal-actions .cancel-button {
+    background-color: #e0e0e0;
+  }
+  
+  .modal-actions .cancel-button:hover {
+    background-color: #bdc3c7;
+  }
+  
+  /* Add the EditRowModal styles to welcome.css */
+  
+  /* Basic styling for the modal */
+  
+  /* .ReactModal__Overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .ReactModal__Content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  button[type="button"] {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  button[type="button"]:hover {
+    background-color: #5a6268;
+  } */
+  
+  
+  
+  
+  
+  
