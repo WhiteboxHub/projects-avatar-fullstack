@@ -1,9 +1,11 @@
 # avatar-app/projects-api/app/schemas.py
-from pydantic import BaseModel,constr, conint, EmailStr, Field,validator
+from pydantic import BaseModel,constr, conint, EmailStr, Field,validator, HttpUrl
 from datetime import datetime, date
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-
+# changes here 
+# from .models import ClientStatus, ClientTier
+# changes here
 
 class UserCreate(BaseModel):
     username: str  
@@ -450,5 +452,55 @@ class OverdueUpdateSchema(BaseModel):
     checkurl: Optional[str]
     notes: Optional[str]
     status: Optional[str]
-    remindertype: Optional[str]    
+    remindertype: Optional[str]
+        
+#  ------------------------------------changes here--------------------------------
+
+class ClientBase(BaseModel):
+    companyname: str
+    tier: int
+    status: str
+    email: EmailStr
+    phone: str
+    fax: str
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    url: HttpUrl
+    manager1name: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    linkedin: Optional[str] = None
+    manager1email: Optional[str] = None
+    manager1phone: Optional[str] = None
+    hmname: Optional[str] = None
+    hmemail: Optional[EmailStr] = None
+    hmphone: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[EmailStr] = None
+    hrphone: Optional[str] = None
+    notes: Optional[str] = None
+
+class ClientCreate(ClientBase):
+    pass
+
+class ClientUpdate(ClientBase):
+    pass
+
+class ClientInDB(ClientBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class ClientResponse(BaseModel):
+    data: List[ClientInDB]
+    total: int
+    page: int
+    page_size: int
+    pages: int
     
+    
+# ----------------------------------------------------------------

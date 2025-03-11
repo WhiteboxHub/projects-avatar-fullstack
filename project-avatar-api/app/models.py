@@ -1,14 +1,16 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, String, Integer, DateTime, Enum, Boolean
 from typing import ClassVar, Optional
 from pydantic_settings import BaseSettings
 from datetime import datetime, date
 from sqlalchemy.orm import DeclarativeBase
 from app.models import Base
+from enum import Enum as PyEnum
 
 Base = declarative_base()
 
@@ -57,13 +59,14 @@ class Batch(Base):
     lastmoddatetime = Column(TIMESTAMP)
     courseid = Column(Integer)
 
-class Placement(Base):
-    __tablename__ = 'placement'
+# class Placement(Base):
+#     __tablename__ = 'placement'
 
 
-    id = Column(Integer, primary_key=True, index=True)
-    candidateid = Column(Integer)
-    placementDate = Column(DateTime)
+#     id = Column(Integer, primary_key=True, index=True)
+#     candidateid = Column(Integer)
+#     placementDate = Column(DateTime)
+  
 
 
 class Lead(Base):
@@ -242,7 +245,9 @@ class Placement(Base):
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
     vendorid = Column(Integer, ForeignKey("vendor.id"))
-    clientid = Column(Integer, ForeignKey("client.id"))
+    # clientid = Column(Integer, ForeignKey("client.id"s))
+    clientid = Column(Integer, ForeignKey("clients.id"))
+
 
     candidate = relationship("Candidate", back_populates="placements")
     vendor = relationship("Vendor", back_populates="placements")
@@ -266,13 +271,39 @@ class Vendor(Base):
     placements = relationship("Placement", back_populates="vendor")
 
 class Client(Base):
-    __tablename__ = "client"
+    __tablename__ = "clients"
 
-    id = Column(Integer, primary_key=True, index=True)
-    companyname = Column(String, nullable=False)
-
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    companyname = Column(String(250), unique=True, nullable=False)
+    tier = Column(Integer, nullable=False, default=2)
+    status = Column(String(45), nullable=False, default="Current")
+    email = Column(String(150), unique=True, nullable=False)
+    phone = Column(String(150), nullable=False, default="000-000-0000")
+    fax = Column(String(150), nullable=False, default="000-000-0000")
+    address = Column(String(250), nullable=True)
+    city = Column(String(150), nullable=True)
+    state = Column(String(150), nullable=True)
+    country = Column(String(150), nullable=True)
+    zip = Column(String(150), nullable=True)
+    url = Column(String(150), nullable=False, default="http://nothing.com")
+    manager1name = Column(String(150), nullable=True)
+    twitter = Column(String(100), nullable=True)
+    facebook = Column(String(100), nullable=True)
+    linkedin = Column(String(100), nullable=True)
+    manager1email = Column(String(150), nullable=True)
+    manager1phone = Column(String(150), nullable=True)
+    hmname = Column(String(150), nullable=True)
+    hmemail = Column(String(150), nullable=True)
+    hmphone = Column(String(150), nullable=True)
+    hrname = Column(String(150), nullable=True)
+    hremail = Column(String(150), nullable=True)
+    hrphone = Column(String(150), nullable=True)
+    notes = Column(Text, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=False)
+    # placements = relationship("Placement", back_populates="client")
     placements = relationship("Placement", back_populates="client")
 
+    
 class PO(Base):
     __tablename__ = "po"
 
