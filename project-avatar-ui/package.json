@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fortawesome/free-brands-svg-icons": "^6.6.0",
     "@fortawesome/free-regular-svg-icons": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.7",
     "ag-grid-community": "^32.2.0",
     "ag-grid-enterprise": "^32.3.2",
     "ag-grid-react": "^32.2.0",

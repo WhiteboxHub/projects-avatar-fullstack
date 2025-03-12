@@ -1,7 +1,7 @@
 // Base Client type with all fields
 export interface Client {
     id: string;
-    companyName: string;
+    companyname: string;
     tier: string;
     status: string;
     email: string;

@@ -1,288 +1,231 @@
-// import React from 'react';
-// import Modal from 'react-modal';
-// import { AiOutlineClose } from 'react-icons/ai';
-
-// interface Recruiter {
-//   id?: string;
-//   name?: string;
-//   email?: string;
-//   phone?: string;
-//   designation?: string;
-//   clientid?: string;
-//   comp?: string;
-//   status?: string;
-//   dob?: string;
-//   personalemail?: string;
-//   skypeid?: string;
-//   linkedin?: string;
-//   twitter?: string;
-//   facebook?: string;
-//   review?: string;
-//   notes?: string;
-// }
-
-// interface ViewRowModalProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   data: Recruiter;
-// }
-
-// const ViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onClose, data }) => {
-//   return (
-//     <Modal
-//       isOpen={isOpen}
-//       onRequestClose={onClose}
-//       style={{
-//         content: {
-//           top: '55%',
-//           left: '50%',
-//           right: 'auto',
-//           bottom: 'auto',
-//           transform: 'translate(-50%, -50%)',
-//           maxWidth: '400px',
-//           width: '90%',
-//           maxHeight: '80vh',
-//           padding: '24px',
-//           borderRadius: '12px',
-//           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-//           overflowY: 'auto',
-//           fontFamily: 'Arial, sans-serif',
-//         },
-//         overlay: {
-//           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-//         },
-//       }}
-//     >
-//       <div className="relative">
-//         <button
-//           onClick={onClose}
-//           className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
-//         >
-//           &times;
-//         </button>
-//       </div>
-//       <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">View Recruiter</h2>
-
-//       <div className="space-y-4">
-//         {/* Name */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-//           <p className="text-sm text-gray-700">{data.name}</p>
-//         </div>
-
-//         {/* Email */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-//           <p className="text-sm text-gray-700">{data.email}</p>
-//         </div>
-
-//         {/* Phone */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
-//           <p className="text-sm text-gray-700">{data.phone}</p>
-//         </div>
-
-//         {/* Designation */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-//           <p className="text-sm text-gray-700">{data.designation}</p>
-//         </div>
-
-//         {/* Client ID */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
-//           <p className="text-sm text-gray-700">{data.clientid}</p>
-//         </div>
-
-//         {/* Company Name */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>
-//           <p className="text-sm text-gray-700">{data.comp}</p>
-//         </div>
-
-//         {/* Status */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-//           <p className="text-sm text-gray-700">{data.status}</p>
-//         </div>
-
-//         {/* Date of Birth */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
-//           <p className="text-sm text-gray-700">{data.dob}</p>
-//         </div>
-
-//         {/* Personal Email */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Personal Email</label>
-//           <p className="text-sm text-gray-700">{data.personalemail}</p>
-//         </div>
-
-//         {/* Skype ID */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
-//           <p className="text-sm text-gray-700">{data.skypeid}</p>
-//         </div>
-
-//         {/* LinkedIn */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
-//           <p className="text-sm text-gray-700">{data.linkedin}</p>
-//         </div>
-
-//         {/* Twitter */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Twitter</label>
-//           <p className="text-sm text-gray-700">{data.twitter}</p>
-//         </div>
-
-//         {/* Facebook */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook</label>
-//           <p className="text-sm text-gray-700">{data.facebook}</p>
-//         </div>
-
-//         {/* Review */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-//           <p className="text-sm text-gray-700">{data.review}</p>
-//         </div>
-
-//         {/* Notes */}
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-//           <p className="text-sm text-gray-700">{data.notes}</p>
-//         </div>
-//       </div>
-//     </Modal>
-//   );
-// };
-
-// export default ViewRowModal;
-
 import React from 'react';
 import Modal from 'react-modal';
 import { Client } from '@/types/client';
 import { AiOutlineClose } from 'react-icons/ai';
 
-interface ViewClientModalProps {
+interface ViewRowClientProps {
   isOpen: boolean;
   onClose: () => void;
-  clientData: Client;
+  client: Client | null;
 }
 
-const ViewClientModal: React.FC<ViewClientModalProps> = ({
-  isOpen,
-  onClose,
-  clientData,
-}) => {
-  const renderField = (label: string, value: string | undefined) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <p className="mt-1 text-sm text-gray-900">{value || 'N/A'}</p>
-    </div>
-  );
-
+const ViewRowClient: React.FC<ViewRowClientProps> = ({ isOpen, onClose, client }) => {
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
-      className="modal-content"
-      overlayClassName="modal-overlay"
+      style={{
+        content: {
+          top: '55%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '400px',
+          width: '90%',
+          maxHeight: '80vh',
+          padding: '24px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          overflowY: 'auto',
+          fontFamily: 'Arial, sans-serif',
+        },
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      }}
+      contentLabel="View Row Modal"
+      ariaHideApp={false}
     >
-      <div className="relative w-full max-w-4xl p-6 bg-white rounded-lg shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Client Details</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
-          >
-            <AiOutlineClose />
-          </button>
-        </div>
+      <div className="relative">
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
+        >
+          <AiOutlineClose />
+        </button>
+      </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Company Information */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              Company Information
-            </h3>
-          </div>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Client Details</h2>
 
-          <div className="space-y-4">
-            {renderField('Company Name', clientData.companyName)}
-            {renderField('Status', clientData.status)}
-            {renderField('Tier', clientData.tier)}
-            {renderField('Website', clientData.url)}
-          </div>
+      <div className="modal-body">
+        {client ? (
+          <div>
+            <div className="modal-field">
+              <label htmlFor="Company Name">Company Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.companyname}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('Email', clientData.email)}
-            {renderField('Phone', clientData.phone)}
-            {renderField('Fax', clientData.fax)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Tier">Tier</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.tier}
+              </div>
+            </div>
 
-          {/* Address Information */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              Address Information
-            </h3>
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Status">Status</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.status}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('Address', clientData.address)}
-            {renderField('City', clientData.city)}
-            {renderField('State', clientData.state)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Email">Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.email}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('Country', clientData.country)}
-            {renderField('ZIP Code', clientData.zip)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Phone">Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.phone}
+              </div>
+            </div>
 
-          {/* Contact Information */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              Contact Information
-            </h3>
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Fax">Fax</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.fax}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('Manager Name', clientData.manager1Name)}
-            {renderField('Manager Email', clientData.manager1Email)}
-            {renderField('Manager Phone', clientData.manager1Phone)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Address">Address</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.address}, {client.city}, {client.state}, {client.zip}, {client.country}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('HR Name', clientData.hrName)}
-            {renderField('HR Email', clientData.hrEmail)}
-            {renderField('HR Phone', clientData.hrPhone)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Twitter">Twitter</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.twitter}
+              </div>
+            </div>
 
-          {/* Social Media */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              Social Media
-            </h3>
-          </div>
+            <div className="modal-field">
+              <label htmlFor="Facebook">Facebook</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.facebook}
+              </div>
+            </div>
 
-          <div className="space-y-4">
-            {renderField('LinkedIn', clientData.linkedIn)}
-            {renderField('Twitter', clientData.twitter)}
-            {renderField('Facebook', clientData.facebook)}
-          </div>
+            <div className="modal-field">
+              <label htmlFor="LinkedIn">LinkedIn</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.linkedIn}
+              </div>
+            </div>
 
-          {/* Notes */}
-          <div className="col-span-2">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              Additional Information
-            </h3>
-            {renderField('Notes', clientData.notes)}
+            <div className="modal-field">
+              <label htmlFor="Manager 1 Name">Manager 1 Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.manager1Name}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Manager 1 Email">Manager 1 Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.manager1Email}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Manager 1 Phone">Manager 1 Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.manager1Phone}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HM Name">HM Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hmName}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HM Email">HM Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hmEmail}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HM Phone">HM Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hmPhone}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HR Name">HR Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hrName}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HR Email">HR Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hrEmail}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HR Phone">HR Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.hrPhone}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Notes">Notes</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.notes}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Last Modified Date Time">Last Modified Date Time</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.lastModDateTime}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Created At">Created At</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.createdAt}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Updated At">Updated At</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.updatedAt}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Is Active">Is Active</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {client.isActive ? 'Yes' : 'No'}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p>No data available</p>
+        )}
       </div>
     </Modal>
   );
 };
 
-export default ViewClientModal;
+export default ViewRowClient;
+

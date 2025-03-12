@@ -42,9 +42,7 @@ app.include_router(po_router,tags=["po"])
 app.include_router(candidate_marketing_router, tags=["candidatemarketing"])  
 app.include_router(current_marketing_router, tags=["currentmarketing"])  
 app.include_router(overdue_router, tags=["overdue"])  
-# Add the new client router
-# Update the client router inclusion with a proper prefix
-app.include_router(client_router, prefix="/api/admin/clients", tags=["clients"])
+app.include_router(client_router, prefix="/api/admin/client", tags=["clients"])
 
 
 @app.get("/")

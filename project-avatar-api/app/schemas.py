@@ -455,7 +455,7 @@ class OverdueUpdateSchema(BaseModel):
     remindertype: Optional[str]
         
 #  ------------------------------------changes here--------------------------------
-
+from pydantic import field_validator
 class ClientBase(BaseModel):
     companyname: str
     tier: int
@@ -476,24 +476,64 @@ class ClientBase(BaseModel):
     manager1email: Optional[str] = None
     manager1phone: Optional[str] = None
     hmname: Optional[str] = None
-    hmemail: Optional[EmailStr] = None
+    hmemail: Optional[str] = None  # Change from EmailStr to str
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
-    hremail: Optional[EmailStr] = None
+    hremail: Optional[str] = None  # Change from EmailStr to str
     hrphone: Optional[str] = None
     notes: Optional[str] = None
+
+    @field_validator("hmemail", "hremail", mode="before")
+    @classmethod
+    def validate_email(cls, v):
+        if v == "":
+            return None  # Convert empty strings to None
+        return v
 
 class ClientCreate(ClientBase):
     pass
 
 class ClientUpdate(ClientBase):
-    pass
+    class Config:
+        from_attributes = True
 
-class ClientInDB(ClientBase):
+class ClientInDB(BaseModel):
     id: int
+    companyname: str
+    tier: int
+    status: str
+    email: EmailStr
+    phone: str
+    fax: str
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    url: HttpUrl
+    manager1name: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    linkedin: Optional[str] = None
+    manager1email: Optional[str] = None
+    manager1phone: Optional[str] = None
+    hmname: Optional[str] = None
+    hmemail: Optional[str] = None  # Allow empty strings
+    hmphone: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[str] = None  # Allow empty strings
+    hrphone: Optional[str] = None
+    notes: Optional[str] = None
+
+    @field_validator("hmemail", "hremail", mode="before")
+    @classmethod
+    def validate_email(cls, v):
+        if v == "":
+            return None  # Convert empty strings to None
+        return v
 
     class Config:
-        orm_mode = True
+        from_attributes = True  
 
 class ClientResponse(BaseModel):
     data: List[ClientInDB]
@@ -501,6 +541,14 @@ class ClientResponse(BaseModel):
     page: int
     page_size: int
     pages: int
+
+class ClientDeleteResponse(BaseModel):
+    message: str
+    client_id: int  # Add client_id to the response
+
+    class Config:
+        orm_mode = True
+
     
     
 # ----------------------------------------------------------------

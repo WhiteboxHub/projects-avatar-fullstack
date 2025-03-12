@@ -246,13 +246,12 @@ class Placement(Base):
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
     vendorid = Column(Integer, ForeignKey("vendor.id"))
     # clientid = Column(Integer, ForeignKey("client.id"s))
-    clientid = Column(Integer, ForeignKey("clients.id"))
-
-
+    clientid = Column(Integer, ForeignKey("client.id"))
     candidate = relationship("Candidate", back_populates="placements")
     vendor = relationship("Vendor", back_populates="placements")
     client = relationship("Client", back_populates="placements")
     po_entries = relationship("PO", back_populates="placement")
+# Client.placements = relationship("Placement", back_populates="client")
 
 class Candidate(Base):
     __tablename__ = "candidate"
@@ -271,7 +270,7 @@ class Vendor(Base):
     placements = relationship("Placement", back_populates="vendor")
 
 class Client(Base):
-    __tablename__ = "clients"
+    __tablename__ = "client"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     companyname = Column(String(250), unique=True, nullable=False)
@@ -299,7 +298,8 @@ class Client(Base):
     hremail = Column(String(150), nullable=True)
     hrphone = Column(String(150), nullable=True)
     notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(TIMESTAMP, nullable=False)
+    lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=func.now())
+
     # placements = relationship("Placement", back_populates="client")
     placements = relationship("Placement", back_populates="client")
 
