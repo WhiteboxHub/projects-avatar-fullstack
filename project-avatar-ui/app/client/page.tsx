@@ -1,19 +1,23 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { AxiosError } from "axios";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "../../modals/client_modals/AddRowClient";
-import EditRowModal from "../../modals/client_modals/EditRowClient";
-// import ViewRowModal from "../../modals/client_modals/ViewRowClient";
+import AddRowModal from "@/modals/client_modals/AddRowClient";
+import EditRowModal from "@/modals/client_modals/EditRowClient";
+import ViewRowModal from "@/modals/client_modals/ViewRowClient"; 
 import { MdDelete } from "react-icons/md";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaAngleDoubleLeft,
+  FaAngleDoubleRight,
+} from "react-icons/fa";
 import {
   AiOutlineEdit,
   AiOutlineEye,
@@ -21,13 +25,13 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import { Client, ErrorResponse } from "@/types";
-
+import { Client } from "@/types/client";
+import { ErrorResponse } from "@/types";
 
 jsPDF.prototype.autoTable = autoTable;
 const Clients = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<
     { headerName: string; field: string }[]
   >([]);
@@ -73,9 +77,10 @@ const Clients = () => {
     }
   };
 
+//  search clients 
   const fetchClients = async (searchQuery = "") => {
     try {
-      const response = await axios.get(`${API_URL}/client/search`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client/search`, {
         params: {
           page: currentPage,
           pageSize: paginationPageSize,
@@ -129,12 +134,14 @@ const Clients = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to edit."); 
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
 
+
+  // Delete a row from the record
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
@@ -148,7 +155,7 @@ const Clients = () => {
           if (!confirmation) return;
 
           try {
-            await axios.delete(`${API_URL}/client/delete/${clientId}`, {
+            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/client/delete/${clientId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert("Client deleted successfully.");
@@ -157,7 +164,8 @@ const Clients = () => {
             const axiosError = error as AxiosError;
             alert(
               `Failed to delete client: ${
-                (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
+                (axiosError.response?.data as ErrorResponse)?.message ||
+                axiosError.message
               }`
             );
           }
@@ -165,8 +173,8 @@ const Clients = () => {
           alert("No valid client ID found for the selected row.");
         }
       } else {
-        setAlertMessage("Please select a row to delete."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to delete.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
@@ -177,15 +185,14 @@ const Clients = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]); // Set the selected row data
-        setModalState((prevState) => ({ ...prevState, view: true })); // Open the view modal
+        setSelectedRow(selectedRows[0]); 
+        setModalState((prevState) => ({ ...prevState, view: true })); 
       } else {
-        setAlertMessage("Please select a row to view."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to view.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
-
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -195,7 +202,7 @@ const Clients = () => {
     autoTable(doc, {
       head: [headers],
       body: pdfData,
-      theme: 'grid',
+      theme: "grid",
       styles: { fontSize: 5 },
     });
     doc.save("client_data.pdf");
@@ -206,11 +213,11 @@ const Clients = () => {
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-    {alertMessage && ( // Conditional rendering of alert message
-      <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
-        {alertMessage}
-      </div>
-    )}
+      {alertMessage && (
+        <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
+          {alertMessage}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold text-gray-800">Client Management</h1>
         <div className="flex space-x-2">
@@ -218,13 +225,13 @@ const Clients = () => {
             onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
           >
-            <MdAdd className="mr-2" /> 
+            <MdAdd className="mr-2" />
           </button>
           <button
             onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
           >
-            <AiOutlineEdit className="mr-2" /> 
+            <AiOutlineEdit className="mr-2" />
           </button>
           <button
             onClick={handleDeleteRow}
@@ -236,13 +243,13 @@ const Clients = () => {
             onClick={handleViewRow}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
           >
-            <AiOutlineEye className="mr-2" /> 
+            <AiOutlineEye className="mr-2" />
           </button>
           <button
             onClick={handleRefresh}
             className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900"
           >
-            <AiOutlineReload className="mr-2" /> 
+            <AiOutlineReload className="mr-2" />
           </button>
           <button
             onClick={handleDownloadPDF}
@@ -315,7 +322,11 @@ const Clients = () => {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              className={`px-2 py-1 rounded-md ${
+                currentPage === page
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-800"
+              }`}
             >
               {page}
             </button>
@@ -347,12 +358,18 @@ const Clients = () => {
         <EditRowModal
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
-          clientData={selectedRow} // Changed 'data' back to 'clientData' to match AddRowModalProps
+          clientData={selectedRow}
           onSave={fetchData}
         />
       )}
+      {modalState.view && selectedRow && ( 
+        <ViewRowModal
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          client={selectedRow}
+        />
+      )}
     </div>
-  )
+  );
 };
-
 export default Clients;

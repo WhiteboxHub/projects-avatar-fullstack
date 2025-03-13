@@ -354,36 +354,36 @@ export interface Vendor {
   notes?: string;
 }
 
-  export  type Client= {
-    id: string;
-    companyName: string;
-    tier: string;
-    status: string;
-    email: string;
-    phone: string;
-    fax?: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    zip: string;
-    url: string;
-    manager1Name: string;
-    twitter?: string;
-    facebook?: string;
-    linkedIn?: string;
-    manager1Email: string;
-    manager1Phone: string;
-    hmName: string; // Hiring manager name
-    hmEmail: string;
-    hmPhone: string;
-    hrName: string;
-    hrEmail: string;
-    hrPhone: string;
-    notes?: string;
-    lastModDateTime: string;
-    client?: string; // Assuming 'clicent' is a typo for 'client'
-  }
+  // export  type Client= {
+  //   id: string;
+  //   companyName: string;
+  //   tier: string;
+  //   status: string;
+  //   email: string;
+  //   phone: string;
+  //   fax?: string;
+  //   address: string;
+  //   city: string;
+  //   state: string;
+  //   country: string;
+  //   zip: string;
+  //   url: string;
+  //   manager1Name: string;
+  //   twitter?: string;
+  //   facebook?: string;
+  //   linkedIn?: string;
+  //   manager1Email: string;
+  //   manager1Phone: string;
+  //   hmName: string; // Hiring manager name
+  //   hmEmail: string;
+  //   hmPhone: string;
+  //   hrName: string;
+  //   hrEmail: string;
+  //   hrPhone: string;
+  //   notes?: string;
+  //   lastModDateTime: string;
+  //   client?: string; // Assuming 'clicent' is a typo for 'client'
+  // }
   
 
   export type Employee ={
@@ -533,4 +533,5 @@ export interface DetailedClient {
   email: string;
   // Add other fields here
 }
+
 
