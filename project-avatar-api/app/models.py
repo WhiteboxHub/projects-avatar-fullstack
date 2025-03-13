@@ -300,8 +300,22 @@ class Client(Base):
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    # placements = relationship("Placement", back_populates="client")
     placements = relationship("Placement", back_populates="client")
+
+class ClientSearch(Base):
+    __tablename__ = "client"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    companyname = Column(String(250), nullable=True)
+    email = Column(String(150), nullable=True)
+    phone = Column(String(150), nullable=True)
+    city = Column(String(150), nullable=True)
+    state = Column(String(150), nullable=True)
+    country = Column(String(150), nullable=True)
+    status = Column(String(45), nullable=True)
+    tier = Column(Integer, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
     
 class PO(Base):

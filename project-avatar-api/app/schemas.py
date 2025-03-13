@@ -476,10 +476,10 @@ class ClientBase(BaseModel):
     manager1email: Optional[str] = None
     manager1phone: Optional[str] = None
     hmname: Optional[str] = None
-    hmemail: Optional[str] = None  # Change from EmailStr to str
+    hmemail: Optional[str] = None  
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
-    hremail: Optional[str] = None  # Change from EmailStr to str
+    hremail: Optional[str] = None  
     hrphone: Optional[str] = None
     notes: Optional[str] = None
 
@@ -489,6 +489,12 @@ class ClientBase(BaseModel):
         if v == "":
             return None  # Convert empty strings to None
         return v
+
+class ClientSearchBase(BaseModel):
+    companyname: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 class ClientCreate(ClientBase):
     pass
