@@ -268,6 +268,7 @@ class Vendor(Base):
     companyname = Column(String, nullable=False)
 
     placements = relationship("Placement", back_populates="vendor")
+    recruiters = relationship("Recruiter", back_populates="vendor")
 
 class Client(Base):
     __tablename__ = "client"
@@ -301,6 +302,7 @@ class Client(Base):
     lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     placements = relationship("Placement", back_populates="client")
+    recruiters = relationship("Recruiter", back_populates="client")
 
 class ClientSearch(Base):
     __tablename__ = "client"
@@ -471,3 +473,48 @@ class Overdue(Base):
     recruiterphone = Column(String, nullable=True)
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
+
+# Add vendor
+
+
+
+
+# Adding recruiter model
+from pydantic import BaseModel, validator, ValidationError
+class Recruiter(Base):
+    __tablename__ = 'recruiter'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), index=True)
+    email = Column(String(150), unique=True, index=True)
+    phone = Column(String(150), nullable=True)
+    status = Column(CHAR(1), nullable=True)
+    designation = Column(String(300), nullable=True)
+    dob = Column(Date, nullable=True)
+    personalemail = Column(String(150), nullable=True)
+    employeeid = Column(Integer, nullable=True)
+    skypeid = Column(String(150), nullable=True)
+    linkedin = Column(String(300), nullable=True)
+    twitter = Column(String(150), nullable=True)
+    facebook = Column(String(300), nullable=True)
+    review = Column(CHAR(1), nullable=True)
+    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
+    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
+    notes = Column(Text, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=True)
+
+
+    client = relationship("Client", back_populates="recruiters")
+    vendor = relationship("Vendor", back_populates="recruiters")
+    
+    @validator('dob', pre=True, always=True)
+    def validate_dob(cls, v):
+         if isinstance(v, date):
+             return v  # Already a date object, return as is
+         if v in ('0000-00-00', None):
+             return None
+         try:
+             return datetime.strptime(v, '%Y-%m-%d').date()
+         except (ValueError, TypeError):
+             raise ValueError("Invalid date format for dob")
+    

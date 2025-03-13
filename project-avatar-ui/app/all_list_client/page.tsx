@@ -1,21 +1,3 @@
-
-
-// const ComingSoon: React.FC = () => {
-//   return (
-//     <div className="flex flex-col items-center justify-center h-screen">
-//       <h1 className="text-4xl font-bold mb-4">Coming Soon</h1>
-//       <p className="text-lg text-gray-600">This feature is under development. Stay tuned!</p>
-//     </div>
-//   );
-// };
-
-// export default ComingSoon;
-
-
-
-
-
-
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -40,7 +22,7 @@ import {
 } from "react-icons/ai";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
-import { Client } from "../../types/index"; // Adjust the import path accordingly
+import { Client } from "../../types/client"; // Adjust the import path accordingly
 
 const AllListClient = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
@@ -246,7 +228,7 @@ const AllListClient = () => {
         </div>
       )}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">Recruiters Management</h1></div>
+        <h1 className="text-3xl font-bold text-gray-800">Recruiter Management</h1></div>
 
 
 

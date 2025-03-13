@@ -16,7 +16,7 @@ from app.routes.currentMarketingRoute import router as current_marketing_router 
 from app.routes.overdueRoute import router as overdue_router
 from app.routes.clientRoute import router as client_router  # Import the new router
 from app.routes.clientSearchRoute import router as client_search_router  # Import the new router
-
+from app.routes.byClientRoute import router as by_client_router
 app = FastAPI()
 
 origins = ["http://localhost:3000"]
@@ -45,7 +45,7 @@ app.include_router(current_marketing_router, tags=["currentmarketing"])
 app.include_router(overdue_router, tags=["overdue"])
 app.include_router(client_search_router, tags=["clientsearch"])
 app.include_router(client_router, prefix="/api/admin/client", tags=["clients"])
-
+app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
 
 @app.get("/")
 def read_root():

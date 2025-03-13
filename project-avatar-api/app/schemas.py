@@ -558,3 +558,49 @@ class ClientDeleteResponse(BaseModel):
     
     
 # ----------------------------------------------------------------
+
+
+# -----------Adding Recruiter Schema ----------------------------------
+
+class RecruiterBase(BaseModel):
+     name:  Optional[str] = None
+     email: str
+     phone: Optional[str] = None
+     status: Optional[str] = None
+     designation: Optional[str] = None
+     dob: Optional[date] = None
+     personalemail: Optional[str] = None
+     employeeid: Optional[int] = None
+     skypeid: Optional[str] = None
+     linkedin: Optional[str] = None
+     twitter: Optional[str] = None
+     facebook: Optional[str] = None
+     review: Optional[str] = None
+     vendorid: Optional[int] = None
+     clientid: Optional[int] = None
+     notes: Optional[str] = None
+     lastmoddatetime: Optional[datetime] = None
+     
+     @validator('dob', pre=True, always=True)
+     def validate_dob(cls, v):
+        if isinstance(v, date):
+            return v  # Already a date object, return as is
+        if v in ('0000-00-00', None):
+            return None
+        try:
+            return datetime.strptime(v, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            raise ValueError("Invalid date format for dob")
+
+
+class RecruiterCreate(RecruiterBase):
+    pass
+
+class RecruiterUpdate(RecruiterBase):
+    pass
+
+class Recruiter(RecruiterBase):
+    id: int
+
+    class Config:
+        orm_mode = True
