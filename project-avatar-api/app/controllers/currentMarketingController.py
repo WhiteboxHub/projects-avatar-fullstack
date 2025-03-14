@@ -58,9 +58,9 @@ def get_current_marketing_list(db: Session, skip: int, limit: int):
     columns = result.keys()
     return [dict(zip(columns, row)) for row in rows]
 
-def get_current_marketing_by_id(db: Session, current_marketing_id: int):
+def get_current_marketing_by_candidate_name(db: Session, name: str):
     """
-    Retrieve a single current marketing record by ID with custom SQL query.
+    Retrieve a single current marketing record by candidate name with custom SQL query.
     """
     query = text("""
         SELECT
@@ -94,19 +94,18 @@ def get_current_marketing_by_id(db: Session, current_marketing_id: int):
             cm.intro,
             cm.notes
         FROM
-            candidatemarketing cm,
-            candidate c
+            candidatemarketing cm
+        JOIN
+            candidate c ON cm.candidateid = c.candidateid
         WHERE
-            cm.candidateid = c.candidateid
-            AND cm.id = :current_marketing_id
+            c.name = :name
             AND c.status IN ('Marketing', 'Placed', 'OnProject-Mkt')
             AND cm.status NOT IN ('6-Suspended', '5-Closed')
     """)
 
-    result = db.execute(query, {"current_marketing_id": current_marketing_id})
+    result = db.execute(query, {"name": name})
     row = result.fetchone()
 
-    # Convert the result to a dictionary
     if row:
         columns = result.keys()
         return dict(zip(columns, row))
