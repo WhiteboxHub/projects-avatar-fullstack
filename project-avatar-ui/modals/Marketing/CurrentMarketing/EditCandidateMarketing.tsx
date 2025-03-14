@@ -1,3 +1,5 @@
+// new-projects-avatar-fullstack/project-avatar-ui/modals/Marketing/CurrentMarketing/EditCandidateMarketing.tsx
+
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
@@ -57,7 +59,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     e.preventDefault();
     if (formData) {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/candidatemarketing/update/${formData.candidateid}`, formData, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/candidatemarketing/${formData.candidateid}`, formData, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();

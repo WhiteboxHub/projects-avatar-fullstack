@@ -452,6 +452,44 @@ class OverdueUpdateSchema(BaseModel):
     checkurl: Optional[str]
     notes: Optional[str]
     status: Optional[str]
+
+    remindertype: Optional[str]    
+    
+    
+    
+class InvoiceBase(BaseModel):
+    invoicenumber: str
+    startdate: date
+    enddate: date
+    invoicedate: date
+    quantity: float
+    otquantity: float = 0.0
+    status: Optional[str] = None
+    amountreceived: Optional[float] = None
+    releaseddate: Optional[date] = None
+    receiveddate: Optional[date] = None
+    checknumber: Optional[str] = None
+    invoiceurl: Optional[str] = None
+    checkurl: Optional[str] = None
+    reminders: str = 'Y'
+    remindertype: str = 'Open'
+    emppaiddate: Optional[date] = None
+    candpaymentstatus: str = 'Open'
+    poid: int
+    notes: Optional[str] = None
+
+class InvoiceCreateSchema(InvoiceBase):
+    pass
+
+class InvoiceUpdateSchema(InvoiceBase):
+    pass
+
+class InvoiceSchema(InvoiceBase):
+    id: int
+
+    class Config:
+        from_attributes = True    
+
     remindertype: Optional[str]
         
 #  ------------------------------------changes here--------------------------------
@@ -604,3 +642,4 @@ class Recruiter(RecruiterBase):
 
     class Config:
         orm_mode = True
+

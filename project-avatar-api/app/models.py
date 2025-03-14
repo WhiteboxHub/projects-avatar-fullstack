@@ -1,6 +1,9 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
+
+
 from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
+
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import declarative_base, relationship
@@ -474,6 +477,33 @@ class Overdue(Base):
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
 
+
+
+class Invoice(Base):
+    __tablename__ = "invoice"
+
+    id = Column(Integer, primary_key=True, index=True)
+    invoicenumber = Column(String(45), unique=True, nullable=False)
+    startdate = Column(Date, nullable=False)
+    enddate = Column(Date, nullable=False)
+    invoicedate = Column(Date, nullable=False)
+    quantity = Column(Numeric(precision=19, scale=1), nullable=False)
+    otquantity = Column(Numeric(precision=19, scale=1), nullable=False, default=0.0)
+    status = Column(String(45), nullable=True)
+    amountreceived = Column(Numeric(precision=19, scale=4), nullable=True)
+    releaseddate = Column(Date, nullable=True)
+    receiveddate = Column(Date, nullable=True)
+    checknumber = Column(String(150), nullable=True)
+    invoiceurl = Column(String(300), nullable=True)
+    checkurl = Column(String(300), nullable=True)
+    reminders = Column(String(1), nullable=False, default='Y')
+    remindertype = Column(String(150), nullable=False, default='Open')
+    emppaiddate = Column(Date, nullable=True)
+    candpaymentstatus = Column(String(45), nullable=False, default='Open')
+    poid = Column(Integer, ForeignKey("po.id"), nullable=False)
+    notes = Column(Text, nullable=True)
+    lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
+
 # Add vendor
 
 
@@ -518,3 +548,4 @@ class Recruiter(Base):
          except (ValueError, TypeError):
              raise ValueError("Invalid date format for dob")
     
+
