@@ -22,6 +22,7 @@
 
 // wbl_admin\app\layout.tsx
 import { Metadata } from 'next';
+import { Toaster } from 'react-hot-toast';
 import './globals.css';
 import { AuthProvider } from '../components/AuthContext'; // Import AuthProvider
 import ClientLayout from './ClientLayout'; // Import the client-side layout component
@@ -44,6 +45,7 @@ export default function RootLayout({
           <ClientLayout>
             {children}
           </ClientLayout>
+          <Toaster position="top-right" />
         </AuthProvider>
       </body>
     </html>
