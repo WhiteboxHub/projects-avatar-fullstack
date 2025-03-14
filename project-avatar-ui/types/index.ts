@@ -24,7 +24,7 @@ export interface Lead {
     [key: string]: any; // Allows additional properties that may not be explicitly defined
   }
   
-  export interface ByPO {
+  export interface invoice {
     batchid: string; // Assuming batchid is a string, adjust as necessary
     title: string; // Example property, change to match your actual data
     description?: string; // Optional property, add more fields as necessary

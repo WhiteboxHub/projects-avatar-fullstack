@@ -14,7 +14,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "ag-grid-community": "^32.2.0",
-    "ag-grid-enterprise": "^32.3.2",
+    "ag-grid-enterprise": "^32.3.4",
     "ag-grid-react": "^32.2.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",

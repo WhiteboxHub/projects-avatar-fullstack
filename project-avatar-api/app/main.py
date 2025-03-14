@@ -14,6 +14,7 @@ from app.routes.poRoute import router as po_router
 from app.routes.candidateMarketingRoute import router as candidate_marketing_router  
 from app.routes.currentMarketingRoute import router as current_marketing_router  # Import the new router
 from app.routes.overdueRoute import router as overdue_router  # Import the new router
+from app.routes.bypoRoute import router as bypo_router
 
 app = FastAPI()
 
@@ -41,6 +42,9 @@ app.include_router(po_router,tags=["po"])
 app.include_router(candidate_marketing_router, tags=["candidatemarketing"])  
 app.include_router(current_marketing_router, tags=["currentmarketing"])  
 app.include_router(overdue_router, tags=["overdue"])  
+app.include_router(bypo_router, tags=["invoices"])
+
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Avatar"}
