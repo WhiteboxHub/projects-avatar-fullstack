@@ -1,5 +1,3 @@
-# avatar/projects-avatar-api/app/main.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import engine, Base
@@ -22,6 +20,8 @@ from app.routes.bypoRoute import router as bypo_router
 from app.routes.clientRoute import router as client_router  # Import the new router
 from app.routes.clientSearchRoute import router as client_search_router  # Import the new router
 from app.routes.byClientRoute import router as by_client_router
+from app.routes.byPlacementRoute import router as by_placement_router
+from app.routes.byAllListRoute import router as by_allList_router
 
 app = FastAPI()
 
@@ -34,9 +34,7 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"],  
 )
-
 Base.metadata.create_all(bind=engine)
-
 
 app.include_router(auth_router, prefix="/api/admin/auth", tags=["auth"])
 app.include_router(access_router, prefix="/api/admin/access", tags=["access"])
@@ -57,6 +55,8 @@ app.include_router(overdue_router, tags=["overdue"])
 app.include_router(client_search_router, tags=["clientsearch"])
 app.include_router(client_router, prefix="/api/admin/client", tags=["clients"])
 app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
+app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiters"])
+app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
 
 
 @app.get("/")
