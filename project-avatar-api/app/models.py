@@ -517,4 +517,6 @@ class Recruiter(Base):
              return datetime.strptime(v, '%Y-%m-%d').date()
          except (ValueError, TypeError):
              raise ValueError("Invalid date format for dob")
+         
+Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
     

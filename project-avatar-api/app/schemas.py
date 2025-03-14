@@ -601,6 +601,7 @@ class RecruiterUpdate(RecruiterBase):
 
 class Recruiter(RecruiterBase):
     id: int
+    comp: Optional[str] = None 
 
     class Config:
         orm_mode = True

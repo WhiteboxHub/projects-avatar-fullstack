@@ -1,23 +1,18 @@
-// types/byclient.ts
-
 export interface Recruiter {
-    company?: string;
     id: number;
-    name: string;
+    name?: string;
     email: string;
-    phone?: string;
-    status?: string;
+    phone: string;
+    status: string;
     designation?: string;
-    dob?: string; 
+    dob?: string;
     personalemail?: string;
-    employeeid?: number;
     skypeid?: string;
     linkedin?: string;
     twitter?: string;
     facebook?: string;
     review?: string;
-    vendorid?: number;
-    clientid?: number;
+    clientid: number;
+    comp?: string; // Company name
     notes?: string;
-    lastmoddatetime?: string;
   }
