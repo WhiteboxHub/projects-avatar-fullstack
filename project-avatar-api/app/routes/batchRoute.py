@@ -7,13 +7,13 @@ from app.schemas import BatchCreate
 router = APIRouter()
 
 
-@router.get("/batches")
-def get_batch_list(search_query: str = "", page: int = 1, page_size: int = 200, db: Session = Depends(get_db)):
-    skip = (page - 1) * page_size
-    batches = get_batches(db=db, search_query=search_query, skip=skip, limit=page_size)
-    return {"data": batches, "totalRows": len(batches)}
+# @router.get("/search")
+# def get_batch_list(search_query: str = "", page: int = 1, page_size: int = 200, db: Session = Depends(get_db)):
+#     skip = (page - 1) * page_size
+#     batches = get_batches(db=db, search_query=search_query, skip=skip, limit=page_size)
+#     return {"data": batches, "totalRows": len(batches)}
 
-@router.get("/batches/search")
+@router.get("/search")
 def search_batches(
     search: str = "", 
     page: int = 1, 

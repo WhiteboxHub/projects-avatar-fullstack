@@ -11,7 +11,7 @@ from app.database.db import get_db
 router = APIRouter()
 
 
-@router.get("/leads/search")
+@router.get("/search")
 async def get_leads(
     page: int = Query(1, description="Page number"),
     page_size: int = Query(200, description="Number of leads per page"),

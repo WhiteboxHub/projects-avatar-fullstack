@@ -15,13 +15,13 @@ from fastapi import status
 router = APIRouter()
 
 
-@router.get("/candidates", response_model=dict)  
+@router.get("/search", response_model=dict)  
 def get_candidates(
     page: int = Query(1, alias="page"),
     pageSize: int = Query(100, alias="pageSize"),
     search: str = Query(None, alias="search"),
     db: Session = Depends(get_db),
-    _: bool = Depends(admin_validation)  
+    # _: bool = Depends(admin_validation)  
 ):
     
 

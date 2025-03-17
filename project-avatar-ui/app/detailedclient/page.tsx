@@ -6,7 +6,7 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_modals/AddRowRecruiter";
+import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -16,8 +16,8 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineSearch
+  // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 
@@ -180,7 +180,7 @@ const RecruiterByClient = () => {
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-          onSubmit={(data) => {
+          onSubmit={() => {
             // Handle add logic
           }}
         />

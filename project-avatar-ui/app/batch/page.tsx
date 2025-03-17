@@ -53,7 +53,7 @@ const Batches = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/batches`, {
+      const response = await axios.get(`${API_URL}/batches/search`, {
         params: {
           page: currentPage,
           pageSize: paginationPageSize,

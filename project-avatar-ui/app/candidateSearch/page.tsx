@@ -397,7 +397,7 @@ const CandidateSearch: React.FC = () => {
 
     try {
       // Update the endpoint to match the backend API
-      const response = await axios.post(`${API_URL}/search`, {
+      const response = await axios.post(`${API_URL}/candidates/search`, {
         name: name
       }, {
         headers: { AuthToken: token },
