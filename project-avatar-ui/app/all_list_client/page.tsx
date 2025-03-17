@@ -18,8 +18,8 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineSearch
+  // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { Recruiter } from "@/types/byAllList";
@@ -89,7 +89,10 @@ const RecruiterByAllList = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
+        setSelectedRow({
+          ...selectedRows[0],
+          name: selectedRows[0].name || "",
+        });
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -246,7 +249,7 @@ const RecruiterByAllList = () => {
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-          onSubmit={(data) => {
+          onSubmit={() => {
             // Handle add logic
           }}
         />
@@ -256,17 +259,17 @@ const RecruiterByAllList = () => {
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
-          onSubmit={(data) => {
+          onSubmit={() => {
           }}
         />
       )}
-      {modalState.view && selectedRow && (
+      {/* {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )}
+      )} */}
     </div>
   );
 };

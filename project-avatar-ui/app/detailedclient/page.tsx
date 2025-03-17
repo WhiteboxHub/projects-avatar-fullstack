@@ -16,8 +16,8 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineSearch
+  // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 
@@ -180,7 +180,7 @@ const RecruiterByClient = () => {
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-          onSubmit={(data) => {
+          onSubmit={() => {
             // Handle add logic
           }}
         />
