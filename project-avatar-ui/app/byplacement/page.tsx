@@ -6,9 +6,9 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-// import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
+import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+// import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -18,16 +18,16 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch
-  // AiOutlineReload,
+  AiOutlineSearch,
+//   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byAllList";
+import { Recruiter } from "@/types/byPlacement";
 import axios from "axios";
 
 jsPDF.prototype.autoTable = autoTable;
 
-const RecruiterByAllList = () => {
+const RecruiterByPlacement = () => {
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
@@ -48,7 +48,7 @@ const RecruiterByAllList = () => {
 
   const fetchRecruiters = async () => {
     try {
-      const response = await axios.get(`${API_URL}/by/recruiters/byAllList`, {
+      const response = await axios.get(`${API_URL}/by/recruiters/by-placement`, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setRowData(response.data);
@@ -89,10 +89,7 @@ const RecruiterByAllList = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow({
-          ...selectedRows[0],
-          name: selectedRows[0].name || "",
-        });
+        setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -109,10 +106,10 @@ const RecruiterByAllList = () => {
       body: rowData.map((row) => [
         row.id,
         row.name || "",
-        row.email,
-        row.phone,
-        row.comp || "",
-        row.status,
+        row.email || "",
+        row.phone || "",
+        // row.comp || "",
+        row.status || "",
         row.designation || "",
         row.dob || "",
         row.personalemail || "",
@@ -122,7 +119,7 @@ const RecruiterByAllList = () => {
         row.twitter || "",
         row.facebook || "",
         row.review || "",
-        row.clientid,
+        row.clientid || "",
         row.notes || "",
         row.lastmoddatetime || "",
       ]),
@@ -274,4 +271,4 @@ const RecruiterByAllList = () => {
   );
 };
 
-export default RecruiterByAllList;
+export default RecruiterByPlacement;

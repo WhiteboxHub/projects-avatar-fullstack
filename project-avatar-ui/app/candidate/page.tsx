@@ -563,7 +563,7 @@ interface GroupedData {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_URL}/candidates`, {
+      const response = await axios.get(`${API_URL}/candidates/search`, {
         params: { page: currentPage, pageSize: paginationPageSize },
         headers: { AuthToken: localStorage.getItem("token") },
       });

@@ -7,8 +7,8 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-// import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -18,16 +18,16 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch
+  AiOutlineSearch,
   // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byAllList";
+import { Recruiter } from "@/types/byClient";
 import axios from "axios";
 
 jsPDF.prototype.autoTable = autoTable;
 
-const RecruiterByAllList = () => {
+const RecruiterByClient = () => {
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
@@ -48,7 +48,7 @@ const RecruiterByAllList = () => {
 
   const fetchRecruiters = async () => {
     try {
-      const response = await axios.get(`${API_URL}/by/recruiters/byAllList`, {
+      const response = await axios.get(`${API_URL}/recruiters/by-client`, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setRowData(response.data);
@@ -89,10 +89,7 @@ const RecruiterByAllList = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow({
-          ...selectedRows[0],
-          name: selectedRows[0].name || "",
-        });
+        setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -105,14 +102,13 @@ const RecruiterByAllList = () => {
     const doc = new jsPDF();
     doc.text("Recruiter Data", 20, 10);
     autoTable(doc, {
-      head: [["ID", "Name", "Email", "Phone", "Company", "Status", "Designation", "DOB", "Personal Email", "Employee ID", "Skype ID", "LinkedIn", "Twitter", "Facebook", "Review", "Client ID", "Notes", "Last Modified DateTime"]],
+      head: [["ID", "Name", "Email", "Phone", "Status", "Designation", "DOB", "Personal Email", "Employee ID", "Skype ID", "LinkedIn", "Twitter", "Facebook", "Review", "Vendor ID", "Client ID", "Notes", "Last Modified DateTime"]],
       body: rowData.map((row) => [
         row.id,
-        row.name || "",
+        row.name,
         row.email,
-        row.phone,
-        row.comp || "",
-        row.status,
+        row.phone || "",
+        row.status || "",
         row.designation || "",
         row.dob || "",
         row.personalemail || "",
@@ -122,7 +118,8 @@ const RecruiterByAllList = () => {
         row.twitter || "",
         row.facebook || "",
         row.review || "",
-        row.clientid,
+        row.vendorid || "",
+        row.clientid || "",
         row.notes || "",
         row.lastmoddatetime || "",
       ]),
@@ -199,7 +196,6 @@ const RecruiterByAllList = () => {
             { headerName: "Name", field: "name" },
             { headerName: "Email", field: "email" },
             { headerName: "Phone", field: "phone" },
-            { headerName: "Company", field: "comp" },
             { headerName: "Status", field: "status" },
             { headerName: "Designation", field: "designation" },
             { headerName: "DOB", field: "dob" },
@@ -210,6 +206,7 @@ const RecruiterByAllList = () => {
             { headerName: "Twitter", field: "twitter" },
             { headerName: "Facebook", field: "facebook" },
             { headerName: "Review", field: "review" },
+            { headerName: "Vendor ID", field: "vendorid" },
             { headerName: "Client ID", field: "clientid" },
             { headerName: "Notes", field: "notes" },
             { headerName: "Last Modified DateTime", field: "lastmoddatetime" },
@@ -260,18 +257,19 @@ const RecruiterByAllList = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={() => {
+            // Handle edit logic
           }}
         />
       )}
-      {/* {modalState.view && selectedRow && (
+      {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )} */}
+      )}
     </div>
   );
 };
 
-export default RecruiterByAllList;
+export default RecruiterByClient;

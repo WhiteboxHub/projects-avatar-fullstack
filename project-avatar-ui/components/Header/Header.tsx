@@ -576,7 +576,7 @@ const DropdownMenu: React.FC<{ item: MenuItem; level: number; isMobile?: boolean
               ? `flex flex-col pl-6 ${isSubMenuOpen ? 'max-h-screen' : 'max-h-0'} overflow-hidden`
               : `absolute bg-indigo-700 rounded-md shadow-lg w-48 transition-all duration-300 ease-in-out ${
                   level === 1 ? 'left-full top-0 ml-0' : 'top-full left-0'
-                }`
+                } z-10 overflow-visible`
           }`}
         >
           {item.subMenu.map((subItem) => (
@@ -594,7 +594,8 @@ const Header: React.FC = () => {
   const { logout } = useAuth();
 
   return (
-    <header className="bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 text-white py-4 shadow-lg fixed top-0 left-0 right-0 z-50">
+    // <header className="bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 text-white py-4 shadow-lg fixed top-0 left-0 right-0 z-50">
+    <header className={`bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 text-white py-4 shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'h-auto' : 'min-h-24 h-24'}`}>
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
