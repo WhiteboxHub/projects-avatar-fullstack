@@ -5,6 +5,14 @@ export interface Lead {
     email: string;
     // Add other fields as necessary
   }
+
+  // Define the ByPO interface
+export interface ByPO {
+  id?: string;
+  pname?: string;
+  // Add other fields that match your data structure
+  [key: string]: any; // Allows additional properties that may not be explicitly defined
+}
   
   export interface Batch {
     batchid: string; // Assuming batchid is a string, adjust as necessary
