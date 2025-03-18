@@ -16,5 +16,6 @@ export interface Recruiter {
     review?: string;
     clientid: number;
     comp?: string; // Company name
+    vendorid?: number;
     notes?: string;
   }

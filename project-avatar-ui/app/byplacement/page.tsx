@@ -19,7 +19,7 @@ import {
   AiOutlineEdit,
   AiOutlineEye,
   AiOutlineSearch,
-  AiOutlineReload,
+//   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { Recruiter } from "@/types/byPlacement";
@@ -106,10 +106,10 @@ const RecruiterByPlacement = () => {
       body: rowData.map((row) => [
         row.id,
         row.name || "",
-        row.email,
-        row.phone,
-        row.comp || "",
-        row.status,
+        row.email || "",
+        row.phone || "",
+        // row.comp || "",
+        row.status || "",
         row.designation || "",
         row.dob || "",
         row.personalemail || "",
@@ -119,7 +119,7 @@ const RecruiterByPlacement = () => {
         row.twitter || "",
         row.facebook || "",
         row.review || "",
-        row.clientid,
+        row.clientid || "",
         row.notes || "",
         row.lastmoddatetime || "",
       ]),

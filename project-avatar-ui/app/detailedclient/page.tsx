@@ -136,7 +136,7 @@ const RecruiterByClient = () => {
         >
           <AiOutlineSearch className="mr-2" /> Search
         </button>
-      </div>
+      </div>`6 `/
       <div
         className="ag-theme-alpine"
         style={{ height: "400px", width: "100%", overflowY: "auto" }}

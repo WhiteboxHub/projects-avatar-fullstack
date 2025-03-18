@@ -8,7 +8,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
+// import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
