@@ -20,8 +20,10 @@ from app.routes.bypoRoute import router as bypo_router
 from app.routes.clientRoute import router as client_router  # Import the new router
 from app.routes.clientSearchRoute import router as client_search_router  # Import the new router
 from app.routes.byClientRoute import router as by_client_router
+
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
+
 app = FastAPI()
 
 origins = ["*"]
