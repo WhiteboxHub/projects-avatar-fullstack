@@ -1,18 +1,14 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-
-
-from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
 
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, String, Integer, DateTime, Enum, Boolean
 from typing import ClassVar, Optional
 from pydantic_settings import BaseSettings
 from datetime import datetime, date
 from sqlalchemy.orm import DeclarativeBase
-from app.models import Base
 from enum import Enum as PyEnum
 
 Base = declarative_base()
