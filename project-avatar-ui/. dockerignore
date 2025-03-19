@@ -1,0 +1,44 @@
+# Ignore Node.js modules
+node_modules/
+
+# Ignore build output directory
+.next/
+out/
+
+# Ignore log files
+*.log
+
+
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore Git-related files
+.git/
+.gitignore
+
+# Ignore other miscellaneous files
+*.swp
+*.swo
+*.DS_Store
+
+# Ignore Docker-related files
+Dockerfile
+docker-compose.yml
+
+# Ignore test-related files and directories
+__tests__/
+*.test.*
+
+# Ignore cache directories
+.cache/
+
+# Ignore coverage reports
+coverage/
+
+# Ignore linting reports
+.eslintcache
+
+# Ignore stylelint cache
+.stylelintcache
