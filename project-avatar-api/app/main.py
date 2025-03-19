@@ -1,3 +1,5 @@
+# new-projects-avatar-fullstack/project-avatar-api/app/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import engine, Base
@@ -14,7 +16,7 @@ from app.routes.currentMarketingRoute import router as current_marketing_router 
 
 from app.routes.overdueRoute import router as overdue_router  # Import the new router
 from app.routes.bypoRoute import router as bypo_router
-
+from app.routes.bymonthRoute import router as bymonth_router
 
 
 from app.routes.clientRoute import router as client_router  # Import the new router
@@ -47,7 +49,8 @@ app.include_router(candidate_marketing_router, tags=["candidatemarketing"])
 app.include_router(current_marketing_router, tags=["currentmarketing"])  
 
 
-app.include_router(bypo_router, tags=["invoices"])
+app.include_router(bypo_router, tags=["invoices_bypo"])
+app.include_router(bymonth_router, tags=["invoices_bymonth"])
 
 
 app.include_router(overdue_router, tags=["overdue"])
