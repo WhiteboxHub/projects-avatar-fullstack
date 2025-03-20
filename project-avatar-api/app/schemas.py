@@ -780,5 +780,128 @@ class RecruiterUpdate(RecruiterBase):
 class RecruiterInDB(RecruiterBase):
     id: int
 
+class VendorBase(BaseModel):
+    companyname: str
+    status: str
+    tier: Optional[str] = None
+    culture: Optional[str] = None
+    solicited: Optional[str] = None
+    minrate: Optional[float] = None
+    hirebeforeterm: Optional[str] = None
+    hireafterterm: Optional[str] = None
+    latepayments: Optional[str] = None
+    totalnetterm: Optional[int] = None
+    defaultedpayment: Optional[str] = None
+    agreementstatus: Optional[str] = None
+    url: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    fax: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[str] = None
+    hrphone: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    linkedin: Optional[str] = None
+    accountnumber: Optional[str] = None
+    managername: Optional[str] = None
+    manageremail: Optional[str] = None
+    managerphone: Optional[str] = None
+    secondaryname: Optional[str] = None
+    secondaryemail: Optional[str] = None
+    secondaryphone: Optional[str] = None
+    timsheetemail: Optional[str] = None
+    agreementname: Optional[str] = None
+    agreementlink: Optional[str] = None
+    subcontractorlink: Optional[str] = None
+    nonsolicitationlink: Optional[str] = None
+    nonhirelink: Optional[str] = None
+    clients: Optional[str] = None
+    notes: Optional[str] = None
+
+
+    @validator('tier', 'status', 'culture', pre=True)
+    def coerce_numbers_to_str(cls, v):
+        if isinstance(v, (int, float)):
+            return str(v)
+        return v
+
+    class Config:
+        anystr_strip_whitespace = True
+
+class VendorCreate(VendorBase):
+    pass
+
+class VendorUpdate(VendorBase):
+    pass
+
+class VendorInDB(VendorBase):
+    id: int
+
+
+class RecruiterByVendorBase(BaseModel):
+    name: str
+    email: str
+    phone: str
+    designation: Optional[str] = None 
+    vendorid: Optional[int] = None
+    status: str
+
+    @validator("email")
+    def validate_email(cls, v):
+        # Basic email validation (fallback to placeholder if invalid)
+        if "@" not in v or "." not in v.split("@")[-1]:
+            return "invalid@example.com"
+        return v
+
+
+class RecruiterByVendorCreate(RecruiterByVendorBase):
+    clientid: int = 0  
+class RecruiterByVendorUpdate(RecruiterByVendorBase):
+    clientid: int = 0  
+class RecruiterByVendorInDB(RecruiterByVendorBase):
+    id: int
+    comp: Optional[str] = None 
+
+
+class RecruiterByPlacementInDB(RecruiterByVendorInDB):
+    pass
+
+
+class PlacementRecruiterBase(BaseModel):
+    name: str
+    email: str
+    phone: str
+    designation: Optional[str] = None   # Allow NULL/None values
+    vendorid: Optional[int] = None
+    status: str
+    comp: Optional[str] = None 
+
+    @validator("email")
+    def validate_email(cls, v):
+        # Basic email validation (fallback to placeholder if invalid)
+        if "@" not in v or "." not in v.split("@")[-1]:
+            return "invalid@example.com"
+        return v
+    # ... other fields (dob, skypeid, etc.) ...
+
+class PlacementRecruiterCreate(PlacementRecruiterBase):
+    clientid: int = 0  # Force clientid = 0
+
+class PlacementRecruiterUpdate(PlacementRecruiterBase):
+    pass
+class RecruiterByPlacementInDB(PlacementRecruiterBase):
+    id: int
+    comp: Optional[str] = None
+
+class PlacementRecruiterInDB(PlacementRecruiterBase):
+    id: int
+    comp: Optional[str] = None  # Vendor company name
+
     class Config:
         from_attributes = True 

@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import Column, Integer, Enum as SAEnum,Numeric, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
 
 from app.database.db import Base
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel,validator,EmailStr
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, String, Integer, DateTime, Enum, Boolean
 from typing import ClassVar, Optional
@@ -268,9 +268,49 @@ class Candidate(Base):
 class Vendor(Base):
     __tablename__ = "vendor"
     
-
     id = Column(Integer, primary_key=True, index=True)
-    companyname = Column(String, nullable=False)
+    companyname = Column(String(250), nullable=False)
+    status = Column(String(50), nullable=True)
+    tier = Column(Integer, nullable=True)
+    culture = Column(String(50), nullable=True)
+    solicited = Column(String(3), nullable=True)
+    minrate = Column(Float, nullable=True)
+    hirebeforeterm = Column(String(3), nullable=True)
+    hireafterterm = Column(String(3), nullable=True)
+    latepayments = Column(String(3), nullable=True)
+    totalnetterm = Column(Integer, nullable=True)
+    defaultedpayment = Column(String(3), nullable=True)
+    agreementstatus = Column(String(50), nullable=True)
+    url = Column(String(200), nullable=True)
+    email = Column(String(250), nullable=False)
+    phone = Column(String(250), nullable=True)
+    fax = Column(String(250), nullable=True)
+    address = Column(String(250), nullable=True)
+    city = Column(String(250), nullable=True)
+    state = Column(String(250), nullable=True)
+    country = Column(String(250), nullable=True)
+    zip = Column(String(250), nullable=True)
+    hrname = Column(String(200), nullable=True)
+    hremail = Column(String(200), nullable=True)
+    hrphone = Column(String(200), nullable=True)
+    twitter = Column(String(200), nullable=True)
+    facebook = Column(String(200), nullable=True)
+    linkedin = Column(String(200), nullable=True)
+    accountnumber = Column(String(200), nullable=True)
+    managername = Column(String(200), nullable=True)
+    manageremail = Column(String(200), nullable=True)
+    managerphone = Column(String(200), nullable=True)
+    secondaryname = Column(String(200), nullable=True)
+    secondaryemail = Column(String(200), nullable=True)
+    secondaryphone = Column(String(200), nullable=True)
+    timsheetemail = Column(String(200), nullable=True)
+    agreementname = Column(String(200), nullable=True)
+    agreementlink = Column(String(200), nullable=True)
+    subcontractorlink = Column(String(200), nullable=True)
+    nonsolicitationlink = Column(String(200), nullable=True)
+    nonhirelink = Column(String(200), nullable=True)
+    clients = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
 
     placements = relationship("Placement", back_populates="vendor")
     recruiters = relationship("Recruiter", back_populates="vendor")  # For Recruiter
@@ -550,7 +590,7 @@ class Invoice(Base):
 
 
 # Adding recruiter model
-from pydantic import BaseModel, validator, ValidationError
+
 class Recruiter(Base):
     __tablename__ = 'recruiter'
     __table_args__ = {'extend_existing': True}
@@ -560,7 +600,7 @@ class Recruiter(Base):
     email = Column(String(150), unique=True, index=True)
     phone = Column(String(150), nullable=True)
     status = Column(CHAR(1), nullable=True)
-    designation = Column(String(300), nullable=True)
+    designation = Column(String, nullable=False) 
     dob = Column(Date, nullable=True)
     personalemail = Column(String(150), nullable=True)
     employeeid = Column(Integer, nullable=True)
@@ -591,3 +631,20 @@ class Recruiter(Base):
          
 Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
     
+
+
+
+
+class PlacementRecruiter(Base):
+    __tablename__ = "placement_recruiter"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    designation = Column(String, nullable=False)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=False)
+    status = Column(String, nullable=False)
+    clientid = Column(Integer, default=0)  # Force clientid = 0
+    # ... other fields (dob, skypeid, etc.) ...
+
+    vendor = relationship("Vendor")

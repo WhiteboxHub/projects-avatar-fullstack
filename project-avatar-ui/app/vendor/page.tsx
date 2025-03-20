@@ -56,11 +56,19 @@ const Vendors = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      const { data, totalRows } = response.data;
-
-      const dataWithSerials = data.map((item: Vendor) => ({
-        ...item,
-      }));
+     console.log("Full API Response:", response);
+             console.log("API Response Data:", response.data);
+     
+             const data = response.data;
+             const totalRows = response.headers['total-rows'] || data.length;
+              
+             if (!Array.isArray(data)) {
+                 throw new Error("Data is not an array or is undefined");
+             }
+             const dataWithSerials = data.map((item: Vendor) => ({
+                 ...item,
+              //   serialNo: (currentPage - 1) * paginationPageSize + index + 1,
+             }));
 
       setRowData(dataWithSerials);
       setTotalRows(totalRows);

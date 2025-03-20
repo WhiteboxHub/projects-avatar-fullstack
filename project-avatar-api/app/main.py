@@ -26,6 +26,11 @@ from app.routes.clientSearchRoute import router as client_search_router  # Impor
 from app.routes.byClientRoute import router as by_client_router
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
+from app.routes.vendorListRoute import router as vendorList_router
+from app.routes.vendorByPlacement import router as vendorByPlacement_router
+from app.routes.byvendorRoute import router as byvendor_route
+
+
 app = FastAPI()
 
 origins = ["http://localhost:3000"]
@@ -64,6 +69,9 @@ app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"
 app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
 app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
 app.include_router(all_vendor_list_router, prefix="/api/admin",tags=["alllistvendordetails"])
+app.include_router(vendorList_router,prefix="/api/admin",tags=["vendorList"])
+app.include_router(vendorByPlacement_router, prefix="/api/admin",tags=["vendorByPlacement"])
+app.include_router(byvendor_route, prefix="/api/admin", tags=["byvendor"])
 
 
 
