@@ -7,12 +7,8 @@ import { AxiosError } from "axios";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/client_modals/AddRowClient";
-import EditRowModal from "@/modals/client_modals/EditRowClient";
-import ViewRowModal from "@/modals/client_modals/ViewRowClient"; 
-import { MdDelete } from "react-icons/md";
 import {
+  FaDownload,
   FaChevronLeft,
   FaChevronRight,
   FaAngleDoubleLeft,
@@ -24,11 +20,15 @@ import {
   AiOutlineSearch,
   AiOutlineReload,
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
+import { MdAdd, MdDelete } from "react-icons/md";
+import AddRowModal from "@/modals/client_modals/AddRowClient";
+import EditRowModal from "@/modals/client_modals/EditRowClient";
+import ViewRowModal from "@/modals/client_modals/ViewRowClient";
 import { Client } from "@/types/client";
 import { ErrorResponse } from "@/types";
 
 jsPDF.prototype.autoTable = autoTable;
+
 const Clients = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -50,26 +50,23 @@ const Clients = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async () => {
+  // Updated: Fetch data with pagination
+  const fetchData = async (page: number = currentPage) => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/client`, {
         params: {
-          page: currentPage,
+          page: page,
           pageSize: paginationPageSize,
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      const { data, totalRows } = response.data;
+      const { data, total } = response.data;
 
-      const dataWithSerials = data.map((item: Client) => ({
-        ...item,
-      }));
-
-      setRowData(dataWithSerials);
-      setTotalRows(totalRows);
-      setupColumns(dataWithSerials);
+      setRowData(data);
+      setTotalRows(total);
+      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -77,10 +74,10 @@ const Clients = () => {
     }
   };
 
-//  search clients 
   const fetchClients = async (searchQuery = "") => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client/search`, {
+      const response = await axios.get(`${API_URL}/client/search`, {
         params: {
           page: currentPage,
           pageSize: paginationPageSize,
@@ -89,12 +86,14 @@ const Clients = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      const { data, totalRows } = response.data;
+      const { data, total } = response.data;
       setRowData(data);
-      setTotalRows(totalRows);
+      setTotalRows(total);
       setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,10 +104,13 @@ const Clients = () => {
   const setupColumns = (data: Client[]) => {
     if (data.length > 0) {
       const columns = [
-        ...Object.keys(data[0]).map((key) => ({
-          headerName: key.charAt(0).toUpperCase() + key.slice(1),
-          field: key,
-        })),
+        { headerName: "ID", field: "id" },
+        ...Object.keys(data[0])
+          .filter((key) => key !== "id")
+          .map((key) => ({
+            headerName: key.charAt(0).toUpperCase() + key.slice(1),
+            field: key,
+          })),
       ];
       setColumnDefs(columns);
     }
@@ -121,7 +123,6 @@ const Clients = () => {
   const handleRefresh = () => {
     setSearchValue("");
     fetchData();
-    window.location.reload();
   };
 
   const handleAddRow = () =>
@@ -134,14 +135,11 @@ const Clients = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit."); 
+        setAlertMessage("Please select a row to edit.");
         setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
-
-
-  // Delete a row from the record
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
@@ -155,7 +153,7 @@ const Clients = () => {
           if (!confirmation) return;
 
           try {
-            await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/client/delete/${clientId}`, {
+            await axios.delete(`${API_URL}/client/delete/${clientId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert("Client deleted successfully.");
@@ -179,14 +177,29 @@ const Clients = () => {
     }
   };
 
-  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
+  // Added: Handle page change for pagination
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      fetchData(newPage);
+    }
+  };
+
+  const totalPages = Math.ceil(totalRows / paginationPageSize);
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(totalPages, currentPage + 2);
+  const pageOptions = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, i) => i + startPage
+  );
 
   const handleViewRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]); 
-        setModalState((prevState) => ({ ...prevState, view: true })); 
+        setSelectedRow(selectedRows[0]);
+        setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -207,9 +220,6 @@ const Clients = () => {
     });
     doc.save("client_data.pdf");
   };
-
-  const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
@@ -274,11 +284,12 @@ const Clients = () => {
           <AiOutlineSearch className="mr-2" /> Search
         </button>
       </div>
-      {loading ? (
-        <div className="flex justify-center items-center h-48">
-          <span className="text-xl">Loading...</span>
-        </div>
-      ) : (
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
+            <span className="text-xl">Loading...</span>
+          </div>
+        )}
         <div
           className="ag-theme-alpine"
           style={{ height: "400px", width: "100%", overflowY: "auto" }}
@@ -301,50 +312,52 @@ const Clients = () => {
             headerHeight={35}
           />
         </div>
-      )}
+      </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
-          <button
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-            className="p-2 disabled:opacity-50"
-          >
-            <FaAngleDoubleLeft />
-          </button>
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-2 disabled:opacity-50"
-          >
-            <FaChevronLeft />
-          </button>
-          {pageOptions.map((page) => (
+        <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
+          <div className="flex space-x-1 overflow-x-auto">
             <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-2 py-1 rounded-md ${
-                currentPage === page
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-800"
-              }`}
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className="p-2 disabled:opacity-50"
             >
-              {page}
+              <FaAngleDoubleLeft />
             </button>
-          ))}
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-2 disabled:opacity-50"
-          >
-            <FaChevronRight />
-          </button>
-          <button
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className="p-2 disabled:opacity-50"
-          >
-            <FaAngleDoubleRight />
-          </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 disabled:opacity-50"
+            >
+              <FaChevronLeft />
+            </button>
+            {pageOptions.map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-2 py-1 rounded-md ${
+                  currentPage === page
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 disabled:opacity-50"
+            >
+              <FaChevronRight />
+            </button>
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className="p-2 disabled:opacity-50"
+            >
+              <FaAngleDoubleRight />
+            </button>
+          </div>
         </div>
       </div>
       {modalState.add && (
@@ -362,7 +375,7 @@ const Clients = () => {
           onSave={fetchData}
         />
       )}
-      {modalState.view && selectedRow && ( 
+      {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
@@ -372,4 +385,5 @@ const Clients = () => {
     </div>
   );
 };
+
 export default Clients;

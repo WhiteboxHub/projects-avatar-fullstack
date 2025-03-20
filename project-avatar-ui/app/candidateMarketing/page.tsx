@@ -461,7 +461,6 @@
 
 // export default withAuth(CurrentMarketing);
 
-
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
@@ -562,7 +561,7 @@ const CurrentMarketing = () => {
     }
   }, [paginationPageSize, API_URL]);
 
-  const searchCandidatesByName = useCallback(async (searchQuery) => {
+  const searchCandidatesByName = useCallback(async (searchQuery: string) => {
     try {
       const response = await axios.get(`${API_URL}/currentmarketing/search/name`, {
         params: { name: searchQuery },

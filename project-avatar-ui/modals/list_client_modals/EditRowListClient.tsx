@@ -306,7 +306,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { AiOutlineClose } from 'react-icons/ai';
-import { Client } from '@/types';
+import { Client } from '@/types/client';
 
 interface Recruiter {
   id?: string;

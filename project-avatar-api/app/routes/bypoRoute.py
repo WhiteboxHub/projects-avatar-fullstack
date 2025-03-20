@@ -9,7 +9,7 @@ from app.schemas import InvoiceSchema, InvoiceCreateSchema, InvoiceUpdateSchema
 router = APIRouter()
 
 @router.get("/api/admin/invoices")
-def read_invoices(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+def read_invoices(page: int = 1, page_size: int = 100, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size
     return get_invoice_list(db, skip, page_size)
 

@@ -1,18 +1,14 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-
-
-from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
 
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, String, Integer, DateTime, Enum, Boolean
 from typing import ClassVar, Optional
 from pydantic_settings import BaseSettings
 from datetime import datetime, date
 from sqlalchemy.orm import DeclarativeBase
-from app.models import Base
 from enum import Enum as PyEnum
 
 Base = declarative_base()
@@ -23,8 +19,6 @@ class User(Base):
     uname = Column(String, unique=True, index=True)
     password = Column(String)
 
-
-
 class User(BaseModel):
     __tablename__ = "authuser" 
     id: ClassVar[Column] = Column(Integer, primary_key=True, index=True)
@@ -33,16 +27,12 @@ class User(BaseModel):
     team: str = Column(String)
     email: str = Column(String, unique=True, index=True)
 
-
     id: Optional[int]
     uname: str
     passwd: str
     team: str
     email: str
 
-
-
-      
 class Batch(Base):
     __tablename__ = "batch"
     
@@ -64,13 +54,9 @@ class Batch(Base):
 
 # class Placement(Base):
 #     __tablename__ = 'placement'
-
-
 #     id = Column(Integer, primary_key=True, index=True)
 #     candidateid = Column(Integer)
 #     placementDate = Column(DateTime)
-  
-
 
 class Lead(Base):
     __tablename__ = "leads"
@@ -93,7 +79,6 @@ class Lead(Base):
     state = Column(String)
     country = Column(String)
 
-  
 class Candidate(Base):
     __tablename__ = 'candidate'
 
@@ -163,13 +148,10 @@ class Candidate(Base):
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
 
-
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
-
-
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"
@@ -240,8 +222,7 @@ class CandidateSearch(Base):
     diceflag = Column(CHAR(1), default='N', nullable=True)
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y', nullable=True)
-    
-    
+
 class Placement(Base):
     __tablename__ = "placement"
     __table_args__ = {'extend_existing': True} 
@@ -288,7 +269,7 @@ class Client(Base):
     state = Column(String(150), nullable=True)
     country = Column(String(150), nullable=True)
     zip = Column(String(150), nullable=True)
-    url = Column(String(150), nullable=False, default="http://nothing.com")
+    url = Column(String(150), nullable=True, default="http://nothing.com")
     manager1name = Column(String(150), nullable=True)
     twitter = Column(String(100), nullable=True)
     facebook = Column(String(100), nullable=True)
@@ -322,7 +303,6 @@ class ClientSearch(Base):
     tier = Column(Integer, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
-    
 class PO(Base):
     __tablename__ = "po"
 
@@ -340,8 +320,6 @@ class PO(Base):
     notes = Column(String, nullable=True)
 
     placement = relationship("Placement", back_populates="po_entries")
-
-
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -370,8 +348,7 @@ class CandidateMarketing(Base):
     notes = Column(Text)
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3))
-    
-    
+
 class AuthUser(Base):
     __tablename__ = "authuser"
 
@@ -403,10 +380,9 @@ class AuthUser(Base):
     reset_token = Column(String(255), nullable=True)
     token_expiry = Column(DateTime, nullable=True)
     role = Column(String(100), nullable=True)    
-    
+
 class CurrentMarketing(Base):
-    __tablename__ = "currentmarketing"
-    # __table_args__ = {'extend_existing': True} 
+    __tablename__ = "currentmarketing" 
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
     startdate = Column(DateTime, nullable=False)
@@ -430,8 +406,7 @@ class CurrentMarketing(Base):
     notes = Column(Text)
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3))    
-    
-    
+
 class Overdue(Base):
     __tablename__ = "overdue"
 
@@ -477,8 +452,6 @@ class Overdue(Base):
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
 
-
-
 class Invoice(Base):
     __tablename__ = "invoice"
 
@@ -503,10 +476,6 @@ class Invoice(Base):
     poid = Column(Integer, ForeignKey("po.id"), nullable=False)
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
-
-# Add vendor
-
-
 
 
 # Adding recruiter model
@@ -533,19 +502,21 @@ class Recruiter(Base):
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
-
     client = relationship("Client", back_populates="recruiters")
     vendor = relationship("Vendor", back_populates="recruiters")
-    
-    @validator('dob', pre=True, always=True)
-    def validate_dob(cls, v):
-         if isinstance(v, date):
-             return v  # Already a date object, return as is
-         if v in ('0000-00-00', None):
-             return None
-         try:
-             return datetime.strptime(v, '%Y-%m-%d').date()
-         except (ValueError, TypeError):
-             raise ValueError("Invalid date format for dob")
-    
 
+class Config:
+    orm_mode = True
+
+@validator('dob', pre=True, always=True)
+def validate_dob(cls, v):
+    if isinstance(v, date):
+        return v 
+    if v in ('0000-00-00', None):
+        return None
+    try:
+        return datetime.strptime(v, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        raise ValueError("Invalid date format for dob")
+
+Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
