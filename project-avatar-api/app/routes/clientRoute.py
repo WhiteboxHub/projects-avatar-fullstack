@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/", response_model=ClientResponse)
 async def get_clients(
     page: int = 1,
-    page_size: int = 10,
+    page_size: int = 100,
     search: Optional[str] = None,
     controller: ClientController = Depends()
 ):
