@@ -304,6 +304,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import EditRowModal from "../../modals/access_modals/EditRowUser";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import ViewRowModal from "../../modals/access_modals/ViewRowUser";
+import { debounce } from "lodash";
 import withAuth from "@/modals/withAuth";
 import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
 import { User } from "../../types/index";
@@ -320,7 +321,7 @@ const Users = () => {
   const [, setAlertMessage] = useState<string | null>(null);
   const gridRef = useRef<AgGridReact>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; 
 
   const fetchData = useCallback(async (searchQuery = "", page = 1) => {
     try {
@@ -332,34 +333,41 @@ const Users = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      let data = response.data;
-
-      // Check if data is an array or a single object
-      if (!Array.isArray(data)) {
-        data = [data]; // Wrap the single object in an array
-      }
-
-      const totalRows = data.length;
+      const data = response.data;
+      const totalRows = data.length; 
       const dataWithSerials = data.map((item: User) => ({
         ...item,
       }));
-      console.log("Fetched Row Data:", dataWithSerials);  // Debugging log
+      console.log("Processed Row Data:", dataWithSerials); 
       setRowData(dataWithSerials);
       setTotalRows(totalRows);
       setupColumns(dataWithSerials);
-
-      // Force refresh the grid to ensure it displays the new data
-      if (gridRef.current && gridRef.current.api) {
-        gridRef.current.api.refreshClientSideRowModel();
-      }
     } catch (error) {
       console.error("Error loading data:", error);
     }
   }, [paginationPageSize, API_URL]);
 
+
+  const debouncedFetchData = useRef(
+    debounce((query: string) => {
+      fetchData(query, currentPage);
+    }, 300)
+  ).current;
+
   useEffect(() => {
-    fetchData("", currentPage);
-  }, [currentPage, fetchData]);
+    if (searchValue) {
+      debouncedFetchData(searchValue);
+    }
+    return () => {
+      debouncedFetchData.cancel();
+    };
+  }, [searchValue, debouncedFetchData, currentPage]);
+
+  useEffect(() => {
+    if (!searchValue) {
+      fetchData("", currentPage);
+    }
+  }, [currentPage, fetchData, searchValue]);
 
   const setupColumns = (data: User[]) => {
     if (Array.isArray(data) && data.length > 0) {
@@ -369,20 +377,12 @@ const Users = () => {
           field: key,
         })),
       ];
-      console.log("Column Definitions:", columns);  // Debugging log
+      console.log("Column Definitions:", columns); // Log the column definitions
       setColumnDefs(columns);
     } else {
       console.error("Data is not an array or is empty:", data);
     }
   };
-
-  useEffect(() => {
-    console.log("Row Data Updated:", rowData);  // Debugging log
-  }, [rowData]);
-
-  useEffect(() => {
-    console.log("Column Definitions Updated:", columnDefs);  // Debugging log
-  }, [columnDefs]);
 
   const handleEditRow = () => {
     if (gridRef.current) {
