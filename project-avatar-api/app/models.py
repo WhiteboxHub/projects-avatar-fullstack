@@ -431,7 +431,8 @@ class CurrentMarketing(Base):
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3))    
     
-    
+
+   
 class Overdue(Base):
     __tablename__ = "overdue"
 

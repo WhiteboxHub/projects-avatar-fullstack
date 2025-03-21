@@ -3,7 +3,6 @@ from app.models import Invoice
 from app.schemas import InvoiceCreateSchema, InvoiceUpdateSchema
 from sqlalchemy import text
 
-
 def get_invoice_months(db: Session):
     query = text("""
         SELECT DISTINCT DATE_FORMAT(i.invoicedate, "%Y-%c-%M") AS invmonth
@@ -14,25 +13,7 @@ def get_invoice_months(db: Session):
     result = db.execute(query)
     return [dict(row._mapping) for row in result]
 
-
-# def get_invoice_months(db: Session):
-#     query = text("""
-#         SELECT NULL AS id, '' AS pname FROM dual
-#         UNION
-#         SELECT
-#             o.id,
-#             CONCAT(c.name, '-', v.companyname, '-', cl.companyname, '-', o.id) AS pname
-#         FROM candidate c
-#         JOIN placement p ON c.candidateid = p.candidateid
-#         JOIN po o ON o.placementid = p.id
-#         JOIN vendor v ON p.vendorid = v.id
-#         JOIN client cl ON p.clientid = cl.id
-#         ORDER BY pname;
-#     """)
-#     result = db.execute(query)
-#     return [dict(row._mapping) for row in result]
-
-def get_invoices_by_month(db: Session, month: str, skip: int, limit: int):
+def get_invoices_by_month(db: Session, month: str, search: str = None, skip: int = 0, limit: int = 100):
     query = text("""
         SELECT
             i.id,
@@ -89,10 +70,13 @@ def get_invoices_by_month(db: Session, month: str, skip: int, limit: int):
         JOIN candidate c ON pl.candidateid = c.candidateid
         JOIN vendor v ON pl.vendorid = v.id
         JOIN recruiter r ON pl.recruiterid = r.id
-        WHERE i.status <> 'Delete' AND DATE_FORMAT(i.invoicedate, "%Y-%c-%M") = :month
+        WHERE i.status <> 'Delete'
+        AND (:month IS NULL OR DATE_FORMAT(i.invoicedate, "%Y-%c-%M") = :month)
+        AND (:search IS NULL OR i.invoicenumber LIKE :search OR c.name LIKE :search)
         LIMIT :limit OFFSET :skip;
     """)
-    result = db.execute(query, {'month': month, 'skip': skip, 'limit': limit})
+    search_param = f"%{search}%" if search else None
+    result = db.execute(query, {'month': month, 'search': search_param, 'skip': skip, 'limit': limit})
     return [dict(row._mapping) for row in result]
 
 def create_invoice(db: Session, invoice_data: InvoiceCreateSchema):

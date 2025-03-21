@@ -12,15 +12,15 @@ from app.routes.candidateRoute import router as candidate_router
 from app.routes.candidate_searchRoute import router as candidate_search_router
 from app.routes.poRoute import router as po_router  
 from app.routes.candidateMarketingRoute import router as candidate_marketing_router  
-from app.routes.currentMarketingRoute import router as current_marketing_router  # Import the new router
+from app.routes.currentMarketingRoute import router as current_marketing_router  
 
-from app.routes.overdueRoute import router as overdue_router  # Import the new router
+from app.routes.overdueRoute import router as overdue_router  
 from app.routes.bypoRoute import router as bypo_router
 from app.routes.bymonthRoute import router as bymonth_router
 
 
-from app.routes.clientRoute import router as client_router  # Import the new router
-from app.routes.clientSearchRoute import router as client_search_router  # Import the new router
+from app.routes.clientRoute import router as client_router  
+from app.routes.clientSearchRoute import router as client_search_router  
 from app.routes.byClientRoute import router as by_client_router
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router

@@ -1,11 +1,9 @@
 # avatar-app/projects-api/app/schemas.py
-from pydantic import BaseModel,constr, conint, EmailStr, Field,validator, HttpUrl
+from pydantic import BaseModel,constr, conint, EmailStr, Field, validator, HttpUrl, field_validator
 from datetime import datetime, date
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-# changes here 
-# from .models import ClientStatus, ClientTier
-# changes here
+
 
 class UserCreate(BaseModel):
     username: str  
@@ -43,7 +41,6 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True 
-
 
 
 class LeadBase(BaseModel):
@@ -401,7 +398,7 @@ class AuthUserSchema(AuthUserBase):
 
 
 class CurrentMarketingBase(BaseModel):
-    candidateid: Optional[int] = None
+    # candidateid: Optional[int] = None
     # mmid: Optional[int] = None
     instructorid: Optional[int] = None
     status: Optional[str] = None
@@ -427,8 +424,31 @@ class CurrentMarketingCreateSchema(CurrentMarketingBase):
     pass
 
 class CurrentMarketingUpdateSchema(CurrentMarketingBase):
-    pass
-    class Config:
+    
+    # candidateid: int
+    # startdate: int
+    mmid: int
+    instructorid: int
+    status: str
+    submitterid: int
+    priority: str
+    technology: str
+    minrate: int
+    currentlocation: str
+    relocation: str
+    locationpreference: str
+    skypeid: str
+    ipemailid: int
+    resumeid: int
+    coverletter: str
+    intro: str
+    closedate: str
+    closedemail: str
+    notes: str
+    suspensionreason: str
+    yearsofexperience: str
+       
+class Config:
         orm_mode = True
 
 class CurrentMarketingSchema(CurrentMarketingBase):
@@ -438,25 +458,21 @@ class CurrentMarketingSchema(CurrentMarketingBase):
         from_attributes = True
         
     
-    
-
 class OverdueUpdateSchema(BaseModel):
-    invoicenumber: Optional[str]
+    # invoicenumber: Optional[str]
     invoicedate: Optional[date]
     quantity: Optional[int]
     amountreceived: Optional[float]
     receiveddate: Optional[date]
     releaseddate: Optional[date]
     checknumber: Optional[str]
-    invoiceurl: Optional[str]
-    checkurl: Optional[str]
+    # invoiceurl: Optional[str]
+    # checkurl: Optional[str]
     notes: Optional[str]
     status: Optional[str]
-
     remindertype: Optional[str]    
     
-    
-    
+       
 class InvoiceBase(BaseModel):
     invoicenumber: str
     startdate: date
@@ -490,10 +506,10 @@ class InvoiceSchema(InvoiceBase):
     class Config:
         from_attributes = True    
 
+
     remindertype: Optional[str]
         
 #  ------------------------------------changes here--------------------------------
-from pydantic import field_validator
 class ClientBase(BaseModel):
     companyname: str
     tier: int
@@ -643,4 +659,3 @@ class Recruiter(RecruiterBase):
 
     class Config:
         orm_mode = True
-
