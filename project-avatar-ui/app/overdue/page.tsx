@@ -453,7 +453,7 @@ const OverdueComponent = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const gridRef = useRef<AgGridReact>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
   const fetchData = async () => {
     setLoading(true);
@@ -469,7 +469,7 @@ const OverdueComponent = () => {
         const { data, totalRows } = response.data;
 
         // Add serial numbers to each row
-        const dataWithSerials = data.map((item: Po, index: number) => ({
+        const dataWithSerials = data.map((item: Overdue, index: number) => ({
             ...item,
             serialNo: (currentPage - 1) * paginationPageSize + index + 1,
         }));

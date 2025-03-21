@@ -225,7 +225,7 @@ const UserEditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose,
     e.preventDefault();
     if (formData) {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/access/authuser/${formData.id}`, formData, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/access/a  uthuser/${formData.id}`, formData, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();
