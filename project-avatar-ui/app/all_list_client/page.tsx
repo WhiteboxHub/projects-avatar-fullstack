@@ -38,20 +38,25 @@ const RecruiterByAllList = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<Recruiter[]>([]);
   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [pageSize] = useState<number>(200);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    fetchRecruiters();
-  }, []);
+    fetchRecruiters(currentPage);
+  }, [currentPage]);
 
-  const fetchRecruiters = async () => {
+  const fetchRecruiters = async (page: number) => {
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/byAllList`, {
         headers: { AuthToken: localStorage.getItem("token") },
+        params: { page, pageSize },
       });
-      setRowData(response.data);
+      setRowData(response.data.data);
+      setTotalPages(response.data.pages);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
@@ -130,6 +135,34 @@ const RecruiterByAllList = () => {
     doc.save("recruiter_data.pdf");
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      }
+    }
+    return pageNumbers;
+  };
+
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
       {alertMessage && (
@@ -181,7 +214,7 @@ const RecruiterByAllList = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={() => {}}
+          onClick={() => fetchRecruiters(currentPage)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
@@ -229,18 +262,34 @@ const RecruiterByAllList = () => {
         />
       </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
-          <button className="p-2">
+        <div className="flex items-center flex-wrap gap-2 overflow-auto">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleLeft />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronLeft />
           </button>
-          {/* Pagination buttons */}
-          <button className="p-2">
+          {renderPageNumbers()}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronRight />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleRight />
           </button>
         </div>
@@ -260,6 +309,7 @@ const RecruiterByAllList = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={() => {
+            // Handle edit logic
           }}
         />
       )}

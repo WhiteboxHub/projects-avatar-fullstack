@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
 import { Recruiter } from '@/types/byAllList';
+import axios from 'axios';
 
 interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Recruiter) => void;
   initialData: Recruiter;
+  onSubmit: ()=> void;
 }
 
-const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, initialData, onSubmit }) => {
   const [formData, setFormData] = useState<Recruiter>(initialData);
 
   useEffect(() => {
@@ -25,10 +26,17 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, on
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    try {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/update/${formData.employeeid}`, formData, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      console.log(response.data.message); // Log success message
+      onClose(); // Close modal after successful submission
+    } catch (error) {
+      console.error("Error updating recruiter:", error);
+    }
   };
 
   return (
@@ -260,7 +268,8 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, on
         <button
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-        >
+          onClick={onSubmit}
+          >
           Save Changes
         </button>
       </form>
