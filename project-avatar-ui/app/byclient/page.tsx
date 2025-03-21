@@ -5,22 +5,17 @@ import autoTable from "jspdf-autotable";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
+  FaDownload,
   FaChevronLeft,
   FaChevronRight,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
 } from "react-icons/fa";
-import {
-  AiOutlineEdit,
-  AiOutlineEye,
-  AiOutlineSearch,
-  // AiOutlineReload,
-} from "react-icons/ai";
+import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { Recruiter } from "@/types/byClient";
 import axios from "axios";
@@ -38,20 +33,25 @@ const RecruiterByClient = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<Recruiter[]>([]);
   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [pageSize] = useState<number>(100);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    fetchRecruiters();
-  }, []);
+    fetchRecruiters(currentPage);
+  }, [currentPage]);
 
-  const fetchRecruiters = async () => {
+  const fetchRecruiters = async (page: number) => {
     try {
       const response = await axios.get(`${API_URL}/recruiters/by-client`, {
+        params: { page, pageSize },
         headers: { AuthToken: localStorage.getItem("token") },
       });
-      setRowData(response.data);
+      setRowData(response.data.data);
+      setTotalPages(response.data.pages);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
@@ -102,7 +102,28 @@ const RecruiterByClient = () => {
     const doc = new jsPDF();
     doc.text("Recruiter Data", 20, 10);
     autoTable(doc, {
-      head: [["ID", "Name", "Email", "Phone", "Status", "Designation", "DOB", "Personal Email", "Employee ID", "Skype ID", "LinkedIn", "Twitter", "Facebook", "Review", "Vendor ID", "Client ID", "Notes", "Last Modified DateTime"]],
+      head: [
+        [
+          "ID",
+          "Name",
+          "Email",
+          "Phone",
+          "Status",
+          "Designation",
+          "DOB",
+          "Personal Email",
+          "Employee ID",
+          "Skype ID",
+          "LinkedIn",
+          "Twitter",
+          "Facebook",
+          "Review",
+          "Vendor ID",
+          "Client ID",
+          "Notes",
+          "Last Modified DateTime",
+        ],
+      ],
       body: rowData.map((row) => [
         row.id,
         row.name,
@@ -127,6 +148,12 @@ const RecruiterByClient = () => {
     doc.save("recruiter_data.pdf");
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
       {alertMessage && (
@@ -135,7 +162,9 @@ const RecruiterByClient = () => {
         </div>
       )}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">Recruiter Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Recruiter Management
+        </h1>
         <div className="flex space-x-2">
           <button
             onClick={handleAddRow}
@@ -227,17 +256,35 @@ const RecruiterByClient = () => {
       </div>
       <div className="flex justify-between mt-4">
         <div className="flex items-center">
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className="p-2"
+          >
             <FaAngleDoubleLeft />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-2"
+          >
             <FaChevronLeft />
           </button>
-          {/* Pagination buttons */}
-          <button className="p-2">
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2"
+          >
             <FaChevronRight />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className="p-2"
+          >
             <FaAngleDoubleRight />
           </button>
         </div>

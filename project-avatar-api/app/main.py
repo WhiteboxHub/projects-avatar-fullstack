@@ -22,8 +22,10 @@ from app.routes.bymonthRoute import router as bymonth_router
 from app.routes.clientRoute import router as client_router  
 from app.routes.clientSearchRoute import router as client_search_router  
 from app.routes.byClientRoute import router as by_client_router
+
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
+
 app = FastAPI()
 
 origins = ["*"]
