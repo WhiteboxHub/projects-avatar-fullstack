@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/api/admin/po")
-def read_po(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+def read_po(page: int = 1, page_size: int = 100, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size  
     po_list = get_po_list(db, skip, page_size)
     total_rows = db.execute(text("SELECT COUNT(*) FROM po")).scalar()
