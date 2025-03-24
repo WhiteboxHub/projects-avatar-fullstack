@@ -1,12 +1,14 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import AddRowModal from "@/modals/recruiter_byDetailed_modals/AddRowRecruiter";
+import EditRowRecruiter from "@/modals/recruiter_byDetailed_modals/EditRowRecruiter"; 
+import ViewRowRecruiterComponent from "@/modals/recruiter_byDetailed_modals/ViewRowRecruiter"; 
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -17,9 +19,77 @@ import {
   AiOutlineEdit,
   AiOutlineEye,
   AiOutlineSearch
-  // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+import axios from 'axios';
+import Modal from 'react-modal';
+import { RecruiterDetails } from '@/types/byDetailed'; 
+import { AiOutlineClose } from 'react-icons/ai';
+
+interface ViewRowRecruiterComponentProps {
+  isOpen: boolean;
+  onClose: () => void;
+  recruiter: RecruiterDetails | null; 
+}
+
+const ViewRowRecruiter: React.FC<ViewRowRecruiterComponentProps> = ({ isOpen, onClose, recruiter }) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      style={{
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '400px',
+          width: '90%',
+          maxHeight: '80vh',
+          padding: '24px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          overflowY: 'auto',
+          fontFamily: 'Arial, sans-serif',
+        },
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      }}
+      contentLabel="View Recruiter Details"
+      ariaHideApp={false}
+    >
+      <div className="relative">
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
+        >
+          <AiOutlineClose />
+        </button>
+      </div>
+
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Recruiter Details</h2>
+
+      <div className="space-y-4">
+        {recruiter ? (
+          <>
+            {Object.entries(recruiter).map(([key, value]) => (
+              <div key={key}>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</label>
+                <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
+                  {value || 'N/A'}
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <p>No data available</p>
+        )}
+      </div>
+    </Modal>
+  );
+};
 
 jsPDF.prototype.autoTable = autoTable;
 
@@ -32,10 +102,32 @@ const RecruiterByClient = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [rowData, setRowData] = useState<any[]>([]);
+  const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null); 
   const gridRef = useRef<AgGridReact>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(100); 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+  useEffect(() => {
+    fetchRecruiters(currentPage);
+  }, [currentPage]);
+
+  const fetchRecruiters = async (page: number) => {
+    try {
+      const response = await axios.get(`${API_URL}/by/recruiters/byDetailed`, {
+        params: { page, pageSize },
+        headers: { AuthToken: localStorage.getItem("token") }, 
+      });
+      setRowData(response.data.data);
+      setTotalPages(response.data.pages);
+    } catch (error) {
+      console.error("Error fetching recruiters:", error);
+    }
+  };
+
+  const handleAddRow = () => setModalState((prevState) => ({ ...prevState, add: true }));
 
   const handleEditRow = () => {
     if (gridRef.current) {
@@ -49,11 +141,25 @@ const RecruiterByClient = () => {
     }
   };
 
-  const handleDeleteRow = () => {
+  const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        // Handle delete logic
+        const confirmDelete = window.confirm("Are you sure you want to delete the selected recruiter(s)?");
+        if (confirmDelete) {
+          try {
+            await Promise.all(selectedRows.map(row => 
+              axios.delete(`${API_URL}/by/recruiters/byDetailed/remove/${row.id}`, {
+                headers: { AuthToken: localStorage.getItem("token") },
+              })
+            ));
+            fetchRecruiters(currentPage); // Refresh the list after deletion
+          } catch (error) {
+            console.error("Error deleting recruiters:", error);
+            setAlertMessage("Error deleting recruiters.");
+            setTimeout(() => setAlertMessage(null), 3000);
+          }
+        }
       } else {
         setAlertMessage("Please select a row to delete.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -65,6 +171,7 @@ const RecruiterByClient = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        setSelectedRecruiter(selectedRows[0]); // Set the selected recruiter for viewing
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -76,8 +183,35 @@ const RecruiterByClient = () => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Recruiter Data", 20, 10);
-    // Add PDF generation logic
     doc.save("recruiter_data.pdf");
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      }
+    }
+    return pageNumbers;
   };
 
   return (
@@ -143,8 +277,25 @@ const RecruiterByClient = () => {
       >
         <AgGridReact
           ref={gridRef}
-          rowData={[]} // Placeholder for row data
-          columnDefs={[]} // Placeholder for column definitions
+          rowData={rowData}
+          columnDefs={[
+            { headerName: "ID", field: "id" },
+            { headerName: "Name", field: "name" },
+            { headerName: "Email", field: "email" },
+            { headerName: "Phone", field: "phone" },
+            { headerName: "Designation", field: "designation" },
+            { headerName: "Client ID", field: "clientid" },
+            { headerName: "Company", field: "comp" },
+            { headerName: "Status", field: "status" },
+            { headerName: "DOB", field: "dob" },
+            { headerName: "Personal Email", field: "personalemail" },
+            { headerName: "Skype ID", field: "skypeid" },
+            { headerName: "LinkedIn", field: "linkedin" },
+            { headerName: "Twitter", field: "twitter" },
+            { headerName: "Facebook", field: "facebook" },
+            { headerName: "Review", field: "review" },
+            { headerName: "Notes", field: "notes" },
+          ]} 
           pagination={false}
           domLayout="normal"
           rowSelection="multiple"
@@ -160,18 +311,34 @@ const RecruiterByClient = () => {
         />
       </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
-          <button className="p-2">
+        <div className="flex items-center flex-wrap gap-2 overflow-auto">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleLeft />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronLeft />
           </button>
-          {/* Pagination buttons */}
-          <button className="p-2">
+          {renderPageNumbers()}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronRight />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleRight />
           </button>
         </div>
@@ -181,11 +348,27 @@ const RecruiterByClient = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-            // Handle add logic
+           
           }}
         />
       )}
-      {/* Add EditRowModal and ViewRowModal similarly */}
+      {modalState.edit &&(
+      <EditRowRecruiter
+       isOpen={modalState.edit}
+       onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+       initialData={gridRef.current?.api.getSelectedRows()[0]} 
+       onSubmit={() => {
+        
+       }}
+      />
+       )}
+      {modalState.view && selectedRecruiter && ( 
+        <ViewRowRecruiterComponent
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          recruiter={selectedRecruiter}
+        />
+      )}
     </div>
   );
 };

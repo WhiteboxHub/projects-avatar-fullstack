@@ -8,7 +8,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-// import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -78,11 +78,23 @@ const RecruiterByAllList = () => {
     }
   };
 
-  const handleDeleteRow = () => {
+  const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        // Handle delete logic
+        const recruiterId = selectedRows[0].id; // Assuming 'id' is the identifier
+        try {
+          await axios.delete(`${API_URL}/by/recruiters/byAllList/remove/${recruiterId}`, {
+            headers: { AuthToken: localStorage.getItem("token") },
+          });
+          setAlertMessage("Recruiter deleted successfully.");
+          setTimeout(() => setAlertMessage(null), 3000);
+          fetchRecruiters(currentPage); // Refresh the list after deletion
+        } catch (error) {
+          console.error("Error deleting recruiter:", error);
+          setAlertMessage("Failed to delete recruiter.");
+          setTimeout(() => setAlertMessage(null), 3000);
+        }
       } else {
         setAlertMessage("Please select a row to delete.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -299,7 +311,6 @@ const RecruiterByAllList = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-            // Handle add logic
           }}
         />
       )}
@@ -309,19 +320,17 @@ const RecruiterByAllList = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={() => {
-            // Handle edit logic
           }}
         />
       )}
-      {/* {modalState.view && selectedRow && (
+      {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )} */}
+      )}
     </div>
   );
 };
-
 export default RecruiterByAllList;

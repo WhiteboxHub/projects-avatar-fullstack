@@ -51,7 +51,7 @@ const RecruiterByClient = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setRowData(response.data.data);
-      setTotalPages(Math.min(response.data.pages, 307)); // Limit total pages to 307
+      setTotalPages(Math.min(response.data.pages, 307));
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
@@ -326,7 +326,6 @@ const RecruiterByClient = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-            // Handle add logic
           }}
         />
       )}
@@ -336,7 +335,6 @@ const RecruiterByClient = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={() => {
-            // Handle edit logic
           }}
         />
       )}

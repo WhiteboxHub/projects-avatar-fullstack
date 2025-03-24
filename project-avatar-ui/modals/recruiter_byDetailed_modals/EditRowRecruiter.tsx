@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
-import { Recruiter } from '@/types/byAllList';
 import axios from 'axios';
+import { RecruiterDetails } from '@/types/byDetailed'; 
 
 interface EditRowRecruiterProps {
   isOpen: boolean;
-  onClose: () => voiad;
-  initialData: Recruiter;
-  onSubmit: ()=> void;
+  onClose: () => void;
+  initialData: RecruiterDetails;
+  onSubmit: () => void;
 }
 
 const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, initialData, onSubmit }) => {
-  const [formData, setFormData] = useState<Recruiter>(initialData);
+  const [formData, setFormData] = useState<RecruiterDetails>(initialData);
 
   useEffect(() => {
     setFormData(initialData);
@@ -29,7 +29,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/update/${formData.employeeid}`, formData, {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byDetailed/update/${formData.id}`, formData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       console.log(response.data.message); // Log success message
@@ -84,6 +84,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
+            required
           />
         </div>
 
@@ -96,6 +97,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
 
@@ -108,6 +110,33 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <input
+            type="text"
+            name="designation"
+            value={formData.designation}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter designation"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
+          <input
+            type="number"
+            name="clientid"
+            value={formData.clientid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter client ID"
+            required
           />
         </div>
 
@@ -124,18 +153,6 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-          <input
-            type="text"
-            name="designation"
-            value={formData.designation}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter designation"
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
           <input
             type="date"
@@ -143,7 +160,6 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             value={formData.dob}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter date of birth"
           />
         </div>
 
@@ -156,18 +172,6 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter personal email"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Employee ID</label>
-          <input
-            type="number"
-            name="employeeid"
-            value={formData.employeeid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter employee ID"
           />
         </div>
 
@@ -219,6 +223,20 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           />
         </div>
 
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">vendor_id</label>
+          <input
+            type="text"
+            name="vendorid"
+            value={formData.vendorid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter designation"
+            required
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
           <textarea
@@ -227,30 +245,6 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter review"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
-          <input
-            type="number"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter vendor ID"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
-          <input
-            type="number"
-            name="clientid"
-            value={formData.clientid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter client ID"
           />
         </div>
 
@@ -269,7 +263,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
           onClick={onSubmit}
-          >
+        >
           Save Changes
         </button>
       </form>
@@ -278,3 +272,4 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
 };
 
 export default EditRowRecruiter;
+
