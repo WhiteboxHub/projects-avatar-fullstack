@@ -102,7 +102,7 @@ const RecruiterByClient = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [rowData, setRowData] = useState<any[]>([]);
+  const [rowData, setRowData] = useState<RecruiterDetails[]>([]);
   const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null); 
   const gridRef = useRef<AgGridReact>(null);
   const [currentPage, setCurrentPage] = useState(1);
