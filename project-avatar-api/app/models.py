@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
 
 from app.database.db import Base
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr ,validator, ValidationError
 from sqlalchemy.orm import declarative_base, relationship
 from typing import ClassVar, Optional
 from pydantic_settings import BaseSettings
@@ -19,6 +19,42 @@ class User(Base):
     uname = Column(String, unique=True, index=True)
     password = Column(String)
 
+
+class Employee(Base):
+    __tablename__ = 'employee'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(150))
+    email = Column(String(150), unique=True)
+    phone = Column(String(150))
+    personalemail = Column(String(150))
+    personalphone = Column(String(150))
+    status = Column(String(45))
+    startdate = Column(Date)
+    address = Column(String(250))
+    city = Column(String(150))
+    state = Column(String(150))
+    country = Column(String(150))
+    zip = Column(String(45))
+    skypeid = Column(String(150))
+    dob = Column(Date)
+    salary = Column(Numeric(19, 4))
+    type = Column(String(45))
+    mgrid = Column(Integer)
+    commission = Column(String(1))
+    commissionrate = Column(Numeric(19, 4))
+    enddate = Column(Date)
+    loginid = Column(Integer)
+    responsibilities = Column(Text)
+    notes = Column(Text)
+    designationid = Column(Integer)
+    dlurl = Column(String(250))
+    empagreementurl = Column(String(250))
+    offerletterurl = Column(String(250))
+    workpermiturl = Column(String(250))
+    contracturl = Column(String(250))
+    
+    
 class User(BaseModel):
     __tablename__ = "authuser" 
     id: ClassVar[Column] = Column(Integer, primary_key=True, index=True)
@@ -481,7 +517,7 @@ class Invoice(Base):
 
 
 # Adding recruiter model
-from pydantic import BaseModel, validator, ValidationError
+
 class Recruiter(Base):
     __tablename__ = 'recruiter'
     
