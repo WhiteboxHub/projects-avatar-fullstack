@@ -30,9 +30,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     
     if user.team == 'admin':
-        return {"token": token, "token_type": "bearer", "message": f"Welcome admin, {user.uname}"}
+        return {"token": token, "token_type": "bearer", "message": f"Welcome  {user.uname} "}
     else:
-        return {"token": token, "token_type": "bearer", "user_details": dict(user), "message": f"Welcome user, {user.uname}"}
+        return {"token": token, "token_type": "bearer", "user_details": dict(user), "message": f"Welcome  {user.uname}"}
 
 def hash_password(password: str) -> str:
     import hashlib

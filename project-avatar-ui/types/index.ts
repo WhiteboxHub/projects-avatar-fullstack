@@ -273,8 +273,6 @@ export interface ErrorResponse {
     Feedback_ID?: string;
     Project_Docs?: string;
     Notes?: string;
-
-    // Additional properties with alternative names
     candidateid?: string;
     mmid?: string;
     recruiterid?: string;
@@ -309,15 +307,13 @@ export interface ErrorResponse {
 export interface Vendor {
   id?: string;
   name: string;
-  vendorid: string; // Required property
-  comp: string; // Required property
-  dob: string; // Required property
-  designation: string; // Required property
-  personalemail: string; // Required property
-  skypeid: string; // Required property
-  review: string; // Required property
-
-  // Fields with specified default values as optional properties
+  vendorid: string;
+  comp: string;
+  dob: string;
+  designation: string; 
+  personalemail: string; 
+  skypeid: string; 
+  review: string; 
   companyname?: string;
   status?: string;
   tier?: string;
@@ -361,38 +357,6 @@ export interface Vendor {
   clients?: string;
   notes?: string;
 }
-
-  // export  type Client= {
-  //   id: string;
-  //   companyName: string;
-  //   tier: string;
-  //   status: string;
-  //   email: string;
-  //   phone: string;
-  //   fax?: string;
-  //   address: string;
-  //   city: string;
-  //   state: string;
-  //   country: string;
-  //   zip: string;
-  //   url: string;
-  //   manager1Name: string;
-  //   twitter?: string;
-  //   facebook?: string;
-  //   linkedIn?: string;
-  //   manager1Email: string;
-  //   manager1Phone: string;
-  //   hmName: string; // Hiring manager name
-  //   hmEmail: string;
-  //   hmPhone: string;
-  //   hrName: string;
-  //   hrEmail: string;
-  //   hrPhone: string;
-  //   notes?: string;
-  //   lastModDateTime: string;
-  //   client?: string; // Assuming 'clicent' is a typo for 'client'
-  // }
-  
 
   export type Employee ={
       id: string;
@@ -453,12 +417,6 @@ export interface Vendor {
       suspensionreason: string;
       yearsofexperience: string;
     }
-
-
-
-
-
-    //+++++++++++++++++++++++++++++++
 
 
   export interface Overdue {
@@ -532,14 +490,4 @@ export interface Vendor {
     yearsofexperience: string;
   }
   
-
-// In your types file (e.g., types/index.ts)
-
-export interface DetailedClient {
-  id: number;
-  name: string;
-  email: string;
-  // Add other fields here
-}
-
 

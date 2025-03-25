@@ -100,7 +100,7 @@
 //   //       headerName: key.charAt(0).toUpperCase() + key.slice(1),
 //   //       field: key,
 //   //     }));
-      
+
 //   //     setColumnDefs(columns);
 //   //   } else {
 //   //     console.warn("Data is not an array or is empty:", data);
@@ -383,40 +383,31 @@
 // import axios from "axios";
 // import { jsPDF } from 'jspdf';
 // import autoTable from 'jspdf-autotable';
-// import { AxiosError } from 'axios';
+// // import { AxiosError } from 'axios';
 // import { AgGridReact } from "ag-grid-react";
 // import "ag-grid-community/styles/ag-grid.css";
 // import "ag-grid-community/styles/ag-theme-alpine.css";
-// import 'ag-grid-enterprise'; // Import AG Grid Enterprise
-// import { FaDownload } from "react-icons/fa";
-// import { MdDelete } from "react-icons/md";
-// import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-// import {
-//   AiOutlineEdit,
-//   AiOutlineEye,
-//   AiOutlineSearch,
-//   AiOutlineReload,
-// } from "react-icons/ai";
-// import { MdAdd } from "react-icons/md";
-// import type { ByPO } from "../../types/index"; // Use type-only import
+// import { FaDownload, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+// import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch, AiOutlineReload } from "react-icons/ai";
+// // import { MdAdd, MdDelete } from "react-icons/md";
+// import Accordion from "../../components/Accordion";
 
 // jsPDF.prototype.autoTable = autoTable;
 
 // const ByPO = () => {
-//   const [rowData, setRowData] = useState<ByPO[]>([]);
-//   const [columnDefs, setColumnDefs] = useState<
-//     { headerName: string; field: string }[]
-//   >([]);
-//   const [paginationPageSize] = useState<number>(100);
-//   const [currentPage, setCurrentPage] = useState<number>(1);
-//   const [totalRows, setTotalRows] = useState<number>(0);
-//   const [loading, setLoading] = useState<boolean>(false);
-//   const [selectedRow, setSelectedRow] = useState<ByPO | null>(null);
-//   const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
-//   const [searchValue, setSearchValue] = useState<string>("");
-//   const gridRef = useRef<AgGridReact>(null);
+//   const [rowData, setRowData] = useState([]);
+//   const [columnDefs, setColumnDefs] = useState([]);
+//   const [paginationPageSize] = useState(100);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalRows, setTotalRows] = useState(0);
+//   const [loading, setLoading] = useState(false);
+//   const [setSelectedRow] = useState(null);
+//   const [detailedData, setDetailedData] = useState([]);
+//   const [alertMessage, setAlertMessage] = useState(null);
+//   const [searchValue, setSearchValue] = useState("");
+//   const gridRef = useRef(null);
 
-//   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/admin"; // Ensure this matches your backend URL
+//   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 //   const fetchData = async () => {
 //     setLoading(true);
@@ -429,10 +420,9 @@
 //         headers: { AuthToken: localStorage.getItem("token") },
 //       });
 
-//       const data = response.data;
+//       const data: unknown = response.data;
 //       if (Array.isArray(data)) {
-//         console.log("Fetched data:", data); // Log the fetched data
-//         setRowData(data);
+//         setRowData(data as never[]);
 //         setTotalRows(data.length);
 //         setupColumns(data);
 //       } else {
@@ -457,7 +447,6 @@
 //       });
 
 //       const { data, totalRows } = response.data;
-//       console.log("Fetched data with search query:", data); // Log the fetched data
 //       setRowData(data);
 //       setTotalRows(totalRows);
 //       setupColumns(data);
@@ -470,20 +459,30 @@
 //     fetchByPOs(searchValue);
 //   };
 
-//   const setupColumns = (data) => {
+//   const setupColumns = (data: Record<string, unknown>[]) => {
 //     if (Array.isArray(data) && data.length > 0) {
 //       const columns = Object.keys(data[0]).map((key) => {
-//         const columnDef = {
+//         const columnDef: { headerName: string; field: string; width?: number; type?: string; valueFormatter?: (params: { value: unknown }) => string; aggFunc?: string } = {
 //           headerName: key.charAt(0).toUpperCase() + key.slice(1),
 //           field: key,
+//           width: key === 'pname' ? 200 : 150, // Set default widths
 //         };
-//         // Set custom width for the 'pname' column
-//         if (key === 'pname') {
-//           columnDef.width = 1200; // Adjust the width as needed
+//         if (key === 'startdate' || key === 'enddate' || key === 'invoicedate' || key === 'expecteddate' || key === 'receiveddate' || key === 'releaseddate' || key === 'emppaiddate') {
+//           columnDef.type = 'dateColumn';
+//           columnDef.valueFormatter = params => {
+//             if (params.value) {
+//               return new Date(params.value as string | number | Date).toISOString().split('T')[0];
+//             }
+//             return '';
+//           };
+//         }
+//         if (key === 'quantity' || key === 'otquantity' || key === 'amountexpected' || key === 'amountreceived') {
+//           columnDef.type = 'numericColumn';
+//           columnDef.aggFunc = 'sum';
 //         }
 //         return columnDef;
 //       });
-//       setColumnDefs(columns);
+//       setColumnDefs(columns as never[]);
 //     } else {
 //       console.warn("Data is not an array or is empty:", data);
 //     }
@@ -499,94 +498,71 @@
 //     window.location.reload();
 //   };
 
-//   const handleAddRow = () =>
-//     setModalState((prevState) => ({ ...prevState, add: true }));
+//   const handleAddRow = () => {
+//     // Implement add row functionality
+//   };
 
 //   const handleEditRow = () => {
-//     if (gridRef.current) {
+//     if (gridRef.current && gridRef.current.api) {
 //       const selectedRows = gridRef.current.api.getSelectedRows();
 //       if (selectedRows.length > 0) {
 //         setSelectedRow(selectedRows[0]);
-//         setModalState((prevState) => ({ ...prevState, edit: true }));
+//         // Implement edit row functionality
 //       } else {
-//         setAlertMessage("Please select a row to edit."); // Set alert message
-//         setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+//         setAlertMessage("Please select a row to edit.");
+//         setTimeout(() => setAlertMessage(null), 3000);
 //       }
 //     }
 //   };
 
-//   const handleDeleteRow = async () => {
+//   // const handleDeleteRow = async () => {
+//   //   if (gridRef.current) {
+//   //     const selectedRows = gridRef.current.api.getSelectedRows();
+//   //     if (selectedRows.length > 0) {
+//   //       const byPoId = selectedRows[0].byPoid || selectedRows[0].id;
+//   //       if (byPoId) {
+//   //         const confirmation = window.confirm(`Are you sure you want to delete By PO ID ${byPoId}?`);
+//   //         if (!confirmation) return;
+
+//   //         try {
+//   //           await axios.delete(`${API_URL}/by-po/delete/${byPoId}`, {
+//   //             headers: { AuthToken: localStorage.getItem("token") },
+//   //           });
+//   //           alert("By PO deleted successfully.");
+//   //           fetchData();
+//   //         } catch (error) {
+//   //           const axiosError = error as AxiosError;
+//   //           alert(`Failed to delete By PO: ${axiosError.message}`);
+//   //         }
+//   //       } else {
+//   //         alert("No valid By PO ID found for the selected row.");
+//   //       }
+//   //     } else {
+//   //       setAlertMessage("Please select a row to delete.");
+//   //       setTimeout(() => setAlertMessage(null), 3000);
+//   //     }
+//   //   }
+//   // };
+
+//   const handlePageChange = (newPage) => setCurrentPage(newPage);
+
+//   const handleViewRow = async () => {
 //     if (gridRef.current) {
 //       const selectedRows = gridRef.current.api.getSelectedRows();
 //       if (selectedRows.length > 0) {
-//         const byPoId = selectedRows[0].byPoid || selectedRows[0].id;
-//         if (byPoId) {
-//           const confirmation = window.confirm(
-//             `Are you sure you want to delete By PO ID ${byPoId}?`
-//           );
-//           if (!confirmation) return;
-
-//           try {
-//             await axios.delete(`${API_URL}/by-po/delete/${byPoId}`, {
-//               headers: { AuthToken: localStorage.getItem("token") },
-//             });
-//             alert("By PO deleted successfully.");
-//             fetchData();
-//           } catch (error) {
-//             const axiosError = error as AxiosError;
-//             alert(
-//                 `Failed to delete By PO: ${
-//                     (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-//                 }`
-//             );
-//           }
-//         } else {
-//           alert("No valid By PO ID found for the selected row.");
-//         }
-//       } else {
-//         setAlertMessage("Please select a row to delete."); // Set alert message
-//         setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
-//       }
-//     }
-//   };
-
-//   const handlePageChange = (newPage: number) => setCurrentPage(newPage);
-
-//   const handleViewRow = async (event: React.MouseEvent<HTMLElement>) => {
-//     if (gridRef.current) {
-//       const selectedRows = gridRef.current.api.getSelectedRows();
-//       if (selectedRows.length > 0) {
-//         const invoiceId = selectedRows[0].id; // Assuming the ID is stored in the 'id' field
+//         const invoiceId = selectedRows[0].id;
 //         try {
 //           const response = await axios.get(`${API_URL}/invoices/${invoiceId}`, {
 //             headers: { AuthToken: localStorage.getItem("token") },
 //           });
-
-//           // Assuming the additional data is in response.data.details
-//           const additionalData = response.data.details;
-
-//           // Update the row data to include the additional data
-//           const updatedRowData = rowData.map(row => {
-//             if (row.id === invoiceId) {
-//               return { ...row, details: additionalData };
-//             }
-//             return row;
-//           });
-
-//           setRowData(updatedRowData);
-
-//           // Trigger the grid to expand the row
-//           gridRef.current.api.forEachNode(node => {
-//             if (node.data.id === invoiceId) {
-//               node.setExpanded(true);
-//             }
-//           });
+//           console.log("Detailed Data:", response.data); // Debugging line
+//           setDetailedData(response.data);
 //         } catch (error) {
 //           console.error("Error fetching detailed data:", error);
 //         }
 //       } else {
-//         setAlertMessage("Please select a row to view."); // Set alert message
-//         setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+//         setAlertMessage("Please select a row to view.");
+//         setTimeout(() => setAlertMessage(null), 3000);
 //       }
 //     }
 //   };
@@ -600,7 +576,7 @@
 //       head: [headers],
 //       body: pdfData,
 //       theme: 'grid',
-//       styles: { fontSize: 5 },
+//       styles: { fontSize: 8 }, // Adjust font size
 //     });
 //     doc.save("by_po_data.pdf");
 //   };
@@ -608,9 +584,23 @@
 //   const totalPages = Math.ceil(totalRows / paginationPageSize);
 //   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+//   // Define the columns you want to display
+//   const detailedColumns = [
+//     "Invoice Number", "Start Date", "End Date", "Invoice Date", "Quantity",
+//     "OT Quantity", "Rate", "Overtime Rate", "Status", "Emp Paid Date",
+//     "Cand Payment Status", "Reminders", "Amount Expected", "Expected Date",
+//     "Amount Received", "Received Date", "Released Date", "Check Number",
+//     "Invoice URL", "Check URL", "Freq Type", "Invoice Net", "Company Name",
+//     "Vendor Fax", "Vendor Phone", "Vendor Email", "Timesheet Email", "HR Name",
+//     "HR Email", "HR Phone", "Manager Name", "Manager Email", "Manager Phone",
+//     "Secondary Name", "Secondary Email", "Secondary Phone", "Candidate Name",
+//     "Candidate Phone", "Candidate Email", "Work Email", "Work Phone",
+//     "Recruiter Name", "Recruiter Phone", "Recruiter Email", "PO ID", "Notes"
+//   ];
+
 //   return (
 //     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-//       {alertMessage && ( // Conditional rendering of alert message
+//       {alertMessage && (
 //         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
 //           {alertMessage}
 //         </div>
@@ -641,7 +631,7 @@
 //             onClick={handleAddRow}
 //             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
 //           >
-//             <MdAdd className="mr-2" />
+//             {/* <MdAdd className="mr-2" /> */}
 //           </button>
 //           <button
 //             onClick={handleEditRow}
@@ -649,7 +639,6 @@
 //           >
 //             <AiOutlineEdit className="mr-2" />
 //           </button>
-
 //           <button
 //             onClick={handleViewRow}
 //             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
@@ -690,29 +679,13 @@
 //             defaultColDef={{
 //               sortable: true,
 //               filter: true,
-//               cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-//               minWidth: 60,
+//               cellStyle: { color: "#333", fontSize: "0.85rem", padding: "8px" }, // Adjust cell style
+//               minWidth: 100,
 //               maxWidth: 1300,
 //             }}
-//             rowHeight={30}
-//             headerHeight={35}
+//             rowHeight={40} // Adjust row height
+//             headerHeight={40} // Adjust header height
 //             onRowClicked={handleViewRow}
-//             masterDetail={true} // Enable master-detail
-//             detailCellRendererParams={{
-//               detailGridOptions: {
-//                 columnDefs: [
-//                   // Define columns for the detailed view
-//                   { field: 'detailField1', headerName: 'Detail 1' },
-//                   { field: 'detailField2', headerName: 'Detail 2' },
-//                   // Add more columns as needed
-//                 ],
-//                 // Other grid options for the detail view
-//               },
-//               getDetailRowData: (params) => {
-//                 // Return the additional data for the selected row
-//                 return params.data.details;
-//               },
-//             }}
 //           />
 //         </div>
 //       )}
@@ -742,7 +715,6 @@
 //               {page}
 //             </button>
 //           ))}
-
 //           <button
 //             onClick={() => handlePageChange(currentPage + 1)}
 //             disabled={currentPage === totalPages}
@@ -759,59 +731,102 @@
 //           </button>
 //         </div>
 //       </div>
+
+//       {detailedData.length > 0 && (
+//         <Accordion header={`Details for Invoice IDs`}>
+//           <div className="overflow-auto" style={{ maxHeight: "300px" }}>
+//             <table className="min-w-full bg-white border border-gray-300">
+//               <thead>
+//                 <tr>
+//                   {detailedColumns.map((column, index) => (
+//                     <th key={index} className="py-2 px-4 border-b text-sm">
+//                       {column}
+//                     </th>
+//                   ))}
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {detailedData.map((data, dataIndex) => (
+//                   <tr key={dataIndex} className="text-sm">
+//                     {detailedColumns.map((column, index) => {
+//                       const fieldName = column.toLowerCase().replace(/ /g, '');
+//                       const value = data[fieldName];
+//                       return (
+//                         <td key={index} className="py-2 px-4 border-b">
+//                           {value !== undefined ? value : 'N/A'}
+//                         </td>
+//                       );
+//                     })}
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </Accordion>
+//       )}
 //     </div>
 //   );
 // };
 
 // export default ByPO;
 
-// __________________________________________________
-
-
-
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { FaDownload } from "react-icons/fa";
-import Accordion from "../../components/Accordion"; // Import the Accordion component
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-import {
-  AiOutlineEdit,
-  AiOutlineEye,
-  AiOutlineSearch,
-  AiOutlineReload,
-} from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
-import type { ByPO } from "../../types/index"; // Use type-only import
+import { FaDownload, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch, AiOutlineReload } from "react-icons/ai";
+import Accordion from "../../components/Accordion";
 
-jsPDF.prototype.autoTable = autoTable;
+// Extend jsPDF with autoTable
+(jsPDF as { prototype: { autoTable: typeof autoTable } }).prototype.autoTable = autoTable;
+
+interface InvoiceData {
+  id?: string;
+  pname?: string;
+  startdate?: string;
+  enddate?: string;
+  invoicedate?: string;
+  expecteddate?: string;
+  receiveddate?: string;
+  releaseddate?: string;
+  emppaiddate?: string;
+  quantity?: number;
+  otquantity?: number;
+  amountexpected?: number;
+  amountreceived?: number;
+  [key: string]: unknown; // Replaces explicit 'any' for dynamic properties
+}
+
+interface ColumnDef {
+  headerName: string;
+  field: string;
+  width?: number;
+  type?: string;
+  valueFormatter?: (params: { value: unknown }) => string;
+  aggFunc?: string;
+}
+
 const ByPO = () => {
-  const [rowData, setRowData] = useState<ByPO[]>([]);
-  const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string }[]
-  >([]);
-  const [paginationPageSize] = useState<number>(100);
-  // const [currentPage, setCurrentPage] = useState<number>(1);
-  const [currentPage, setCurrentPage] = useState<number>(1); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [totalRows, setTotalRows] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [expandedRow, setExpandedRow] = useState<ByPO | null>(null); // New state for expanded row
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
-  const [searchValue, setSearchValue] = useState<string>("");
-  const gridRef = useRef<AgGridReact>(null);
-  const [modalState, setModalState] = useState({ add: false, edit: false }); //eslint-disable-line @typescript-eslint/no-unused-vars
-  const [selectedRow, setSelectedRow] = useState<ByPO | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [rowData, setRowData] = useState<InvoiceData[]>([]);
+  const [columnDefs, setColumnDefs] = useState<ColumnDef[]>([]);
+  const [paginationPageSize] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [detailedData, setDetailedData] = useState<InvoiceData[]>([]);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState("");
+  const gridRef = useRef<AgGridReact<InvoiceData>>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/admin"; // Ensure this matches your backend URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/invoices`, {
@@ -819,12 +834,11 @@ const ByPO = () => {
           page: currentPage,
           pageSize: paginationPageSize,
         },
-        headers: { AuthToken: localStorage.getItem("token") },
+        headers: { AuthToken: localStorage.getItem("token") || "" },
       });
 
       const data = response.data;
       if (Array.isArray(data)) {
-        console.log("Fetched data:", data); // Log the fetched data
         setRowData(data);
         setTotalRows(data.length);
         setupColumns(data);
@@ -836,7 +850,7 @@ const ByPO = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize]);
 
   const fetchByPOs = async (searchQuery = "") => {
     try {
@@ -846,11 +860,10 @@ const ByPO = () => {
           pageSize: paginationPageSize,
           search: searchQuery,
         },
-        headers: { AuthToken: localStorage.getItem("token") },
+        headers: { AuthToken: localStorage.getItem("token") || "" },
       });
 
       const { data, totalRows } = response.data;
-      console.log("Fetched data with search query:", data); // Log the fetched data
       setRowData(data);
       setTotalRows(totalRows);
       setupColumns(data);
@@ -858,47 +871,35 @@ const ByPO = () => {
       console.error("Error loading data:", error);
     }
   };
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchData(); // Fetch data for the new page
-  };
-  //   const handlePageChange = (newPage: number) => setCurrentPage(newPage);
 
   const handleSearch = () => {
     fetchByPOs(searchValue);
   };
 
-  // const setupColumns = (data) => {
-  //   if (Array.isArray(data) && data.length > 0) {
-  //     const columns = Object.keys(data[0]).map((key) => {
-  //       const columnDef = {
-  //         headerName: key.charAt(0).toUpperCase() + key.slice(1),
-  //         field: key,
-  //       };
-  //       // Set custom width for the 'pname' column
-  //       if (key === 'pname') {
-  //         columnDef.width = 1200; // Adjust the width as needed
-  //       }
-  //       return columnDef;
-  //     });
-  //     setColumnDefs(columns);
-  //   } else {
-  //     console.warn("Data is not an array or is empty:", data);
-  //   }
-  // };
-
-  const setupColumns = (data: ByPO[]) => {
+  const setupColumns = (data: InvoiceData[]) => {
     if (Array.isArray(data) && data.length > 0) {
       const columns = Object.keys(data[0]).map((key) => {
-        const columnDef: { headerName: string; field: string; width?: number } = {
+        const columnDef: ColumnDef = {
           headerName: key.charAt(0).toUpperCase() + key.slice(1),
           field: key,
+          width: key === 'pname' ? 200 : 150,
         };
-        // Set custom width for the 'pname' column
-        if (key === 'pname') {
-          columnDef.width = 1200; // Adjust the width as needed
+
+        if (['startdate', 'enddate', 'invoicedate', 'expecteddate', 'receiveddate', 'releaseddate', 'emppaiddate'].includes(key)) {
+          columnDef.type = 'dateColumn';
+          columnDef.valueFormatter = (params) => {
+            if (params.value) {
+              return new Date(params.value as string).toISOString().split('T')[0];
+            }
+            return '';
+          };
         }
+
+        if (['quantity', 'otquantity', 'amountexpected', 'amountreceived'].includes(key)) {
+          columnDef.type = 'numericColumn';
+          columnDef.aggFunc = 'sum';
+        }
+
         return columnDef;
       });
       setColumnDefs(columns);
@@ -906,50 +907,51 @@ const ByPO = () => {
       console.warn("Data is not an array or is empty:", data);
     }
   };
-  
 
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
+  }, [currentPage, fetchData]);
 
   const handleRefresh = () => {
     setSearchValue("");
     fetchData();
-    window.location.reload();
   };
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+  const handleAddRow = () => {
+    // Implement add row functionality
+  };
 
   const handleEditRow = () => {
-    if (gridRef.current) {
+    if (gridRef.current && gridRef.current.api) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, edit: true }));
+        setAlertMessage("Edit functionality not implemented yet");
+        setTimeout(() => setAlertMessage(null), 3000);
       } else {
-        setAlertMessage("Please select a row to edit."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to edit.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
 
+  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
+
   const handleViewRow = async () => {
-    if (gridRef.current) {
+    if (gridRef.current && gridRef.current.api) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const invoiceId = selectedRows[0].id; // Assuming the ID is stored in the 'id' field
+        const invoiceId = selectedRows[0].id;
         try {
           const response = await axios.get(`${API_URL}/invoices/${invoiceId}`, {
-            headers: { AuthToken: localStorage.getItem("token") },
+            headers: { AuthToken: localStorage.getItem("token") || "" },
           });
-          setExpandedRow(response.data); // Store expanded row data in the state
+          setDetailedData(Array.isArray(response.data) ? response.data : [response.data]);
         } catch (error) {
           console.error("Error fetching detailed data:", error);
         }
       } else {
-        setAlertMessage("Please select a row to view."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to view.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
@@ -959,21 +961,46 @@ const ByPO = () => {
     doc.text("By PO Data", 20, 10);
     const pdfData = rowData.map((row) => Object.values(row));
     const headers = columnDefs.map((col) => col.headerName);
-    autoTable(doc, {
+  
+    // Type-safe solution using declaration merging
+    interface jsPDFWithAutoTable extends jsPDF {
+      autoTable: (options: {
+        head: string[][];
+        body: unknown[][];
+        theme?: string;
+        styles?: { fontSize?: number };
+      }) => jsPDF;
+    }
+  
+    (doc as jsPDFWithAutoTable).autoTable({
       head: [headers],
       body: pdfData,
       theme: 'grid',
-      styles: { fontSize: 5 },
+      styles: { fontSize: 8 },
     });
+  
     doc.save("by_po_data.pdf");
   };
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+  const detailedColumns = [
+    "Invoice Number", "Start Date", "End Date", "Invoice Date", "Quantity",
+    "OT Quantity", "Rate", "Overtime Rate", "Status", "Emp Paid Date",
+    "Cand Payment Status", "Reminders", "Amount Expected", "Expected Date",
+    "Amount Received", "Received Date", "Released Date", "Check Number",
+    "Invoice URL", "Check URL", "Freq Type", "Invoice Net", "Company Name",
+    "Vendor Fax", "Vendor Phone", "Vendor Email", "Timesheet Email", "HR Name",
+    "HR Email", "HR Phone", "Manager Name", "Manager Email", "Manager Phone",
+    "Secondary Name", "Secondary Email", "Secondary Phone", "Candidate Name",
+    "Candidate Phone", "Candidate Email", "Work Email", "Work Phone",
+    "Recruiter Name", "Recruiter Phone", "Recruiter Email", "PO ID", "Notes"
+  ];
+
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-      {alertMessage && ( // Conditional rendering of alert message
+      {alertMessage && (
         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
           {alertMessage}
         </div>
@@ -1004,7 +1031,7 @@ const ByPO = () => {
             onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
           >
-            <MdAdd className="mr-2" />
+            {/* Add icon if needed */}
           </button>
           <button
             onClick={handleEditRow}
@@ -1012,7 +1039,6 @@ const ByPO = () => {
           >
             <AiOutlineEdit className="mr-2" />
           </button>
-
           <button
             onClick={handleViewRow}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
@@ -1043,7 +1069,7 @@ const ByPO = () => {
           className="ag-theme-alpine"
           style={{ height: "400px", width: "100%", overflowY: "auto" }}
         >
-          <AgGridReact
+          <AgGridReact<InvoiceData>
             ref={gridRef}
             rowData={rowData}
             columnDefs={columnDefs}
@@ -1053,12 +1079,12 @@ const ByPO = () => {
             defaultColDef={{
               sortable: true,
               filter: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              minWidth: 60,
+              cellStyle: { color: "#333", fontSize: "0.85rem", padding: "8px" },
+              minWidth: 100,
               maxWidth: 1300,
             }}
-            rowHeight={30}
-            headerHeight={35}
+            rowHeight={40}
+            headerHeight={40}
             onRowClicked={handleViewRow}
           />
         </div>
@@ -1089,7 +1115,6 @@ const ByPO = () => {
               {page}
             </button>
           ))}
-
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -1107,9 +1132,36 @@ const ByPO = () => {
         </div>
       </div>
 
-      {expandedRow && (
-        <Accordion header={`Details for Invoice ID: ${expandedRow.id}`}>
-          <pre>{JSON.stringify(expandedRow, null, 2)}</pre>
+      {detailedData.length > 0 && (
+        <Accordion header={`Details for Invoice ${detailedData[0]?.id || ''}`}>
+          <div className="overflow-auto" style={{ maxHeight: "300px" }}>
+            <table className="min-w-full bg-white border border-gray-300">
+              <thead>
+                <tr>
+                  {detailedColumns.map((column, index) => (
+                    <th key={index} className="py-2 px-4 border-b text-sm">
+                      {column}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {detailedData.map((data, dataIndex) => (
+                  <tr key={dataIndex} className="text-sm">
+                    {detailedColumns.map((column, index) => {
+                      const fieldName = column.toLowerCase().replace(/ /g, '');
+                      const value = data[fieldName];
+                      return (
+                        <td key={index} className="py-2 px-4 border-b">
+                          {value !== undefined ? String(value) : 'N/A'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Accordion>
       )}
     </div>

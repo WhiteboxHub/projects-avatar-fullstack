@@ -2,27 +2,27 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // Import Image component
+import Image from "next/image"; 
 import logo from '../../public/images/ip_logo1.jpg';
-import { useAuth } from "../../components/AuthContext"; // Import authentication context
+import { useAuth } from "../../components/AuthContext"; 
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [alertMessage, ] = useState<string | null>(null); // Added state for alert message
-  const [loading, setLoading] = useState(false); // Loading state
+  const [alertMessage, ] = useState<string | null>(null); 
+  const [loading, setLoading] = useState(false); 
 
   const router = useRouter();
-  const { login } = useAuth(); // Get the login function from the context
+  const { login } = useAuth(); 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   console.log(API_URL);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Start loading
-    setError(null); // Clear previous errors
+    setLoading(true); 
+    setError(null); 
     try {
       const response = await axios.post(`${API_URL}/auth/login`, {
         username,
@@ -34,12 +34,11 @@ const Login = () => {
       localStorage.setItem("token", token);
       setMessage(response.data.message);
 
-      login(); // Update the global authentication state
-      setLoading(false); // Stop loading
-
-      router.push("/leads"); // Redirect after login
+      login(); 
+      setLoading(false); 
+      router.push("/leads"); 
     } catch {
-      setLoading(false); // Stop loading on error
+      setLoading(false); 
       setError("Invalid username or password");
       setMessage(null);
     }
@@ -47,16 +46,16 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    {alertMessage && ( // Conditional rendering of alert message
+    {alertMessage && ( 
       <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
         {alertMessage}
       </div>
     )}
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"> {/* Adjusted padding */}
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"> 
         <div className="flex justify-center mb-4 mr-8">
-          <Image src={logo} alt="Logo" width={200} height={200} /> {/* Increased logo size */}
+          <Image src={logo} alt="Logo" width={200} height={200} /> 
         </div>
-        <h2 className="text-xl font-bold text-center text-gray-800 mb-4"> {/* Reduced margin bottom */}
+        <h2 className="text-xl font-bold text-center text-gray-800 mb-4"> 
           Login
         </h2>
         {loading ? (
@@ -90,7 +89,7 @@ const Login = () => {
               className={`w-full py-2 bg-blue-600 text-white font-bold rounded-md transition duration-300 ${
                 loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
-              disabled={loading} // Disable the button while loading
+              disabled={loading} 
             >
               Login
             </button>
