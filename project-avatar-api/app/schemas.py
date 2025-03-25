@@ -314,46 +314,49 @@ class POUpdateSchema(BaseModel):
     
     
     
-
 class CandidateMarketingBase(BaseModel):
-    # candidateid: int
-    candidateid: Optional[int] = None
-    # startdate: datetime
-    mmid: Optional[int] = None
-    instructorid: Optional[int] = None
-    status: Optional[str] = None
-    submitterid: Optional[int] = None
-    priority: Optional[str] = None
-    technology: Optional[str] = None
-    minrate: Optional[int] = None
-    currentlocation: Optional[str] = None
-    relocation: Optional[str] = None
-    locationpreference: Optional[str] = None
-    skypeid: Optional[str] = None
-    ipemailid: Optional[int] = None
-    resumeid: Optional[int] = None
-    coverletter: Optional[str] = None
-    intro: Optional[str] = None
-    closedate: Optional[datetime] = None
-    closedemail: Optional[str] = None
-    notes: Optional[str] = None
-    suspensionreason: Optional[str] = None
-    yearsofexperience: Optional[str] = None
+    
+#     status: Optional[str] = None
+#     priority: Optional[str] = None
+#     technology: Optional[str] = None
+#     minrate: Optional[int] = None
+#     currentlocation: Optional[str] = None
+#     relocation: Optional[str] = None
+#     locationpreference: Optional[str] = None
+#     ipemailid: Optional[int] = None
+#     resumeid: Optional[int] = None
+#     coverletter: Optional[str] = None
+#     intro: Optional[str] = None
+#     closedate: Optional[datetime] = None
+#     notes: Optional[str] = None
+ pass
 
 class CandidateMarketingCreateSchema(CandidateMarketingBase):
     pass
-
 class CandidateMarketingUpdateSchema(CandidateMarketingBase):
-    pass
-
+    manager_name: Optional[str] = None  
+    instructor_name: Optional[str] = None
+    submitter_name: Optional[str] = None
+    status: Optional[str] = None
+    locationpreference: Optional[str] = None
+    priority: Optional[str] = None
+    technology: Optional[str] = None
+    resumeid: Optional[int] = None
+    minrate: Optional[int] = None 
+    ipemailid: Optional[int] = None
+    currentlocation: Optional[str] = None
+    relocation: Optional[str] = None
+    closedate: Optional[datetime] = None
+    suspensionreason: Optional[str] = None  
+    intro: Optional[str] = None
+    notes: Optional[str] = None
+    
 class CandidateMarketingSchema(CandidateMarketingBase):
     id: int
 
-    class Config:
+class Config:
         from_attributes = True     
-        
-        
-        
+              
 class AuthUserBase(BaseModel):
     uname: str=''
     team: Optional[str] = ''
