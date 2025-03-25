@@ -1,7 +1,6 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
-
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR ,Numeric
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr ,validator, ValidationError
 from sqlalchemy.orm import declarative_base, relationship
@@ -383,8 +382,9 @@ class CandidateMarketing(Base):
     closedemail = Column(CHAR(1), default='N')
     notes = Column(Text)
     suspensionreason = Column(CHAR(1), default='A')
-    yearsofexperience = Column(CHAR(3))
-
+    yearsofexperience = Column(CHAR(3)) 
+    
+    
 class AuthUser(Base):
     __tablename__ = "authuser"
 

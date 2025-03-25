@@ -17,7 +17,7 @@ router = APIRouter()
 def search_batches(
     search: str = "", 
     page: int = 1, 
-    pageSize: int = 200, 
+    pageSize: int = 500, 
     db: Session = Depends(get_db)
 ):
     skip = (page - 1) * pageSize
