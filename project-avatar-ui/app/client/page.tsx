@@ -97,9 +97,17 @@ const Clients = () => {
     }
   };
 
-  const handleSearch = () => {
-    fetchClients(searchValue);
-  };
+  // debouncing for search
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      fetchClients(searchValue);
+    }, 500);
+    return () => clearTimeout(delaySearch);
+  }, [searchValue]);
+
+  // const handleSearch = () => {
+  //   fetchClients(searchValue);
+  // };
 
   const setupColumns = (data: Client[]) => {
     if (data.length > 0) {
@@ -278,7 +286,7 @@ const Clients = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={handleSearch}
+          onClick={() => fetchClients(searchValue)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
