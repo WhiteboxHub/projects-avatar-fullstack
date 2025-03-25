@@ -8,7 +8,6 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byDetailed_modals/AddRowRecruiter";
 import EditRowRecruiter from "@/modals/recruiter_byDetailed_modals/EditRowRecruiter"; 
-import ViewRowRecruiterComponent from "@/modals/recruiter_byDetailed_modals/ViewRowRecruiter"; 
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -32,7 +31,7 @@ interface ViewRowRecruiterComponentProps {
   recruiter: RecruiterDetails | null; 
 }
 
-const ViewRowRecruiter: React.FC<ViewRowRecruiterComponentProps> = ({ isOpen, onClose, recruiter }) => {
+const ViewRowRecruiterComponent: React.FC<ViewRowRecruiterComponentProps> = ({ isOpen, onClose, recruiter }) => {
   return (
     <Modal
       isOpen={isOpen}
