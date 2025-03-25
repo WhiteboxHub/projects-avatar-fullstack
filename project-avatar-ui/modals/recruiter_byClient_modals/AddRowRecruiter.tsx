@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
-
+import axios from "axios"
 interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +28,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     notes: '',
   });
 
+ 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -36,11 +37,20 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
-  };
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/add`, formData, {
+            headers: { AuthToken: localStorage.getItem("token") },
+        });
+        console.log(response.data.message);
+        onSubmit(formData); // Optionally, you can pass the response data here
+        onClose();
+    } catch (error) {
+        console.error("Error adding recruiter:", error);
+    }
+};
+
 
   return (
     <Modal

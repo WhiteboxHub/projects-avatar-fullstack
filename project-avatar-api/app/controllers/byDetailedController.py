@@ -1,9 +1,13 @@
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from app.database.db import get_db
 from app.models import Recruiter, Client
 from app.schemas import RecruiterResponse
 
-def get_recruiters_with_clients(db: Session, page: int, page_size: int):
+router = APIRouter()
+
+def get_recruiter_details(db: Session, page: int, page_size: int):
     query = db.query(
         Recruiter.id,
         Recruiter.name,
@@ -11,7 +15,7 @@ def get_recruiters_with_clients(db: Session, page: int, page_size: int):
         Recruiter.phone,
         Recruiter.designation,
         Recruiter.clientid,
-        func.ifnull(Client.companyname, " ").label('comp'),
+        func.ifnull(Client.companyname, " ").label("comp"),
         Recruiter.status,
         Recruiter.dob,
         Recruiter.personalemail,
@@ -21,21 +25,24 @@ def get_recruiters_with_clients(db: Session, page: int, page_size: int):
         Recruiter.facebook,
         Recruiter.review,
         Recruiter.notes
-    ).outerjoin(Client, Recruiter.clientid == Client.id).filter(
-        Recruiter.vendorid == 0
-    )
+    ).outerjoin(Client, Recruiter.clientid == Client.id) \
+     .filter(Recruiter.vendorid == 0) \
+     .filter(Recruiter.clientid != 0) \
+     .filter(Recruiter.name.isnot(None), func.length(Recruiter.name) > 1) \
+     .filter(Recruiter.phone.isnot(None), func.length(Recruiter.phone) > 1) \
+     .filter(Recruiter.designation.isnot(None), func.length(Recruiter.designation) > 1)
 
     total = query.count()
     recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
-
+    
     recruiter_data = [RecruiterResponse.from_orm(recruiter) for recruiter in recruiters]
-
+    
     return {
         "data": recruiter_data,
         "total": total,
         "page": page,
         "page_size": page_size,
-        "pages": (total + page_size - 1) // page_size  # Ensure correct total pages calculation
+        "pages": (total + page_size - 1) // page_size,
     }
 
 def add_recruiter(db: Session, recruiter_data: Recruiter) -> RecruiterResponse:
