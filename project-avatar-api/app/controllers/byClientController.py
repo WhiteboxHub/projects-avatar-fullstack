@@ -3,20 +3,6 @@ from fastapi import HTTPException
 from app.models import Recruiter
 from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterResponse
 from sqlalchemy import func
-# def get_recruiters_by_client(db: Session):
-#     return db.query(Recruiter).filter(Recruiter.vendorid == 0).all()
-
-# def get_recruiters_by_client(db: Session, page: int, page_size: int):
-#     query = db.query(Recruiter).filter(Recruiter.vendorid == 0)
-#     total = query.count()
-#     recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
-#     return {
-#         "data": recruiters,
-#         "total": total,
-#         "page": page,
-#         "page_size": page_size,
-#         "pages": (total + page_size - 1) // page_size,
-#     }
 
 def get_recruiters_by_client(db: Session, page: int, page_size: int):
     query = db.query(Recruiter).filter(Recruiter.vendorid == 0)

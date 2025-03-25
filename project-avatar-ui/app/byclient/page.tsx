@@ -35,7 +35,7 @@ const RecruiterByClient = () => {
   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [pageSize] = useState<number>(100);
+  const [pageSize] = useState<number>(200);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -51,7 +51,7 @@ const RecruiterByClient = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setRowData(response.data.data);
-      setTotalPages(response.data.pages);
+      setTotalPages(Math.min(response.data.pages, 307));
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
@@ -73,11 +73,21 @@ const RecruiterByClient = () => {
     }
   };
 
-  const handleDeleteRow = () => {
+  const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        // Handle delete logic
+        const recruiterId = selectedRows[0].id; // Assuming the recruiter object has an 'id' property
+        try {
+          await axios.delete(`${API_URL}/recruiters/byClient/remove/${recruiterId}`, {
+            headers: { AuthToken: localStorage.getItem("token") },
+          });
+          setAlertMessage("Recruiter deleted successfully.");
+          fetchRecruiters(currentPage); // Refresh the list after deletion
+        } catch (error) {
+          console.error("Error deleting recruiter:", error);
+          setAlertMessage("Failed to delete recruiter.");
+        }
       } else {
         setAlertMessage("Please select a row to delete.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -150,8 +160,32 @@ const RecruiterByClient = () => {
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
+      // Allow going to the last page
       setCurrentPage(newPage);
     }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      // Include the last page
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      }
+    }
+    return pageNumbers;
   };
 
   return (
@@ -255,35 +289,33 @@ const RecruiterByClient = () => {
         />
       </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
+        <div className="flex items-center flex-wrap gap-2 overflow-auto">
           <button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
-            className="p-2"
+            className="text-sm px-2 py-1 rounded-md"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2"
+            className="text-sm px-2 py-1 rounded-md"
           >
             <FaChevronLeft />
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          {renderPageNumbers()}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2"
+            className="text-sm px-2 py-1 rounded-md"
           >
             <FaChevronRight />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="p-2"
+            className="text-sm px-2 py-1 rounded-md"
           >
             <FaAngleDoubleRight />
           </button>
@@ -294,7 +326,6 @@ const RecruiterByClient = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-            // Handle add logic
           }}
         />
       )}
@@ -304,7 +335,6 @@ const RecruiterByClient = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={() => {
-            // Handle edit logic
           }}
         />
       )}

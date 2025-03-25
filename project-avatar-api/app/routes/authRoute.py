@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
   
-    user = db.execute(text("SELECT * FROM wbl_db.authuser WHERE uname = :username"), {"username": request.username}).fetchone()
+    user = db.execute(text("SELECT * FROM whiteboxqa.authuser WHERE uname = :username"), {"username": request.username}).fetchone()
     
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
@@ -30,9 +30,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     
     if user.team == 'admin':
-        return {"token": token, "token_type": "bearer", "message": f"Welcome admin, {user.uname}"}
+        return {"token": token, "token_type": "bearer", "message": f"Welcome  {user.uname} "}
     else:
-        return {"token": token, "token_type": "bearer", "user_details": dict(user), "message": f"Welcome user, {user.uname}"}
+        return {"token": token, "token_type": "bearer", "user_details": dict(user), "message": f"Welcome  {user.uname}"}
 
 def hash_password(password: str) -> str:
     import hashlib
