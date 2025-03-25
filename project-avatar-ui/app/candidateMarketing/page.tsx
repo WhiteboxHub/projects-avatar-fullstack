@@ -1448,6 +1448,7 @@ const CurrentMarketing = () => {
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={selectedRow as RowData}
           onSave={fetchAllCandidates}
+          employees={[]} // Add your employees array here
         />
         <ViewRowModal
           isOpen={modalState.view}

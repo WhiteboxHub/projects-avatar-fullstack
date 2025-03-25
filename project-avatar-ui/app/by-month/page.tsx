@@ -1,5 +1,6 @@
 // ++++++++++++++++______________________+++++++++++++++++++++++++++++++
 
+
 // "use client";
 
 // import React, { useState, useEffect, useRef } from "react";
@@ -520,13 +521,13 @@ const ByMonth = () => {
     fetchByMonths(null, searchValue);
   };
 
-  const setupColumns = (data) => {
+  const setupColumns = (data: Record<string, unknown>[]) => {
     if (data.length > 0) {
       const columns = Object.keys(data[0]).map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
       }));
-      console.log("Column Definitions:", columns); // Log the column definitions
+      console.log("Column Definitions:", columns);
       setColumnDefs(columns);
     }
   };
@@ -612,27 +613,34 @@ const ByMonth = () => {
     }
   };
 
-  const handleRowClick = async (params) => {
-    const month = params.data.invmonth; // Ensure 'invmonth' is the correct field name
-    console.log("Row clicked with data:", params.data); // Log the entire row data
-    console.log("Selected Month:", month); // Log the selected month
-
-    if (month) {
-      setSelectedMonth(month);
-      try {
-        const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
-          headers: { AuthToken: localStorage.getItem("token") },
-        });
-        const data = response.data; // Ensure this matches your API response structure
-        console.log("Fetched Month Data:", data); // Log the fetched data
-        setMonthData(data);
-      } catch (error) {
-        console.error("Error loading month data:", error);
-      }
-    } else {
-      console.error("Month is undefined. Please check the data structure.");
+    interface RowClickParams {
+      data: {
+        invmonth?: string;
+        [key: string]: string | number | boolean | null | undefined; // Specify possible types for additional properties
+      };
     }
-  };
+
+    const handleRowClick = async (params: RowClickParams) => {
+      const month = params.data.invmonth; // Ensure 'invmonth' is the correct field name
+      console.log("Row clicked with data:", params.data); // Log the entire row data
+      console.log("Selected Month:", month); // Log the selected month
+
+      if (month) {
+        setSelectedMonth(month);
+        try {
+          const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
+            headers: { AuthToken: localStorage.getItem("token") },
+          });
+          const data = response.data; // Ensure this matches your API response structure
+          console.log("Fetched Month Data:", data); // Log the fetched data
+          setMonthData(data);
+        } catch (error) {
+          console.error("Error loading month data:", error);
+        }
+      } else {
+        console.error("Month is undefined. Please check the data structure.");
+      }
+    };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
