@@ -2,7 +2,7 @@
 from sqlalchemy.sql import func
 
 
-from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR,Numeric
 
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr
