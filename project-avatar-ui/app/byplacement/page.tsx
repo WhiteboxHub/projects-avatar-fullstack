@@ -8,7 +8,6 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-// import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -19,7 +18,6 @@ import {
   AiOutlineEdit,
   AiOutlineEye,
   AiOutlineSearch,
-  AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { Recruiter } from "@/types/byPlacement";
@@ -38,20 +36,26 @@ const RecruiterByPlacement = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<Recruiter[]>([]);
   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [pageSize] = useState<number>(100);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    fetchRecruiters();
-  }, []);
+    fetchRecruiters(currentPage);
+  }, [currentPage]);
 
-  const fetchRecruiters = async () => {
+  const fetchRecruiters = async (page: number) => {
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/by-placement`, {
+        params: { page, pageSize },
         headers: { AuthToken: localStorage.getItem("token") },
       });
-      setRowData(response.data);
+      setRowData(response.data.data);
+      setTotalPages(response.data.pages);
+      console.log(response.data.pages);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
@@ -73,11 +77,21 @@ const RecruiterByPlacement = () => {
     }
   };
 
-  const handleDeleteRow = () => {
+  const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        // Handle delete logic
+        const recruiterId = selectedRows[0].id; // Assuming 'id' is the identifier
+        try {
+          await axios.delete(`${API_URL}/by/recruiters/byPlacement/remove/${recruiterId}`, {
+            headers: { AuthToken: localStorage.getItem("token") },
+          });
+          setAlertMessage("Recruiter deleted successfully.");
+          fetchRecruiters(currentPage); // Refresh the list after deletion
+        } catch (error) {
+          setAlertMessage("Error deleting recruiter.");
+          console.error("Error deleting recruiter:", error);
+        }
       } else {
         setAlertMessage("Please select a row to delete.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -106,10 +120,10 @@ const RecruiterByPlacement = () => {
       body: rowData.map((row) => [
         row.id,
         row.name || "",
-        row.email,
-        row.phone,
-        row.comp || "",
-        row.status,
+        row.email || "",
+        row.phone || "",
+        // row.comp || "",
+        row.status || "",
         row.designation || "",
         row.dob || "",
         row.personalemail || "",
@@ -119,12 +133,40 @@ const RecruiterByPlacement = () => {
         row.twitter || "",
         row.facebook || "",
         row.review || "",
-        row.clientid,
+        row.clientid || "",
         row.notes || "",
         row.lastmoddatetime || "",
       ]),
     });
     doc.save("recruiter_data.pdf");
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      }
+    }
+    return pageNumbers;
   };
 
   return (
@@ -226,18 +268,34 @@ const RecruiterByPlacement = () => {
         />
       </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
-          <button className="p-2">
+        <div className="flex items-center flex-wrap gap-2 overflow-auto">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleLeft />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronLeft />
           </button>
-          {/* Pagination buttons */}
-          <button className="p-2">
+          {renderPageNumbers()}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaChevronRight />
           </button>
-          <button className="p-2">
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className="text-sm px-2 py-1 rounded-md"
+          >
             <FaAngleDoubleRight />
           </button>
         </div>

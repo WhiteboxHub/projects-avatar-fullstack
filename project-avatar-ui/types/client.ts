@@ -1,4 +1,3 @@
-// Base Client type with all fields
 export interface Client {
     id: string;
     companyname: string;
@@ -12,7 +11,7 @@ export interface Client {
     state: string;
     country: string;
     zip: string;
-    url: string;
+    url?: string;
     twitter?: string;
     facebook?: string;
     linkedIn?: string;

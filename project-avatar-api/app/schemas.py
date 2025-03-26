@@ -1,11 +1,8 @@
-# avatar-app/projects-api/app/schemas.py
-from pydantic import BaseModel,constr, conint, EmailStr, Field,validator, HttpUrl
+from pydantic import BaseModel,constr, conint, EmailStr, Field, validator, HttpUrl, field_validator
 from datetime import datetime, date
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-# changes here 
-# from .models import ClientStatus, ClientTier
-# changes here
+
 
 class UserCreate(BaseModel):
     username: str  
@@ -43,7 +40,6 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True 
-
 
 
 class LeadBase(BaseModel):
@@ -318,46 +314,49 @@ class POUpdateSchema(BaseModel):
     
     
     
-
 class CandidateMarketingBase(BaseModel):
-    # candidateid: int
-    candidateid: Optional[int] = None
-    # startdate: datetime
-    mmid: Optional[int] = None
-    instructorid: Optional[int] = None
-    status: Optional[str] = None
-    submitterid: Optional[int] = None
-    priority: Optional[str] = None
-    technology: Optional[str] = None
-    minrate: Optional[int] = None
-    currentlocation: Optional[str] = None
-    relocation: Optional[str] = None
-    locationpreference: Optional[str] = None
-    skypeid: Optional[str] = None
-    ipemailid: Optional[int] = None
-    resumeid: Optional[int] = None
-    coverletter: Optional[str] = None
-    intro: Optional[str] = None
-    closedate: Optional[datetime] = None
-    closedemail: Optional[str] = None
-    notes: Optional[str] = None
-    suspensionreason: Optional[str] = None
-    yearsofexperience: Optional[str] = None
+    
+#     status: Optional[str] = None
+#     priority: Optional[str] = None
+#     technology: Optional[str] = None
+#     minrate: Optional[int] = None
+#     currentlocation: Optional[str] = None
+#     relocation: Optional[str] = None
+#     locationpreference: Optional[str] = None
+#     ipemailid: Optional[int] = None
+#     resumeid: Optional[int] = None
+#     coverletter: Optional[str] = None
+#     intro: Optional[str] = None
+#     closedate: Optional[datetime] = None
+#     notes: Optional[str] = None
+ pass
 
 class CandidateMarketingCreateSchema(CandidateMarketingBase):
     pass
-
 class CandidateMarketingUpdateSchema(CandidateMarketingBase):
-    pass
-
+    manager_name: Optional[str] = None  
+    instructor_name: Optional[str] = None
+    submitter_name: Optional[str] = None
+    status: Optional[str] = None
+    locationpreference: Optional[str] = None
+    priority: Optional[str] = None
+    technology: Optional[str] = None
+    resumeid: Optional[int] = None
+    minrate: Optional[int] = None 
+    ipemailid: Optional[int] = None
+    currentlocation: Optional[str] = None
+    relocation: Optional[str] = None
+    closedate: Optional[datetime] = None
+    suspensionreason: Optional[str] = None  
+    intro: Optional[str] = None
+    notes: Optional[str] = None
+    
 class CandidateMarketingSchema(CandidateMarketingBase):
     id: int
 
-    class Config:
+class Config:
         from_attributes = True     
-        
-        
-        
+              
 class AuthUserBase(BaseModel):
     uname: str=''
     team: Optional[str] = ''
@@ -401,7 +400,7 @@ class AuthUserSchema(AuthUserBase):
 
 
 class CurrentMarketingBase(BaseModel):
-    candidateid: Optional[int] = None
+    # candidateid: Optional[int] = None
     # mmid: Optional[int] = None
     instructorid: Optional[int] = None
     status: Optional[str] = None
@@ -427,8 +426,31 @@ class CurrentMarketingCreateSchema(CurrentMarketingBase):
     pass
 
 class CurrentMarketingUpdateSchema(CurrentMarketingBase):
-    pass
-    class Config:
+    
+    # candidateid: int
+    # startdate: int
+    mmid: int
+    instructorid: int
+    status: str
+    submitterid: int
+    priority: str
+    technology: str
+    minrate: int
+    currentlocation: str
+    relocation: str
+    locationpreference: str
+    skypeid: str
+    ipemailid: int
+    resumeid: int
+    coverletter: str
+    intro: str
+    closedate: str
+    closedemail: str
+    notes: str
+    suspensionreason: str
+    yearsofexperience: str
+       
+class Config:
         orm_mode = True
 
 class CurrentMarketingSchema(CurrentMarketingBase):
@@ -438,25 +460,21 @@ class CurrentMarketingSchema(CurrentMarketingBase):
         from_attributes = True
         
     
-    
-
 class OverdueUpdateSchema(BaseModel):
-    invoicenumber: Optional[str]
+    # invoicenumber: Optional[str]
     invoicedate: Optional[date]
     quantity: Optional[int]
     amountreceived: Optional[float]
     receiveddate: Optional[date]
     releaseddate: Optional[date]
     checknumber: Optional[str]
-    invoiceurl: Optional[str]
-    checkurl: Optional[str]
+    # invoiceurl: Optional[str]
+    # checkurl: Optional[str]
     notes: Optional[str]
     status: Optional[str]
-
     remindertype: Optional[str]    
     
-    
-    
+       
 class InvoiceBase(BaseModel):
     invoicenumber: str
     startdate: date
@@ -490,10 +508,17 @@ class InvoiceSchema(InvoiceBase):
     class Config:
         from_attributes = True    
 
+
     remindertype: Optional[str]
-        
-#  ------------------------------------changes here--------------------------------
-from pydantic import field_validator
+    
+       
+import re
+def sanitize_input(value: str) -> str:
+    """Sanitize the input by removing unwanted characters."""
+    pattern = r'[\u200b\u00a0\u202f\u2028\u2029\u3000\uFEFF\s]+'
+    sanitized_value = re.sub(pattern, '', value) 
+    return sanitized_value.strip()
+
 class ClientBase(BaseModel):
     companyname: str
     tier: int
@@ -506,7 +531,7 @@ class ClientBase(BaseModel):
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    url: HttpUrl
+    url: Optional[HttpUrl]  
     manager1name: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
@@ -517,16 +542,46 @@ class ClientBase(BaseModel):
     hmemail: Optional[str] = None  
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
-    hremail: Optional[str] = None  
+    hremail: Optional[str] = None
     hrphone: Optional[str] = None
     notes: Optional[str] = None
 
-    @field_validator("hmemail", "hremail", mode="before")
+    @field_validator("url", mode="before")
+    @classmethod
+    def validate_url(cls, v):
+        if v is None or v.strip() == "":
+            return None  
+        sanitized_url = sanitize_input(v)
+        return sanitized_url
+
+    @field_validator("email", "hmemail", "hremail", mode="before")
     @classmethod
     def validate_email(cls, v):
-        if v == "":
-            return None  # Convert empty strings to None
-        return v
+        if v is None or v.strip() == "":
+            return None  
+        sanitized_email = sanitize_input(v)
+        return sanitized_email
+
+class ClientInDB(ClientBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class ClientResponse(BaseModel):
+    data: List[ClientInDB]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+class ClientDeleteResponse(BaseModel):
+    message: str
+    client_id: int  
+
+    class Config:
+        orm_mode = True
 
 class ClientSearchBase(BaseModel):
     companyname: Optional[str] = None
@@ -539,67 +594,8 @@ class ClientCreate(ClientBase):
 
 class ClientUpdate(ClientBase):
     class Config:
-        from_attributes = True
-
-class ClientInDB(BaseModel):
-    id: int
-    companyname: str
-    tier: int
-    status: str
-    email: EmailStr
-    phone: str
-    fax: str
-    address: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-    zip: Optional[str] = None
-    url: HttpUrl
-    manager1name: Optional[str] = None
-    twitter: Optional[str] = None
-    facebook: Optional[str] = None
-    linkedin: Optional[str] = None
-    manager1email: Optional[str] = None
-    manager1phone: Optional[str] = None
-    hmname: Optional[str] = None
-    hmemail: Optional[str] = None  # Allow empty strings
-    hmphone: Optional[str] = None
-    hrname: Optional[str] = None
-    hremail: Optional[str] = None  # Allow empty strings
-    hrphone: Optional[str] = None
-    notes: Optional[str] = None
-
-    @field_validator("hmemail", "hremail", mode="before")
-    @classmethod
-    def validate_email(cls, v):
-        if v == "":
-            return None  # Convert empty strings to None
-        return v
-
-    class Config:
-        from_attributes = True  
-
-class ClientResponse(BaseModel):
-    data: List[ClientInDB]
-    total: int
-    page: int
-    page_size: int
-    pages: int
-
-class ClientDeleteResponse(BaseModel):
-    message: str
-    client_id: int  # Add client_id to the response
-
-    class Config:
-        orm_mode = True
-
+        from_attributes = True    
     
-    
-# ----------------------------------------------------------------
-
-
-# -----------Adding Recruiter Schema ----------------------------------
-
 class RecruiterBase(BaseModel):
      name:  Optional[str] = None
      email: str
@@ -622,7 +618,7 @@ class RecruiterBase(BaseModel):
      @validator('dob', pre=True, always=True)
      def validate_dob(cls, v):
         if isinstance(v, date):
-            return v  # Already a date object, return as is
+            return v  
         if v in ('0000-00-00', None):
             return None
         try:
@@ -643,4 +639,50 @@ class Recruiter(RecruiterBase):
 
     class Config:
         orm_mode = True
+        from_attributes=True
+        
+        
+class RecruiterSchema(RecruiterBase):  
+    id: int  
+    comp: Optional[str] = None
 
+    class Config:
+        orm_mode = True
+
+class RecruiterResponse(RecruiterBase):
+    id: int
+    comp: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+        
+# class Mkt_submissionBase(BaseModel):
+#     candidateid: int
+#     employeeid: int
+#     submitter: Optional[int]=None
+#     submissiondate:str
+#     type: str
+#     name: Optional[str]=None
+#     email: Optional[str]=None
+#     phone: Optional[str]=None
+#     url: Optional[str]=None
+#     location: Optional[str]=None
+#     notes: Optional[str]= None
+#     feedback: Optional[str]=None
+    
+# class Mkt_SubmissionCreate(Mkt_submissionBase):
+#     pass
+
+# class Mkt_SubmissionUpdate(Mkt_submissionBase):
+#     pass
+
+# class Mkt_SubmissionResponse(Mkt_submissionBase):
+#     id : int
+    
+#     class config:
+#         orm_mode = True
+#         from_attributes = True
+        
+    
+    

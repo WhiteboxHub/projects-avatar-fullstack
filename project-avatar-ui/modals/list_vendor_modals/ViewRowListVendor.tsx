@@ -171,7 +171,8 @@
 
 import React from 'react';
 import Modal from 'react-modal';
-import { Batch, Client, Vendor } from '../../types/index';
+import { Batch, Vendor } from '../../types/index';
+import {Client} from '@/types/client'
 import { AiOutlineClose } from 'react-icons/ai'; // Adjust the import path accordingly
 
 interface ViewRowModalProps {

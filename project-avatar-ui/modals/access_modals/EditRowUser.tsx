@@ -370,4 +370,3 @@ const UserEditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose,
 };
 
 export default UserEditRowModal;
-

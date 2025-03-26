@@ -410,7 +410,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -431,9 +431,32 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import type { ErrorResponse, Overdue, Po } from "../../types/index";
+
+interface Overdue {
+  pkid?: number;
+  candidateid?: number;
+  candidatename?: string;
+  clientname?: string;
+  startdate?: string;
+  enddate?: string;
+  invoicedate?: string;
+  amountexpected?: number;
+  amountreceived?: number;
+  expecteddate?: string;
+  receiveddate?: string;
+  checknumber?: string;
+  status?: string;
+  notes?: string;
+  serialNo?: number;
+}
+
+interface ApiOverdueResponse {
+  data: Overdue[];
+  totalRows: number;
+}
 
 jsPDF.prototype.autoTable = autoTable;
+
 const OverdueComponent = () => {
   const [rowData, setRowData] = useState<Overdue[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -453,87 +476,90 @@ const OverdueComponent = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const gridRef = useRef<AgGridReact>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-        const response = await axios.get(`${API_URL}/overdue`, {
-            params: {
-                page: currentPage,
-                page_size: paginationPageSize,
-            },
-            headers: { AuthToken: localStorage.getItem("token") },
-        });
+      const response = await axios.get<ApiOverdueResponse>(`${API_URL}/overdue`, {
+        params: {
+          page: currentPage,
+          page_size: paginationPageSize,
+        },
+        headers: { AuthToken: localStorage.getItem("token") || "" },
+      });
 
-        const { data, totalRows } = response.data;
+      const { data, totalRows } = response.data;
 
-        // Add serial numbers to each row
-        const dataWithSerials = data.map((item: Po, index: number) => ({
-            ...item,
-            serialNo: (currentPage - 1) * paginationPageSize + index + 1,
-        }));
+      const dataWithSerials = data.map((item, index) => ({
+        ...item,
+        serialNo: (currentPage - 1) * paginationPageSize + index + 1,
+        amountreceived: item.amountreceived ? Number(item.amountreceived) : undefined
+      }));
 
-        setRowData(dataWithSerials);
-        setTotalRows(totalRows);
-        setupColumns(dataWithSerials);
+      setRowData(dataWithSerials);
+      setTotalRows(totalRows);
+      setupColumns(dataWithSerials);
     } catch (error) {
-        console.error("Error loading data:", error);
+      console.error("Error loading data:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize]);
 
-  const fetchOverdues = async (searchQuery = "") => {
+  const fetchOverdues = useCallback(async (searchQuery = "") => {
     try {
-      const response = await axios.get(`${API_URL}/overdue`, {
+      const response = await axios.get<ApiOverdueResponse>(`${API_URL}/overdue`, {
         params: {
           page: currentPage,
           page_size: paginationPageSize,
           search: searchQuery,
         },
-        headers: { AuthToken: localStorage.getItem("token") },
+        headers: { AuthToken: localStorage.getItem("token") || "" },
       });
 
       const { data, totalRows } = response.data;
-      setRowData(data);
+      
+      const processedData = data.map(item => ({
+        ...item,
+        amountreceived: item.amountreceived ? Number(item.amountreceived) : undefined
+      }));
+      
+      setRowData(processedData);
       setTotalRows(totalRows);
-      setupColumns(data);
+      setupColumns(processedData);
     } catch (error) {
       console.error("Error loading data:", error);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     fetchOverdues(searchValue);
-  };
+  }, [fetchOverdues, searchValue]);
 
   const setupColumns = (data: Overdue[]) => {
     if (data.length > 0) {
-      const columns = [
-        ...Object.keys(data[0]).map((key) => ({
-          headerName: key.charAt(0).toUpperCase() + key.slice(1),
-          field: key,
-        })),
-      ];
+      const columns = Object.keys(data[0]).map((key) => ({
+        headerName: key.charAt(0).toUpperCase() + key.slice(1),
+        field: key,
+      }));
       setColumnDefs(columns);
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [currentPage]);
+  }, [currentPage, fetchData]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     setSearchValue("");
     fetchData();
-    window.location.reload();
-  };
+  }, [fetchData]);
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+  const handleAddRow = useCallback(() =>
+    setModalState((prevState) => ({ ...prevState, add: true })), []);
 
-  const handleEditRow = () => {
+  const handleEditRow = useCallback(() => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
@@ -544,9 +570,9 @@ const OverdueComponent = () => {
         setTimeout(() => setAlertMessage(null), 3000);
       }
     }
-  };
+  }, []);
 
-  const handleDeleteRow = async () => {
+  const handleDeleteRow = useCallback(async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
@@ -559,16 +585,16 @@ const OverdueComponent = () => {
 
           try {
             await axios.delete(`${API_URL}/overdue/${overdueId}`, {
-              headers: { AuthToken: localStorage.getItem("token") },
+              headers: { AuthToken: localStorage.getItem("token") || "" },
             });
             alert("Overdue deleted successfully.");
             fetchData();
           } catch (error) {
-            const axiosError = error as AxiosError;
+            const axiosError = error as AxiosError<{ message?: string }>;
             alert(
-                `Failed to delete Overdue: ${
-                    (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-                }`
+              `Failed to delete Overdue: ${
+                axiosError.response?.data?.message || axiosError.message
+              }`
             );
           }
         } else {
@@ -579,11 +605,11 @@ const OverdueComponent = () => {
         setTimeout(() => setAlertMessage(null), 3000);
       }
     }
-  };
+  }, [API_URL, fetchData]);
 
-  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
+  const handlePageChange = useCallback((newPage: number) => setCurrentPage(newPage), []);
 
-  const handleViewRow = () => {
+  const handleViewRow = useCallback(() => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
@@ -594,9 +620,9 @@ const OverdueComponent = () => {
         setTimeout(() => setAlertMessage(null), 3000);
       }
     }
-  };
+  }, []);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = useCallback(() => {
     const doc = new jsPDF();
     doc.text("Overdue Data", 20, 10);
     const pdfData = rowData.map((row) => Object.values(row));
@@ -608,12 +634,12 @@ const OverdueComponent = () => {
       styles: { fontSize: 5 },
     });
     doc.save("overdue_data.pdf");
-  };
+  }, [rowData, columnDefs]);
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
   const maxPageButtons = 5;
 
-  const getPageButtons = () => {
+  const getPageButtons = useCallback(() => {
     const pageButtons = [];
     const halfMax = Math.floor(maxPageButtons / 2);
 
@@ -629,7 +655,7 @@ const OverdueComponent = () => {
     }
 
     return pageButtons;
-  };
+  }, [currentPage, totalPages]);
 
   const pageButtons = getPageButtons();
 
@@ -793,7 +819,11 @@ const OverdueComponent = () => {
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
-          rowData={selectedRow}
+          rowData={{
+            ...selectedRow,
+            amountexpected: selectedRow.amountexpected?.toString(),
+            amountreceived: selectedRow.amountreceived?.toString()
+          }}
         />
       )}
     </div>

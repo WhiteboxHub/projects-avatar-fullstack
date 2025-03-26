@@ -1,3 +1,5 @@
+# new-projects-avatar-fullstack/project-avatar-api/app/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import engine, Base
@@ -10,23 +12,23 @@ from app.routes.candidateRoute import router as candidate_router
 from app.routes.candidate_searchRoute import router as candidate_search_router
 from app.routes.poRoute import router as po_router  
 from app.routes.candidateMarketingRoute import router as candidate_marketing_router  
-from app.routes.currentMarketingRoute import router as current_marketing_router  # Import the new router
-
-from app.routes.overdueRoute import router as overdue_router  # Import the new router
+from app.routes.currentMarketingRoute import router as current_marketing_router  
+from app.routes.overdueRoute import router as overdue_router  
+from app.routes.currentMarketingRoute import router as current_marketing_router 
+from app.routes.overdueRoute import router as overdue_router 
 from app.routes.bypoRoute import router as bypo_router
-
-
-
-from app.routes.clientRoute import router as client_router  # Import the new router
-from app.routes.clientSearchRoute import router as client_search_router  # Import the new router
+from app.routes.bymonthRoute import router as bymonth_router
+from app.routes.clientRoute import router as client_router  
+from app.routes.clientSearchRoute import router as client_search_router  
+from app.routes.clientRoute import router as client_router 
+from app.routes.clientSearchRoute import router as client_search_router  
 from app.routes.byClientRoute import router as by_client_router
-
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
-
+from app.routes.byDetailedRoute import router as by_detailed_router
 app = FastAPI()
 
-origins = ["http://localhost:3000"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,19 +49,16 @@ app.include_router(candidate_search_router,tags=["search"])
 app.include_router(po_router,tags=["po"])
 app.include_router(candidate_marketing_router, tags=["candidatemarketing"])  
 app.include_router(current_marketing_router, tags=["currentmarketing"])  
-
-
+app.include_router(bypo_router, tags=["invoices_bypo"])
+app.include_router(bymonth_router, tags=["invoices_bymonth"])
 app.include_router(bypo_router, tags=["invoices"])
-
-
 app.include_router(overdue_router, tags=["overdue"])
 app.include_router(client_search_router, tags=["clientsearch"])
 app.include_router(client_router, prefix="/api/admin/client", tags=["clients"])
 app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
 app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
-
-
+app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Avatar"}

@@ -9,7 +9,7 @@ from app.schemas import InvoiceSchema, InvoiceCreateSchema, InvoiceUpdateSchema
 router = APIRouter()
 
 @router.get("/api/admin/invoices")
-def read_invoices(page: int = 1, page_size: int = 10, db: Session = Depends(get_db)):
+def read_invoices(page: int = 1, page_size: int = 100, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size
     return get_invoice_list(db, skip, page_size)
 
@@ -27,7 +27,7 @@ def read_invoice_by_id(invoice_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Invoice not found")
     return invoice
 
-@router.post("/api/admin/invoices")
+@router.post("/api/admin/invoices/")
 def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depends(get_db)):
     print(invoice_data)  
     try:
@@ -35,6 +35,6 @@ def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depend
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.put("/api/admin/invoices/{invoice_id}")
+@router.put("/api/admin/invoices/bypo/{invoice_id}")
 def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
     return update_invoice(db, invoice_id, invoice_data)

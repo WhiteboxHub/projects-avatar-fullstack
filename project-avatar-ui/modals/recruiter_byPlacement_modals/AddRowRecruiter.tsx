@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
+import axios from 'axios'; // Import axios for API calls
 
 interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit:()=> void
 }
 
 const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -37,10 +37,15 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byPlacement/add`, formData); // API call to add recruiter
+      console.log(response.data); // Log the response for debugging
+      onClose(); // Close the modal after submission
+    } catch (error) {
+      console.error('Error adding recruiter:', error); // Handle error
+    }
   };
 
   return (
@@ -272,7 +277,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
         <button
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-        >
+         onClick={onSubmit}>
           Submit
         </button>
       </form>
