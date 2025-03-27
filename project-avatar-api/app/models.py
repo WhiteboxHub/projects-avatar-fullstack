@@ -182,6 +182,9 @@ class Candidate(Base):
     diceflag = Column(CHAR(1), default='N', comment="This flag is set to 'Y' if it's a dice candidate, otherwise 'N'")
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
+    mkt_submissions = relationship("MktSubmission", back_populates="candidate")
+    placements = relationship("Placement", back_populates="candidate")
+    
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -272,13 +275,14 @@ class Placement(Base):
     po_entries = relationship("PO", back_populates="placement")
 # Client.placements = relationship("Placement", back_populates="client")
 
-class Candidate(Base):
-    __tablename__ = "candidate"
-    __table_args__ = {'extend_existing': True} 
-    candidateid = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+# class Candidate(Base):
+#     __tablename__ = "candidate"
+#     __table_args__ = {'extend_existing': True} 
+#     candidateid = Column(Integer, primary_key=True, index=True)
+#     name = Column(String, nullable=False)
 
-    placements = relationship("Placement", back_populates="candidate")
+#     placements = relationship("Placement", back_populates="candidate")
+#     mkt_submissions = relationship("MktSubmission", back_populates="candidate")
 
 class Vendor(Base):
     __tablename__ = "vendor"
@@ -560,27 +564,38 @@ def validate_dob(cls, v):
 Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
 
 
-# class Submission(Base):
-#     __tablename__ = 'mkt_submission'
-    
-#     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-#     candidateid = Column(Integer, nullable=False)
-#     employeeid = Column(Integer, nullable=False)
-#     submitter = Column(Integer, nullable=True)
-#     submissiondate = Column(Date, nullable=False)
-#     type = Column(String(45), nullable=False)
-#     name = Column(String(150), nullable=True)
-#     email = Column(String(150), nullable=True)
-#     phone = Column(String(150), nullable=True)
-#     url = Column(String(300), nullable=True)
-#     location = Column(String(300), nullable=True)
-#     notes = Column(Text, nullable=True)
-#     feedback = Column(Text, nullable=True)
-#     lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=Text('CURRENT_TIMESTAMP'))
-    #  # Relationships
-    # candidate = relationship("Candidate", backref="mkt_submissions")
-    # employee = relationship("Employee", foreign_keys=[employeeid], backref="employee_submissions")
-    # submitter_employee = relationship("Employee", foreign_keys=[submitter], backref="submitter_submissions")
+# Adding mkl_submission 
 
-# class Config:
-#     orm_mode = True
+class MktSubmission(Base):
+    __tablename__ = "mkt_submission"
+    
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
+    employeeid = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    submitter = Column(Integer, ForeignKey("employee.id"), nullable=True)
+    submissiondate = Column(Date, nullable=False)
+    type = Column(String(45), nullable=False)
+    name = Column(String(150), nullable=True)
+    email = Column(String(150), nullable=True)
+    phone = Column(String(150), nullable=True)
+    url = Column(String(300), nullable=True)
+    location = Column(String(300), nullable=True)
+    notes = Column(Text, nullable=True)
+    feedback = Column(Text, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=func.now())
+    
+    candidate = relationship("Candidate", back_populates="mkt_submissions")
+    employee = relationship("Employee", foreign_keys=[employeeid], primaryjoin="MktSubmission.employeeid == Employee.id")
+    submitter_rel = relationship("Employee", foreign_keys=[submitter], primaryjoin="MktSubmission.submitter == Employee.id")
+
+    
+    @validator('submissiondate', pre=True, always=True)
+    def validate_submission_date(cls, v):
+        if isinstance(v, date):
+            return v
+        if v in ('0000-00-00', None):
+            return None
+        try:
+            return datetime.strptime(v, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            raise ValueError("Invalid date format for submissiondate")
