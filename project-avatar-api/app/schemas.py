@@ -681,18 +681,138 @@ class Mkt_SubmissionUpdate(Mkt_submissionBase):
 class Mkt_SubmissionResponse(Mkt_submissionBase):
     id : int
     
-    class config:
-        orm_mode = True
-        from_attributes = True
+#     class config:
+#         orm_mode = True
+#         from_attributes = True
+        
+    
+# class MktSubmissionBase(BaseModel):
+#     candidateid: int
+#     employeeid: int
+#     submitter: Optional[int] = None
+#     submissiondate: Optional[date] = None
+#     type: Optional[str] = None
+#     name: Optional[str] = None
+#     email: Optional[EmailStr] = None
+#     phone: Optional[str] = None
+#     url: Optional[str] = None
+#     location: Optional[str] = None
+#     notes: Optional[str] = None
+#     feedback: Optional[str] = None
+    
+#     @validator('email', pre=True)
+#     def validate_empty_email(cls, v):
+#         if v == '' or v is None:
+#             return None
+#         return v
+    
+#     @validator('submissiondate', pre=True)
+#     def validate_submission_date(cls, v):
+#         if isinstance(v, date):
+#             return v
+#         if v in ('0000-00-00', None, ''):
+#             return None
+#         try:
+#             return datetime.strptime(v, '%Y-%m-%d').date()
+#         except (ValueError, TypeError):
+#             return None
+    
+# class MktSubmissionCreate(MktSubmissionBase):
+#     pass
 
-class MktSubmissionInDB(Mkt_submissionBase):
+# class MktSubmissionUpdate(MktSubmissionBase):
+#     pass
+
+# class MktSubmissionResponse(MktSubmissionBase):
+#     id: int
+#     lastmoddatetime: Optional[datetime] = None
+#     candidate: Optional["CandidateResponse"] = None
+    
+#     class Config:
+#         orm_mode = True
+#         from_attributes = True
+
+# class MktSubmissionWithCandidateResponse(BaseModel):
+#     id: int
+#     submissiondate: Optional[date] = None
+#     candidateid: int
+#     employeeid: int
+#     submitter: Optional[int] = None
+#     course: Optional[str] = None
+#     email: Optional[str] = None
+#     phone: Optional[str] = None
+#     url: Optional[str] = None
+#     name: Optional[str] = None
+#     location: Optional[str] = None
+#     notes: Optional[str] = None
+#     feedback: Optional[str] = None
+    
+#     @validator('submissiondate', pre=True)
+#     def validate_submission_date(cls, v):
+#         if isinstance(v, date):
+#             return v
+#         if v in ('0000-00-00', None, ''):
+#             return None
+#         try:
+#             return datetime.strptime(v, '%Y-%m-%d').date()
+#         except (ValueError, TypeError):
+#             return None
+    
+#     class Config:
+#         orm_mode = True
+#         from_attributes = True
+
+
+# from pydantic import BaseModel, EmailStr, validator
+# from typing import Optional, List
+# from datetime import date, datetime
+
+class EmployeeResponse(BaseModel):
     id: int
+    name: str
+    status: str
 
     class Config:
         orm_mode = True
 
-class CandidateInDB(CandidateBase):
-    submissions: List[MktSubmissionInDB] = []
+# ... other imports and classes ...
 
+class MktSubmissionWithCandidateResponse(BaseModel):
+    id: int
+    submissiondate: Optional[date] = None
+    candidateid: int
+    employeeid: int
+    submitter: Optional[int] = None
+    course: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    url: Optional[str] = None
+    name: Optional[str] = None
+    location: Optional[str] = None
+    notes: Optional[str] = None
+    feedback: Optional[str] = None
+    candidate_name: Optional[str] = None
+    employee_name: Optional[str] = None
+
+    @validator('submissiondate', pre=True)
+    def validate_submission_date(cls, v):
+        if isinstance(v, date):
+            return v
+        if v in ('0000-00-00', None, ''):
+            return None
+        try:
+            return datetime.strptime(v, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return None
+    
+    class Config:
+        orm_mode = True
+
+class GridResponse(BaseModel):
+    page: int
+    total: int
+    records: List[MktSubmissionWithCandidateResponse]
+    total_records: int
+    
     class Config:
         orm_mode = True
