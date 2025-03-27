@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { Recruiter } from '@/types/byClient';
+import { Recruiter } from '@/types/byAllList';
 import { AiOutlineClose } from 'react-icons/ai';
 
 interface ViewRowRecruiterProps {

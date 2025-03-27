@@ -146,38 +146,69 @@ def get_overdue_by_id(db: Session, overdue_id: int):
     result = db.execute(query, {"overdue_id": overdue_id}).mappings().first()
     return result
 
+# def update_overdue(db: Session, overdue_id: int, overdue_data: OverdueUpdateSchema):
+#     query = text("""
+#         UPDATE invoice
+#         SET
+#             invoicenumber = :invoicenumber,
+#             invoicedate = :invoicedate,
+#             quantity = :quantity,
+#             amountreceived = :amountreceived,
+#             receiveddate = :receiveddate,
+#             releaseddate = :releaseddate,
+#             checknumber = :checknumber,
+#             invoiceurl = :invoiceurl,
+#             checkurl = :checkurl,
+#             notes = :notes,
+#             status = :status,
+#             remindertype = :remindertype
+#         WHERE id = :overdue_id
+#     """)
+
+#     params = {
+#         "invoicenumber": overdue_data.invoicenumber,
+#         "invoicedate": overdue_data.invoicedate,
+#         "quantity": overdue_data.quantity,
+#         "amountreceived": overdue_data.amountreceived,
+#         "receiveddate": overdue_data.receiveddate,
+#         "releaseddate": overdue_data.releaseddate,
+#         "checknumber": overdue_data.checknumber,
+#         "invoiceurl": overdue_data.invoiceurl,
+#         "checkurl": overdue_data.checkurl,
+#         "notes": overdue_data.notes,
+#         "status": overdue_data.status,
+#         "remindertype": overdue_data.remindertype,
+#         "overdue_id": overdue_id
+#     }
+
+#     result = db.execute(query, params)
+#     db.commit()
+
+#     if result.rowcount == 0:
+#         return {"error": "Overdue not found"}
+
+#     return {"message": "Overdue updated successfully"}
+
 def update_overdue(db: Session, overdue_id: int, overdue_data: OverdueUpdateSchema):
     query = text("""
         UPDATE invoice
         SET
-            invoicenumber = :invoicenumber,
-            invoicedate = :invoicedate,
-            quantity = :quantity,
+            status = :status,
+            remindertype = :remindertype,
             amountreceived = :amountreceived,
             receiveddate = :receiveddate,
-            releaseddate = :releaseddate,
             checknumber = :checknumber,
-            invoiceurl = :invoiceurl,
-            checkurl = :checkurl,
-            notes = :notes,
-            status = :status,
-            remindertype = :remindertype
+            notes = :notes
         WHERE id = :overdue_id
     """)
 
     params = {
-        "invoicenumber": overdue_data.invoicenumber,
-        "invoicedate": overdue_data.invoicedate,
-        "quantity": overdue_data.quantity,
-        "amountreceived": overdue_data.amountreceived,
-        "receiveddate": overdue_data.receiveddate,
-        "releaseddate": overdue_data.releaseddate,
-        "checknumber": overdue_data.checknumber,
-        "invoiceurl": overdue_data.invoiceurl,
-        "checkurl": overdue_data.checkurl,
-        "notes": overdue_data.notes,
         "status": overdue_data.status,
         "remindertype": overdue_data.remindertype,
+        "amountreceived": overdue_data.amountreceived,
+        "receiveddate": overdue_data.receiveddate,
+        "checknumber": overdue_data.checknumber,
+        "notes": overdue_data.notes,
         "overdue_id": overdue_id
     }
 
@@ -188,4 +219,3 @@ def update_overdue(db: Session, overdue_id: int, overdue_data: OverdueUpdateSche
         return {"error": "Overdue not found"}
 
     return {"message": "Overdue updated successfully"}
-

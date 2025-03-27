@@ -371,11 +371,12 @@ const AllListVendor = () => {
       )}
       {modalState.edit && selectedRow && (
         <EditRowModal
-          isOpen={modalState.edit}
-          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
-          onSave={fetchData}
-          initialData={selectedRow} // Added initialData prop
-        />
+        isOpen={modalState.edit}
+        onRequestClose={() => setModalState((prev) => ({ ...prev, edit: false }))} 
+        rowData={selectedRow}
+        onSave={fetchData}
+        initialData={selectedRow}
+      />
       )}
       {modalState.view && selectedRow && (
         <ViewRowModal
