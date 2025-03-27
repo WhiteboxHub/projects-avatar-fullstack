@@ -182,6 +182,10 @@ class Candidate(Base):
     diceflag = Column(CHAR(1), default='N', comment="This flag is set to 'Y' if it's a dice candidate, otherwise 'N'")
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
+    
+    # submissions = relationship("MktSubmission", back_populates="candidate")
+    submissions = relationship("MktSubmission", back_populates="candidate")
+
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -584,3 +588,27 @@ Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_popula
 
 # class Config:
 #     orm_mode = True
+
+
+class MktSubmission(Base):
+    __tablename__ = "mkt_submission"
+
+    id = Column(Integer, primary_key=True, index=True)
+    submissiondate = Column(DateTime)
+    candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=True)
+    employeeid = Column(Integer)
+    submitter = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    url = Column(String)
+    name = Column(String)
+    location = Column(String)
+    notes = Column(String)
+    feedback = Column(String)
+    
+    candidate = relationship("Candidate", back_populates="submissions")
+
+    # candidate = relationship("Candidate", back_populates="submissions")
+     
+     
+    
