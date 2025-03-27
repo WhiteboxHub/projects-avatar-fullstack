@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
 import { Recruiter } from '@/types/byClient';
+import axios from 'axios'; // Import axios for API calls
 
 interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Recruiter) => void;
   initialData: Recruiter;
 }
 
-const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, initialData }) => {
   const [formData, setFormData] = useState<Recruiter>(initialData);
 
   useEffect(() => {
@@ -25,10 +25,15 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, on
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    try {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byPlacement/update/${formData.id}`, formData); // API call to update recruiter
+      console.log(response.data); // Log the response for debugging
+      onClose(); // Close the modal after submission
+    } catch (error) {
+      console.error('Error updating recruiter:', error); // Handle error
+    }
   };
 
   return (

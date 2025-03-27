@@ -1,19 +1,13 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-
-
-from sqlalchemy import Column, Integer, Enum as SAEnum,Numeric, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR
-
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR ,Numeric
 from app.database.db import Base
-from pydantic import BaseModel,validator,EmailStr
+from pydantic import BaseModel, EmailStr ,validator, ValidationError
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, String, Integer, DateTime, Enum, Boolean
 from typing import ClassVar, Optional
 from pydantic_settings import BaseSettings
 from datetime import datetime, date
 from sqlalchemy.orm import DeclarativeBase
-from app.models import Base
-from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
 
 Base = declarative_base()
@@ -25,7 +19,41 @@ class User(Base):
     password = Column(String)
 
 
+class Employee(Base):
+    __tablename__ = 'employee'
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(150))
+    email = Column(String(150), unique=True)
+    phone = Column(String(150))
+    personalemail = Column(String(150))
+    personalphone = Column(String(150))
+    status = Column(String(45))
+    startdate = Column(Date)
+    address = Column(String(250))
+    city = Column(String(150))
+    state = Column(String(150))
+    country = Column(String(150))
+    zip = Column(String(45))
+    skypeid = Column(String(150))
+    dob = Column(Date)
+    salary = Column(Numeric(19, 4))
+    type = Column(String(45))
+    mgrid = Column(Integer)
+    commission = Column(String(1))
+    commissionrate = Column(Numeric(19, 4))
+    enddate = Column(Date)
+    loginid = Column(Integer)
+    responsibilities = Column(Text)
+    notes = Column(Text)
+    designationid = Column(Integer)
+    dlurl = Column(String(250))
+    empagreementurl = Column(String(250))
+    offerletterurl = Column(String(250))
+    workpermiturl = Column(String(250))
+    contracturl = Column(String(250))
+    
+    
 class User(BaseModel):
     __tablename__ = "authuser" 
     id: ClassVar[Column] = Column(Integer, primary_key=True, index=True)
@@ -34,16 +62,12 @@ class User(BaseModel):
     team: str = Column(String)
     email: str = Column(String, unique=True, index=True)
 
-
     id: Optional[int]
     uname: str
     passwd: str
     team: str
     email: str
 
-
-
-      
 class Batch(Base):
     __tablename__ = "batch"
     
@@ -65,13 +89,9 @@ class Batch(Base):
 
 # class Placement(Base):
 #     __tablename__ = 'placement'
-
-
 #     id = Column(Integer, primary_key=True, index=True)
 #     candidateid = Column(Integer)
 #     placementDate = Column(DateTime)
-  
-
 
 class Lead(Base):
     __tablename__ = "leads"
@@ -94,7 +114,6 @@ class Lead(Base):
     state = Column(String)
     country = Column(String)
 
-  
 class Candidate(Base):
     __tablename__ = 'candidate'
 
@@ -164,13 +183,10 @@ class Candidate(Base):
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
 
-
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
-
-
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"
@@ -241,8 +257,7 @@ class CandidateSearch(Base):
     diceflag = Column(CHAR(1), default='N', nullable=True)
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y', nullable=True)
-    
-    
+
 class Placement(Base):
     __tablename__ = "placement"
     __table_args__ = {'extend_existing': True} 
@@ -267,54 +282,12 @@ class Candidate(Base):
 
 class Vendor(Base):
     __tablename__ = "vendor"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    companyname = Column(String(250), nullable=False)
-    status = Column(String(50), nullable=True)
-    tier = Column(Integer, nullable=True)
-    culture = Column(String(50), nullable=True)
-    solicited = Column(String(3), nullable=True)
-    minrate = Column(Float, nullable=True)
-    hirebeforeterm = Column(String(3), nullable=True)
-    hireafterterm = Column(String(3), nullable=True)
-    latepayments = Column(String(3), nullable=True)
-    totalnetterm = Column(Integer, nullable=True)
-    defaultedpayment = Column(String(3), nullable=True)
-    agreementstatus = Column(String(50), nullable=True)
-    url = Column(String(200), nullable=True)
-    email = Column(String(250), nullable=False)
-    phone = Column(String(250), nullable=True)
-    fax = Column(String(250), nullable=True)
-    address = Column(String(250), nullable=True)
-    city = Column(String(250), nullable=True)
-    state = Column(String(250), nullable=True)
-    country = Column(String(250), nullable=True)
-    zip = Column(String(250), nullable=True)
-    hrname = Column(String(200), nullable=True)
-    hremail = Column(String(200), nullable=True)
-    hrphone = Column(String(200), nullable=True)
-    twitter = Column(String(200), nullable=True)
-    facebook = Column(String(200), nullable=True)
-    linkedin = Column(String(200), nullable=True)
-    accountnumber = Column(String(200), nullable=True)
-    managername = Column(String(200), nullable=True)
-    manageremail = Column(String(200), nullable=True)
-    managerphone = Column(String(200), nullable=True)
-    secondaryname = Column(String(200), nullable=True)
-    secondaryemail = Column(String(200), nullable=True)
-    secondaryphone = Column(String(200), nullable=True)
-    timsheetemail = Column(String(200), nullable=True)
-    agreementname = Column(String(200), nullable=True)
-    agreementlink = Column(String(200), nullable=True)
-    subcontractorlink = Column(String(200), nullable=True)
-    nonsolicitationlink = Column(String(200), nullable=True)
-    nonhirelink = Column(String(200), nullable=True)
-    clients = Column(Text, nullable=True)
-    notes = Column(Text, nullable=True)
+    companyname = Column(String, nullable=False)
 
     placements = relationship("Placement", back_populates="vendor")
-    recruiters = relationship("Recruiter", back_populates="vendor")  # For Recruiter
-
+    recruiters = relationship("Recruiter", back_populates="vendor")
 
 class Client(Base):
     __tablename__ = "client"
@@ -331,7 +304,7 @@ class Client(Base):
     state = Column(String(150), nullable=True)
     country = Column(String(150), nullable=True)
     zip = Column(String(150), nullable=True)
-    url = Column(String(150), nullable=False, default="http://nothing.com")
+    url = Column(String(150), nullable=True, default="http://nothing.com")
     manager1name = Column(String(150), nullable=True)
     twitter = Column(String(100), nullable=True)
     facebook = Column(String(100), nullable=True)
@@ -348,7 +321,6 @@ class Client(Base):
     lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     placements = relationship("Placement", back_populates="client")
-    recruiters = relationship("Recruiter", back_populates="client")  # For Recruiter
     recruiters = relationship("Recruiter", back_populates="client")
 
 class ClientSearch(Base):
@@ -366,7 +338,6 @@ class ClientSearch(Base):
     tier = Column(Integer, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
-    
 class PO(Base):
     __tablename__ = "po"
 
@@ -384,8 +355,6 @@ class PO(Base):
     notes = Column(String, nullable=True)
 
     placement = relationship("Placement", back_populates="po_entries")
-
-
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -413,7 +382,7 @@ class CandidateMarketing(Base):
     closedemail = Column(CHAR(1), default='N')
     notes = Column(Text)
     suspensionreason = Column(CHAR(1), default='A')
-    yearsofexperience = Column(CHAR(3))
+    yearsofexperience = Column(CHAR(3)) 
     
     
 class AuthUser(Base):
@@ -447,10 +416,9 @@ class AuthUser(Base):
     reset_token = Column(String(255), nullable=True)
     token_expiry = Column(DateTime, nullable=True)
     role = Column(String(100), nullable=True)    
-    
+
 class CurrentMarketing(Base):
-    __tablename__ = "currentmarketing"
-    # __table_args__ = {'extend_existing': True} 
+    __tablename__ = "currentmarketing" 
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
     startdate = Column(DateTime, nullable=False)
@@ -475,7 +443,8 @@ class CurrentMarketing(Base):
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3))    
     
-    
+
+   
 class Overdue(Base):
     __tablename__ = "overdue"
 
@@ -520,6 +489,105 @@ class Overdue(Base):
     recruiterphone = Column(String, nullable=True)
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
+
+class Invoice(Base):
+    __tablename__ = "invoice"
+
+    id = Column(Integer, primary_key=True, index=True)
+    invoicenumber = Column(String(45), unique=True, nullable=False)
+    startdate = Column(Date, nullable=False)
+    enddate = Column(Date, nullable=False)
+    invoicedate = Column(Date, nullable=False)
+    quantity = Column(Numeric(precision=19, scale=1), nullable=False)
+    otquantity = Column(Numeric(precision=19, scale=1), nullable=False, default=0.0)
+    status = Column(String(45), nullable=True)
+    amountreceived = Column(Numeric(precision=19, scale=4), nullable=True)
+    releaseddate = Column(Date, nullable=True)
+    receiveddate = Column(Date, nullable=True)
+    checknumber = Column(String(150), nullable=True)
+    invoiceurl = Column(String(300), nullable=True)
+    checkurl = Column(String(300), nullable=True)
+    reminders = Column(String(1), nullable=False, default='Y')
+    remindertype = Column(String(150), nullable=False, default='Open')
+    emppaiddate = Column(Date, nullable=True)
+    candpaymentstatus = Column(String(45), nullable=False, default='Open')
+    poid = Column(Integer, ForeignKey("po.id"), nullable=False)
+    notes = Column(Text, nullable=True)
+    lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
+
+
+# Adding recruiter model
+
+class Recruiter(Base):
+    __tablename__ = 'recruiter'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), index=True)
+    email = Column(String(150), unique=True, index=True)
+    phone = Column(String(150), nullable=True)
+    status = Column(CHAR(1), nullable=True)
+    designation = Column(String(300), nullable=True)
+    dob = Column(Date, nullable=True)
+    personalemail = Column(String(150), nullable=True)
+    employeeid = Column(Integer, nullable=True)
+    skypeid = Column(String(150), nullable=True)
+    linkedin = Column(String(300), nullable=True)
+    twitter = Column(String(150), nullable=True)
+    facebook = Column(String(300), nullable=True)
+    review = Column(CHAR(1), nullable=True)
+    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
+    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
+    notes = Column(Text, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=True)
+
+    client = relationship("Client", back_populates="recruiters")
+    vendor = relationship("Vendor", back_populates="recruiters")
+
+class Config:
+    orm_mode = True
+
+@validator('dob', pre=True, always=True)
+def validate_dob(cls, v):
+    if isinstance(v, date):
+        return v 
+    if v in ('0000-00-00', None):
+        return None
+    try:
+        return datetime.strptime(v, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        raise ValueError("Invalid date format for dob")
+
+Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
+
+
+# class Submission(Base):
+#     __tablename__ = 'mkt_submission'
+    
+#     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+#     candidateid = Column(Integer, nullable=False)
+#     employeeid = Column(Integer, nullable=False)
+#     submitter = Column(Integer, nullable=True)
+#     submissiondate = Column(Date, nullable=False)
+#     type = Column(String(45), nullable=False)
+#     name = Column(String(150), nullable=True)
+#     email = Column(String(150), nullable=True)
+#     phone = Column(String(150), nullable=True)
+#     url = Column(String(300), nullable=True)
+#     location = Column(String(300), nullable=True)
+#     notes = Column(Text, nullable=True)
+#     feedback = Column(Text, nullable=True)
+#     lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=Text('CURRENT_TIMESTAMP'))
+    #  # Relationships
+    # candidate = relationship("Candidate", backref="mkt_submissions")
+    # employee = relationship("Employee", foreign_keys=[employeeid], backref="employee_submissions")
+    # submitter_employee = relationship("Employee", foreign_keys=[submitter], backref="submitter_submissions")
+
+# class Config:
+#     orm_mode = True
+
+
+
+
 
 
 

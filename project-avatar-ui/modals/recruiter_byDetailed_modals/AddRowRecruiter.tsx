@@ -6,25 +6,25 @@ import axios from 'axios';
 interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit: () => void;
 }
 
-const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) => {
+const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => { 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    status: '',
     designation: '',
+    clientid: '',
+    status: '',
     dob: '',
     personalemail: '',
-    employeeid: '',
     skypeid: '',
     linkedin: '',
     twitter: '',
     facebook: '',
+    vendorid:'',
     review: '',
-    vendorid: '',
-    clientid: '',
     notes: '',
   });
 
@@ -39,11 +39,12 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/add`, formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byDetailed/add`, formData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
-      console.log(response.data.message); // Log success message
-      onClose(); // Close modal after successful submission
+      console.log(response.data.message); 
+      onSubmit(); // Call onSubmit instead of onClose
+      onClose(); 
     } catch (error) {
       console.error("Error adding recruiter:", error);
     }
@@ -94,6 +95,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
+            required
           />
         </div>
 
@@ -106,6 +108,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
 
@@ -118,6 +121,33 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <input
+            type="text"
+            name="designation"
+            value={formData.designation}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter designation"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
+          <input
+            type="number"
+            name="clientid"
+            value={formData.clientid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter client ID"
+            required
           />
         </div>
 
@@ -134,18 +164,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-          <input
-            type="text"
-            name="designation"
-            value={formData.designation}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter designation"
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
           <input
             type="date"
@@ -153,7 +171,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             value={formData.dob}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter date of birth"
           />
         </div>
 
@@ -166,18 +183,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter personal email"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Employee ID</label>
-          <input
-            type="number"
-            name="employeeid"
-            value={formData.employeeid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter employee ID"
           />
         </div>
 
@@ -230,6 +235,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
         </div>
 
         <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">vendorid</label>
+          <input
+            type="text"
+            name="vendorid"
+            value={formData.vendorid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter vendorid"
+            required
+          />
+        </div>
+
+        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
           <textarea
             name="review"
@@ -237,30 +255,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter review"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
-          <input
-            type="number"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter vendor ID"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
-          <input
-            type="number"
-            name="clientid"
-            value={formData.clientid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter client ID"
           />
         </div>
 

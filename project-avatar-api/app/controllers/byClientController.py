@@ -1,10 +1,23 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models import Recruiter
-from app.schemas import RecruiterCreate, RecruiterUpdate
+from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterResponse
+from sqlalchemy import func
 
-def get_recruiters_by_client(db: Session):
-    return db.query(Recruiter).filter(Recruiter.vendorid == 0).all()
+def get_recruiters_by_client(db: Session, page: int, page_size: int):
+    query = db.query(Recruiter).filter(Recruiter.vendorid == 0)
+    total = db.query(func.count(Recruiter.id)).scalar()
+    recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
+    
+    recruiter_data = [RecruiterResponse.from_orm(recruiter) for recruiter in recruiters]
+    
+    return {
+        "data": recruiter_data,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": (total + page_size - 1) // page_size,
+    }
 
 def create_recruiter(db: Session, recruiter: RecruiterCreate):
     db_recruiter = Recruiter(**recruiter.dict())
