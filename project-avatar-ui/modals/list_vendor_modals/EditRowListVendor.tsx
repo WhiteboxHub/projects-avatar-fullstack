@@ -23,13 +23,13 @@ const initialData: Vendor = {
   notes: '',
 };
 
-export interface EditRowModalProps {
-    isOpen: boolean;
-    onRequestClose: () => void; // Ensure this prop is defined
-    rowData: Vendor;            // Ensure rowData is defined and matches the expected type
-    onSave: () => Promise<void>; // Ensure onSave is defined
-  }
-  
+interface EditRowModalProps {
+  isOpen: boolean;
+  onRequestClose: () => void;
+  rowData: Vendor; 
+  onSave: () => Promise<void>;
+  initialData: Vendor;
+}
   const EditRowModal: React.FC<EditRowModalProps> = ({
     isOpen,
     onRequestClose,

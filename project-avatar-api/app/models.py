@@ -522,46 +522,6 @@ class Invoice(Base):
 
 # Adding recruiter model
 
-class Recruiter(Base):
-    __tablename__ = 'recruiter'
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(150), index=True)
-    email = Column(String(150), unique=True, index=True)
-    phone = Column(String(150), nullable=True)
-    status = Column(CHAR(1), nullable=True)
-    designation = Column(String(300), nullable=True)
-    dob = Column(Date, nullable=True)
-    personalemail = Column(String(150), nullable=True)
-    employeeid = Column(Integer, nullable=True)
-    skypeid = Column(String(150), nullable=True)
-    linkedin = Column(String(300), nullable=True)
-    twitter = Column(String(150), nullable=True)
-    facebook = Column(String(300), nullable=True)
-    review = Column(CHAR(1), nullable=True)
-    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
-    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
-    notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(TIMESTAMP, nullable=True)
-
-    client = relationship("Client", back_populates="recruiters")
-    vendor = relationship("Vendor", back_populates="recruiters")
-
-class Config:
-    orm_mode = True
-
-@validator('dob', pre=True, always=True)
-def validate_dob(cls, v):
-    if isinstance(v, date):
-        return v 
-    if v in ('0000-00-00', None):
-        return None
-    try:
-        return datetime.strptime(v, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        raise ValueError("Invalid date format for dob")
-
-Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
 
 
 # Adding mkl_submission 
@@ -599,3 +559,62 @@ class MktSubmission(Base):
             return datetime.strptime(v, '%Y-%m-%d').date()
         except (ValueError, TypeError):
             raise ValueError("Invalid date format for submissiondate")
+
+
+
+
+
+
+
+
+
+class Url(Base):
+    __tablename__ = "sales_url_db"
+
+    
+    url = Column(String(255), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    lastmoddatetime = Column(DateTime, nullable=False, server_default=func.now())  
+# Recruiter Model
+class Recruiter(Base):
+    __tablename__ = "recruiter"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    phone = Column(String, nullable=False)
+    designation = Column(String, nullable=False)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    status = Column(String, nullable=False)
+    dob = Column(Date, nullable=True)
+    personalemail = Column(String, nullable=True)
+    skypeid = Column(String, nullable=True)
+    linkedin = Column(String, nullable=True)
+    twitter = Column(String, nullable=True)
+    facebook = Column(String, nullable=True)
+    review = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    clientid = Column(Integer, ForeignKey("client.id"), nullable=True)
+
+    # Relationships
+    vendor = relationship("Vendor", back_populates="recruiters")
+    client = relationship("Client", back_populates="recruiters")
+
+
+
+
+
+
+class PlacementRecruiter(Base):
+    __tablename__ = "placement_recruiter"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    designation = Column(String, nullable=False)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=False)
+    status = Column(String, nullable=False)
+    clientid = Column(Integer, default=0)  # Force clientid = 0
+    # ... other fields (dob, skypeid, etc.) ...
+
+    vendor = relationship("Vendor")

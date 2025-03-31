@@ -189,7 +189,6 @@ const Urls = () => {
     }
   };
 
-
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("URL Data", 20, 10);
@@ -205,42 +204,37 @@ const Urls = () => {
   };
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(totalPages, currentPage + 2);
+  const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-    {alertMessage && ( // Conditional rendering of alert message
-      <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
-        {alertMessage}
-      </div>
-    )}
+      {alertMessage && ( // Conditional rendering of alert message
+        <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
+          {alertMessage}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">URL Management</h1></div>
-
-
-
-
-
-
-
-        <div className="flex flex-col md:flex-row mb-4 justify-between   items-center">
-        <div className="flex w-full md:w-auto mb-2 md:mb-0">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-64"
-        />
-        <button
-          onClick={handleSearch}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
-        >
-          <AiOutlineSearch className="mr-2" /> Search
-        </button>
+        <h1 className="text-3xl font-bold text-gray-800">URL Management</h1>
       </div>
 
-
+      <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
+        <div className="flex w-full md:w-auto mb-2 md:mb-0">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="border border-gray-300 rounded-md p-2 w-64"
+          />
+          <button
+            onClick={handleSearch}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
+          >
+            <AiOutlineSearch className="mr-2" /> Search
+          </button>
+        </div>
 
         <div className="flex space-x-2">
           <button
@@ -280,9 +274,8 @@ const Urls = () => {
             <FaDownload className="mr-2" />  
           </button>
         </div>
-      
-      
-        </div>
+      </div>
+
       {loading ? (
         <div className="flex justify-center items-center h-48">
           <span className="text-xl">Loading...</span>

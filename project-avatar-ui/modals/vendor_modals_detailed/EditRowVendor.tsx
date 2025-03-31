@@ -7,9 +7,9 @@ import { Vendor } from '../../types/index'; // Import Vendor type
 interface EditRowModalProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshData: () => void;
-  rowData: Vendor; // Change initialData to rowData
+  rowData: Vendor;
   onSave: () => Promise<void>;
+  refreshData: () => void; // Add this
 }
 
 const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, refreshData, rowData, onSave }) => {

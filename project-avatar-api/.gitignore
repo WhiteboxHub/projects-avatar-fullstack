@@ -2,7 +2,7 @@
 
 */__pycache__/
 *.py[cod]
-venv
+myvenv
 
 __pycache__/
 *.pyc
