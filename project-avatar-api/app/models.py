@@ -518,46 +518,6 @@ class Invoice(Base):
 
 # Adding recruiter model
 
-class Recruiter(Base):
-    __tablename__ = 'recruiter'
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(150), index=True)
-    email = Column(String(150), unique=True, index=True)
-    phone = Column(String(150), nullable=True)
-    status = Column(CHAR(1), nullable=True)
-    designation = Column(String(300), nullable=True)
-    dob = Column(Date, nullable=True)
-    personalemail = Column(String(150), nullable=True)
-    employeeid = Column(Integer, nullable=True)
-    skypeid = Column(String(150), nullable=True)
-    linkedin = Column(String(300), nullable=True)
-    twitter = Column(String(150), nullable=True)
-    facebook = Column(String(300), nullable=True)
-    review = Column(CHAR(1), nullable=True)
-    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
-    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
-    notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(TIMESTAMP, nullable=True)
-
-    client = relationship("Client", back_populates="recruiters")
-    vendor = relationship("Vendor", back_populates="recruiters")
-
-class Config:
-    orm_mode = True
-
-@validator('dob', pre=True, always=True)
-def validate_dob(cls, v):
-    if isinstance(v, date):
-        return v 
-    if v in ('0000-00-00', None):
-        return None
-    try:
-        return datetime.strptime(v, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        raise ValueError("Invalid date format for dob")
-
-Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
 
 
 # class Submission(Base):
@@ -626,79 +586,6 @@ class Recruiter(Base):
     client = relationship("Client", back_populates="recruiters")
 
 
-
-class Invoice(Base):
-    __tablename__ = "invoice"
-
-    id = Column(Integer, primary_key=True, index=True)
-    invoicenumber = Column(String(45), unique=True, nullable=False)
-    startdate = Column(Date, nullable=False)
-    enddate = Column(Date, nullable=False)
-    invoicedate = Column(Date, nullable=False)
-    quantity = Column(Numeric(precision=19, scale=1), nullable=False)
-    otquantity = Column(Numeric(precision=19, scale=1), nullable=False, default=0.0)
-    status = Column(String(45), nullable=True)
-    amountreceived = Column(Numeric(precision=19, scale=4), nullable=True)
-    releaseddate = Column(Date, nullable=True)
-    receiveddate = Column(Date, nullable=True)
-    checknumber = Column(String(150), nullable=True)
-    invoiceurl = Column(String(300), nullable=True)
-    checkurl = Column(String(300), nullable=True)
-    reminders = Column(String(1), nullable=False, default='Y')
-    remindertype = Column(String(150), nullable=False, default='Open')
-    emppaiddate = Column(Date, nullable=True)
-    candpaymentstatus = Column(String(45), nullable=False, default='Open')
-    poid = Column(Integer, ForeignKey("po.id"), nullable=False)
-    notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
-
-# Add vendor
-
-
-
-
-# Adding recruiter model
-
-class Recruiter(Base):
-    __tablename__ = 'recruiter'
-    __table_args__ = {'extend_existing': True}
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(150), index=True)
-    email = Column(String(150), unique=True, index=True)
-    phone = Column(String(150), nullable=True)
-    status = Column(CHAR(1), nullable=True)
-    designation = Column(String, nullable=False) 
-    dob = Column(Date, nullable=True)
-    personalemail = Column(String(150), nullable=True)
-    employeeid = Column(Integer, nullable=True)
-    skypeid = Column(String(150), nullable=True)
-    linkedin = Column(String(300), nullable=True)
-    twitter = Column(String(150), nullable=True)
-    facebook = Column(String(300), nullable=True)
-    review = Column(CHAR(1), nullable=True)
-    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
-    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
-    notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(TIMESTAMP, nullable=True)
-
-
-    client = relationship("Client", back_populates="recruiters")
-    vendor = relationship("Vendor", back_populates="recruiters")
-    
-    @validator('dob', pre=True, always=True)
-    def validate_dob(cls, v):
-         if isinstance(v, date):
-             return v  # Already a date object, return as is
-         if v in ('0000-00-00', None):
-             return None
-         try:
-             return datetime.strptime(v, '%Y-%m-%d').date()
-         except (ValueError, TypeError):
-             raise ValueError("Invalid date format for dob")
-         
-Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
-    
 
 
 

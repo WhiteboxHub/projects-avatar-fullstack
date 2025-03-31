@@ -703,6 +703,53 @@ class UrlInDB(UrlBase):
 
     class Config:
        from_attributes = True 
+
+
+
+
+
+class EmployeeBase(BaseModel):
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    status: Optional[str] = None
+    startdate: Optional[date] = None
+    mgrid: Optional[int] = None
+    designationid: Optional[int] = None
+    personalemail: Optional[EmailStr] = None
+    personalphone: Optional[str] = None
+    dob: Optional[date] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    skypeid: Optional[str] = None
+    salary: Optional[float] = None
+    commission: Optional[bool] = None
+    commissionrate: Optional[float] = None
+    type: Optional[str] = None
+    empagreementurl: Optional[HttpUrl] = None
+    offerletterurl: Optional[HttpUrl] = None
+    dlurl: Optional[HttpUrl] = None
+    workpermiturl: Optional[HttpUrl] = None
+    contracturl: Optional[HttpUrl] = None
+    enddate: Optional[date] = None
+    loginid: Optional[int] = None
+    responsibilities: Optional[str] = None
+    notes: Optional[str] = None
+
+class EmployeeCreate(EmployeeBase):
+    pass
+
+class EmployeeUpdate(EmployeeBase):
+    pass
+
+class EmployeeInDB(EmployeeBase):
+    id: int
+
+    class Config:
+        orm_mode = True
        
        
 
@@ -946,3 +993,6 @@ class PlacementRecruiterInDB(PlacementRecruiterBase):
 
     class Config:
         from_attributes = True 
+
+
+
