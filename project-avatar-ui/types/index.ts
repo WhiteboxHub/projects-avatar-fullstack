@@ -2,7 +2,34 @@
 export interface Lead {
     leadid?: string; // make leadid optional if it's not always present
     name: string;
+    startdate:string;
+    course: string;
+    workexperience: string;
     email: string;
+    phone: string;
+    secondaryemail: string;
+    secondaryphone: string;
+    status: string;
+    priority: string;
+    usstatus: string;
+    spousename: string;
+    spouseemail: string;
+    spousephone: string;
+    spouseoccupationinfo: string;
+    attendedclass: string;
+    siteaccess: string;
+    faq: string;
+    closedate: string;
+    assignedto: string;
+    callsmade: string;
+    source: string;
+    sourcename: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    zip: string;
+    notes: string;
     // Add other fields as necessary
   }
 

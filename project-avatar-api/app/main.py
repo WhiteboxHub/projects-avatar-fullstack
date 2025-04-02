@@ -6,7 +6,7 @@ from app.database.db import engine, Base
 from app.routes.batchRoute import router as batch_router
 from app.routes.accessRoute import router as access_router
 from app.routes.authRoute import router as auth_router
-from app.routes.accessRoute import router as user_router
+# from app.routes.accessRoute import router as user_router
 from app.routes.leadsRoute import router as leads_router
 from app.routes.candidateRoute import router as candidate_router
 from app.routes.candidate_searchRoute import router as candidate_search_router
@@ -32,7 +32,7 @@ origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"], 
     allow_headers=["*"],  
@@ -42,8 +42,8 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router, prefix="/api/admin/auth", tags=["auth"])
 app.include_router(access_router, prefix="/api/admin/access", tags=["access"])
 app.include_router(batch_router, prefix="/api/admin/batches", tags=["batch"]) 
-app.include_router(user_router, prefix="/api/admin/admin", tags=["users"])
-app.include_router(leads_router, prefix="/api/admin/leads", tags=["leads"])  
+# app.include_router(user_router, prefix="/api/admin/admin", tags=["users"])
+app.include_router(leads_router, tags=["leads"])  
 app.include_router(candidate_router, prefix="/api/admin/candidates", tags=["candidates"])
 app.include_router(candidate_search_router,tags=["search"])
 app.include_router(po_router,tags=["po"])

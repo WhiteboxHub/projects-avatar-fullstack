@@ -595,7 +595,7 @@ const Header: React.FC = () => {
 
   return (
     // <header className="bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 text-white py-4 shadow-lg fixed top-0 left-0 right-0 z-50">
-    <header className={`bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 text-white py-4 shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'h-auto' : 'min-h-24 h-24'}`}>
+    <header className={`bg-gradient-to-r from-blue-700 via-indigo-800 to-blue-900 text-white py-4 shadow-lg transition-all duration-300 ${isMobileMenuOpen ? 'h-auto' : 'min-h-24 h-24'}`}>
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">

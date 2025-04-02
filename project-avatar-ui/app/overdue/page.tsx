@@ -660,7 +660,7 @@ const OverdueComponent = () => {
   const pageButtons = getPageButtons();
 
   return (
-    <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
+    <div className="p-4 mt-20 mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
       {alertMessage && (
         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
           {alertMessage}

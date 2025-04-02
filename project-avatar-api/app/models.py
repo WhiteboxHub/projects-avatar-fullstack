@@ -1,7 +1,6 @@
 # avatar-app/projects-api/app/models.py
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
-
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr ,validator, ValidationError
 from sqlalchemy.orm import declarative_base, relationship
@@ -54,6 +53,23 @@ class Employee(Base):
     workpermiturl = Column(String(250))
     contracturl = Column(String(250))
     
+
+class Course(Base):
+    __tablename__ = 'course'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(200), nullable=False, default='Quality Engineering')
+    alias = Column(String(200), nullable=True)
+    description = Column(Text, nullable=False)
+    syllabus = Column(Text, nullable=False)
+    lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=text('0000-00-00 00:00:00'))
+    displayquestion = Column(String(200), nullable=False)
+    displayanswer = Column(String(500), nullable=False)
+    courseaddition = Column(String(500), nullable=False)
+    certificatetitle = Column(String(500), nullable=True)
+
+    # Establish a one-to-many relationship with Batch
+    batches = relationship('Batch', back_populates='course')
     
 class User(BaseModel):
     __tablename__ = "authuser" 
@@ -79,14 +95,14 @@ class Batch(Base):
     subject = Column(String(45))
     startdate = Column(Date)
     enddate = Column(Date)
-    exams = Column(Integer)
     instructor1 = Column(Integer)
     instructor2 = Column(Integer)
     instructor3 = Column(Integer)
     topicscovered = Column(Text)
     topicsnotcovered = Column(Text)
     lastmoddatetime = Column(TIMESTAMP)
-    courseid = Column(Integer)
+    courseid = Column(Integer, ForeignKey('course.id'))  # Define the foreign key constraint
+    course = relationship('Course', back_populates='batches')
 
 # class Placement(Base):
 #     __tablename__ = 'placement'
@@ -97,23 +113,39 @@ class Batch(Base):
 class Lead(Base):
     __tablename__ = "leads"
 
-    leadid = Column(Integer, primary_key=True, index=True)  
-    name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    phone = Column(String)
-    sourcename = Column(String)
-    course = Column(String)
-    status = Column(String) 
-    secondaryemail = Column(String)
-    secondaryphone = Column(String)
-    address = Column(String)
-    spousename = Column(String)
-    spouseemail = Column(String)
-    spousephone = Column(String) 
-    spouseoccupationinfo = Column(String) 
-    city = Column(String)
-    state = Column(String)
-    country = Column(String)
+    leadid = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), index=True)
+    startdate = Column(DateTime)
+    phone = Column(String(45))
+    email = Column(String(45), nullable=False, index=True)
+    priority = Column(String(2))
+    workstatus = Column(String(10))
+    source = Column(String(10))
+    workexperience = Column(String(150))
+    sourcename = Column(String(100))
+    course = Column(String(10), default="QA")
+    intent = Column(String(45))
+    attendedclass = Column(String(1))
+    siteaccess = Column(String(1))
+    assignedto = Column(String(45))
+    status = Column(String(45), default="Open")
+    secondaryemail = Column(String(100))
+    secondaryphone = Column(String(45))
+    address = Column(String(100))
+    spousename = Column(String(100))
+    spouseemail = Column(String(45))
+    spousephone = Column(String(45))
+    spouseoccupationinfo = Column(String(250))
+    city = Column(String(100))
+    state = Column(String(100))
+    country = Column(String(100))
+    zip = Column(String(100))
+    faq = Column(String(1))
+    callsmade = Column(Integer, default=0)
+    closedate = Column(Date)
+    notes = Column(Text)
+    lastmoddatetime = Column(DateTime, server_default='CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+    
 
 class Candidate(Base):
     __tablename__ = 'candidate'
@@ -184,10 +216,6 @@ class Candidate(Base):
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
 
-class CandidateMarketing(Base):
-    __tablename__ = "candidatemarketing"
-    id = Column(Integer, primary_key=True, index=True)
-    candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"

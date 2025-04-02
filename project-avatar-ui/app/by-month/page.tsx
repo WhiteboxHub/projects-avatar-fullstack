@@ -1,6 +1,3 @@
-// ++++++++++++++++______________________+++++++++++++++++++++++++++++++
-
-
 // "use client";
 
 // import React, { useState, useEffect, useRef } from "react";
@@ -72,9 +69,9 @@
 //     }
 //   };
 
-//   const fetchByMonths = async (searchQuery = "") => {
+//   const fetchByMonths = async (month = null, searchQuery = "") => {
 //     try {
-//       const response = await axios.get(`${API_URL}/invoices/month/${searchQuery}`, {
+//       const response = await axios.get(`${API_URL}/invoices/month/${month || ''}`, {
 //         params: {
 //           page: currentPage,
 //           pageSize: paginationPageSize,
@@ -93,16 +90,16 @@
 //   };
 
 //   const handleSearch = () => {
-//     fetchByMonths(searchValue);
+//     fetchByMonths(null, searchValue);
 //   };
 
-//   const setupColumns = (data) => {
+//   const setupColumns = (data: Record<string, unknown>[]) => {
 //     if (data.length > 0) {
 //       const columns = Object.keys(data[0]).map((key) => ({
 //         headerName: key.charAt(0).toUpperCase() + key.slice(1),
 //         field: key,
 //       }));
-//       console.log("Column Definitions:", columns); // Log the column definitions
+//       console.log("Column Definitions:", columns);
 //       setColumnDefs(columns);
 //     }
 //   };
@@ -188,27 +185,34 @@
 //     }
 //   };
 
-//   const handleRowClick = async (params) => {
-//     const month = params.data.month; // Ensure 'month' is the correct field name
-//     console.log("Row clicked with data:", params.data); // Log the entire row data
-//     console.log("Selected Month:", month); // Log the selected month
-
-//     if (month) {
-//       setSelectedMonth(month);
-//       try {
-//         const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
-//           headers: { AuthToken: localStorage.getItem("token") },
-//         });
-//         const data = response.data; // Ensure this matches your API response structure
-//         console.log("Fetched Month Data:", data); // Log the fetched data
-//         setMonthData(data);
-//       } catch (error) {
-//         console.error("Error loading month data:", error);
-//       }
-//     } else {
-//       console.error("Month is undefined. Please check the data structure.");
+//     interface RowClickParams {
+//       data: {
+//         invmonth?: string;
+//         [key: string]: string | number | boolean | null | undefined; // Specify possible types for additional properties
+//       };
 //     }
-//   };
+
+//     const handleRowClick = async (params: RowClickParams) => {
+//       const month = params.data.invmonth; // Ensure 'invmonth' is the correct field name
+//       console.log("Row clicked with data:", params.data); // Log the entire row data
+//       console.log("Selected Month:", month); // Log the selected month
+
+//       if (month) {
+//         setSelectedMonth(month);
+//         try {
+//           const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
+//             headers: { AuthToken: localStorage.getItem("token") },
+//           });
+//           const data = response.data; // Ensure this matches your API response structure
+//           console.log("Fetched Month Data:", data); // Log the fetched data
+//           setMonthData(data);
+//         } catch (error) {
+//           console.error("Error loading month data:", error);
+//         }
+//       } else {
+//         console.error("Month is undefined. Please check the data structure.");
+//       }
+//     };
 
 //   const handleDownloadPDF = () => {
 //     const doc = new jsPDF();
@@ -228,13 +232,14 @@
 //   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
 //   return (
-//     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-//       {alertMessage && ( // Conditional rendering of alert message
+//     <div className="p-4 mt-20 mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
+//       {alertMessage && ( 
 //         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
 //           {alertMessage}
 //         </div>
 //       )}
-//       <div className="flex justify-between items-center mb-4">
+
+//       <div className="flex flex-col md:flex-row justify-between items-center mb-4">
 //         <h1 className="text-3xl font-bold text-gray-800">Invoice Management</h1>
 //       </div>
 
@@ -301,27 +306,29 @@
 //         </div>
 //       ) : (
 //         <div
-//           className="ag-theme-alpine"
-//           style={{ height: "400px", width: "100%", overflowY: "auto" }}
+//           className="ag-theme-alpine table-container"
+//           style={{ height: "300px", width: "100%", overflowY: "auto" }}
 //         >
-//         <AgGridReact
-//           ref={gridRef}
-//           rowData={rowData}
-//           columnDefs={columnDefs}
-//           pagination={false}
-//           domLayout="normal"
-//           rowSelection="multiple"
-//           defaultColDef={{
-//             sortable: true,
-//             filter: true,
-//             cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-//             minWidth: 60,
-//             maxWidth: 1200,
-//           }}
-//           rowHeight={30}
-//           headerHeight={35}
-//           onRowClicked={handleRowClick} // Ensure this is correctly set
-//         />
+//           <AgGridReact
+//             ref={gridRef}
+//             rowData={rowData}
+//             columnDefs={columnDefs}
+//             pagination={false}
+//             domLayout="normal"
+//             rowSelection="multiple"
+//             defaultColDef={{
+//               sortable: true,
+//               filter: true,
+//               cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+//               minWidth: 60,
+//               maxWidth: 1200,
+//               width: 150,
+              
+//             }}
+//             rowHeight={30}
+//             headerHeight={35}
+//             onRowClicked={handleRowClick} // Ensure this is correctly set
+//           />
 //         </div>
 //       )}
 
@@ -334,7 +341,56 @@
 //           >
 //             <AgGridReact
 //               rowData={monthData}
-//               columnDefs={columnDefs}
+//               columnDefs={[
+//                 { headerName: "ID", field: "id" },
+//                 { headerName: "PO ID", field: "poid" },
+//                 { headerName: "Invoice Number", field: "invoicenumber" },
+//                 { headerName: "Start Date", field: "startdate" },
+//                 { headerName: "End Date", field: "enddate" },
+//                 { headerName: "Invoice Date", field: "invoicedate" },
+//                 { headerName: "Invoice Month", field: "invmonth" },
+//                 { headerName: "Quantity", field: "quantity" },
+//                 { headerName: "OT Quantity", field: "otquantity" },
+//                 { headerName: "Rate", field: "rate" },
+//                 { headerName: "Overtime Rate", field: "overtimerate" },
+//                 { headerName: "Status", field: "status" },
+//                 { headerName: "Emp Paid Date", field: "emppaiddate" },
+//                 { headerName: "Cand Payment Status", field: "candpaymentstatus" },
+//                 { headerName: "Reminders", field: "reminders" },
+//                 { headerName: "Amount Expected", field: "amountexpected" },
+//                 { headerName: "Expected Date", field: "expecteddate" },
+//                 { headerName: "Amount Received", field: "amountreceived" },
+//                 { headerName: "Received Date", field: "receiveddate" },
+//                 { headerName: "Released Date", field: "releaseddate" },
+//                 { headerName: "Check Number", field: "checknumber" },
+//                 { headerName: "Invoice URL", field: "invoiceurl" },
+//                 { headerName: "Check URL", field: "checkurl" },
+//                 { headerName: "Freq Type", field: "freqtype" },
+//                 { headerName: "Invoice Net", field: "invoicenet" },
+//                 { headerName: "Company Name", field: "companyname" },
+//                 { headerName: "Vendor Fax", field: "vendorfax" },
+//                 { headerName: "Vendor Phone", field: "vendorphone" },
+//                 { headerName: "Vendor Email", field: "vendoremail" },
+//                 { headerName: "Timesheet Email", field: "timsheetemail" },
+//                 { headerName: "HR Name", field: "hrname" },
+//                 { headerName: "HR Email", field: "hremail" },
+//                 { headerName: "HR Phone", field: "hrphone" },
+//                 { headerName: "Manager Name", field: "managername" },
+//                 { headerName: "Manager Email", field: "manageremail" },
+//                 { headerName: "Manager Phone", field: "managerphone" },
+//                 { headerName: "Secondary Name", field: "secondaryname" },
+//                 { headerName: "Secondary Email", field: "secondaryemail" },
+//                 { headerName: "Secondary Phone", field: "secondaryphone" },
+//                 { headerName: "Candidate Name", field: "candidatename" },
+//                 { headerName: "Candidate Phone", field: "candidatephone" },
+//                 { headerName: "Candidate Email", field: "candidateemail" },
+//                 { headerName: "WRK Email", field: "wrkemail" },
+//                 { headerName: "WRK Phone", field: "wrkphone" },
+//                 { headerName: "Recruiter Name", field: "recruitername" },
+//                 { headerName: "Recruiter Phone", field: "recruiterphone" },
+//                 { headerName: "Recruiter Email", field: "recruiteremail" },
+//                 { headerName: "Notes", field: "notes" },
+//               ]}
 //               pagination={false}
 //               domLayout="normal"
 //               defaultColDef={{
@@ -422,7 +478,6 @@
 // export default ByMonth;
 
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -449,7 +504,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import type { ByMonth } from "../../types/index"; // Use type-only import
+import type { ByMonth } from "../../types/index";
 
 jsPDF.prototype.autoTable = autoTable;
 
@@ -486,9 +541,9 @@ const ByMonth = () => {
       });
 
       const data = response.data;
-      console.log("Fetched Data:", data); // Log the data
+      console.log("Fetched Data:", data);
       setRowData(data);
-      setTotalRows(data.length); // Assuming totalRows is the length of the data array
+      setTotalRows(data.length);
       setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -552,15 +607,14 @@ const ByMonth = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to edit.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
 
   interface ErrorResponse {
     message: string;
-    // Add other properties if needed
   }
 
   const handleDeleteRow = async () => {
@@ -592,8 +646,8 @@ const ByMonth = () => {
           alert("No valid By Month ID found for the selected row.");
         }
       } else {
-        setAlertMessage("Please select a row to delete."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to delete.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
@@ -604,43 +658,50 @@ const ByMonth = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]); // Set the selected row data
-        setModalState((prevState) => ({ ...prevState, view: true })); // Open the view modal
+        setSelectedRow(selectedRows[0]);
+        setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
-        setAlertMessage("Please select a row to view."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to view.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
 
-    interface RowClickParams {
-      data: {
-        invmonth?: string;
-        [key: string]: string | number | boolean | null | undefined; // Specify possible types for additional properties
-      };
-    }
-
-    const handleRowClick = async (params: RowClickParams) => {
-      const month = params.data.invmonth; // Ensure 'invmonth' is the correct field name
-      console.log("Row clicked with data:", params.data); // Log the entire row data
-      console.log("Selected Month:", month); // Log the selected month
-
-      if (month) {
-        setSelectedMonth(month);
-        try {
-          const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
-            headers: { AuthToken: localStorage.getItem("token") },
-          });
-          const data = response.data; // Ensure this matches your API response structure
-          console.log("Fetched Month Data:", data); // Log the fetched data
-          setMonthData(data);
-        } catch (error) {
-          console.error("Error loading month data:", error);
-        }
-      } else {
-        console.error("Month is undefined. Please check the data structure.");
-      }
+  interface RowClickParams {
+    data: {
+      invmonth?: string;
+      [key: string]: string | number | boolean | null | undefined;
     };
+  }
+
+  const handleRowClick = async (params: RowClickParams) => {
+    const month = params.data.invmonth;
+    console.log("Row clicked with data:", params.data);
+    console.log("Selected Month:", month);
+
+    if (month) {  
+      setSelectedMonth(month);
+      try {
+        const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
+          headers: { AuthToken: localStorage.getItem("token") },
+        });
+        const data = response.data;
+        console.log("Fetched Month Data:", data);
+        setMonthData(data);
+        
+        // Get the current row node
+        const rowNode = gridRef.current?.api.getRowNode(params.data.id);
+        if (rowNode) {
+          // Set the expanded state
+          rowNode.setExpanded(!rowNode.expanded);
+        }
+      } catch (error) {
+        console.error("Error loading month data:", error);
+      }
+    } else {
+      console.error("Month is undefined. Please check the data structure.");
+    }
+  };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -659,14 +720,89 @@ const ByMonth = () => {
   const totalPages = Math.ceil(totalRows / paginationPageSize);
   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+  // Detail cell renderer component
+// Also update the DetailCellRenderer component to handle cases where data might be undefined
+const DetailCellRenderer = ({ data }: { data: unknown }) => {
+  if (!data || !monthData.length) {
+    return <div className="p-4 text-gray-500">No invoice data available</div>;
+  }
+    return (
+      <div className="ag-theme-alpine" style={{ height: '200px', width: '100%' }}>
+        <AgGridReact
+          rowData={monthData}
+          columnDefs={[
+            { headerName: "ID", field: "id" },
+            { headerName: "PO ID", field: "poid" },
+            { headerName: "Invoice Number", field: "invoicenumber" },
+            { headerName: "Start Date", field: "startdate" },
+            { headerName: "End Date", field: "enddate" },
+            { headerName: "Invoice Date", field: "invoicedate" },
+            { headerName: "Invoice Month", field: "invmonth" },
+            { headerName: "Quantity", field: "quantity" },
+            { headerName: "OT Quantity", field: "otquantity" },
+            { headerName: "Rate", field: "rate" },
+            { headerName: "Overtime Rate", field: "overtimerate" },
+            { headerName: "Status", field: "status" },
+            { headerName: "Emp Paid Date", field: "emppaiddate" },
+            { headerName: "Cand Payment Status", field: "candpaymentstatus" },
+            { headerName: "Reminders", field: "reminders" },
+            { headerName: "Amount Expected", field: "amountexpected" },
+            { headerName: "Expected Date", field: "expecteddate" },
+            { headerName: "Amount Received", field: "amountreceived" },
+            { headerName: "Received Date", field: "receiveddate" },
+            { headerName: "Released Date", field: "releaseddate" },
+            { headerName: "Check Number", field: "checknumber" },
+            { headerName: "Invoice URL", field: "invoiceurl" },
+            { headerName: "Check URL", field: "checkurl" },
+            { headerName: "Freq Type", field: "freqtype" },
+            { headerName: "Invoice Net", field: "invoicenet" },
+            { headerName: "Company Name", field: "companyname" },
+            { headerName: "Vendor Fax", field: "vendorfax" },
+            { headerName: "Vendor Phone", field: "vendorphone" },
+            { headerName: "Vendor Email", field: "vendoremail" },
+            { headerName: "Timesheet Email", field: "timsheetemail" },
+            { headerName: "HR Name", field: "hrname" },
+            { headerName: "HR Email", field: "hremail" },
+            { headerName: "HR Phone", field: "hrphone" },
+            { headerName: "Manager Name", field: "managername" },
+            { headerName: "Manager Email", field: "manageremail" },
+            { headerName: "Manager Phone", field: "managerphone" },
+            { headerName: "Secondary Name", field: "secondaryname" },
+            { headerName: "Secondary Email", field: "secondaryemail" },
+            { headerName: "Secondary Phone", field: "secondaryphone" },
+            { headerName: "Candidate Name", field: "candidatename" },
+            { headerName: "Candidate Phone", field: "candidatephone" },
+            { headerName: "Candidate Email", field: "candidateemail" },
+            { headerName: "WRK Email", field: "wrkemail" },
+            { headerName: "WRK Phone", field: "wrkphone" },
+            { headerName: "Recruiter Name", field: "recruitername" },
+            { headerName: "Recruiter Phone", field: "recruiterphone" },
+            { headerName: "Recruiter Email", field: "recruiteremail" },
+            { headerName: "Notes", field: "notes" },
+          ]}
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+            minWidth: 60,
+            maxWidth: 1200,
+          }}
+          rowHeight={30}
+          headerHeight={35}
+        />
+      </div>
+    );
+  };
+
   return (
-    <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-      {alertMessage && ( // Conditional rendering of alert message
+    <div className="p-4 mt-20 mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
+      {alertMessage && ( 
         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
           {alertMessage}
         </div>
       )}
-      <div className="flex justify-between items-center mb-4">
+
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
         <h1 className="text-3xl font-bold text-gray-800">Invoice Management</h1>
       </div>
 
@@ -733,8 +869,8 @@ const ByMonth = () => {
         </div>
       ) : (
         <div
-          className="ag-theme-alpine"
-          style={{ height: "400px", width: "100%", overflowY: "auto" }}
+          className="ag-theme-alpine table-container"
+          style={{ height: "300px", width: "100%", overflowY: "auto" }}
         >
           <AgGridReact
             ref={gridRef}
@@ -749,86 +885,17 @@ const ByMonth = () => {
               cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
               minWidth: 60,
               maxWidth: 1200,
+              width: 150,
             }}
             rowHeight={30}
             headerHeight={35}
-            onRowClicked={handleRowClick} // Ensure this is correctly set
+            onRowClicked={handleRowClick}
+            masterDetail={true}
+            detailCellRenderer={DetailCellRenderer}
+            isRowMaster={(rowNode) => {
+              return rowNode.data && selectedMonth === rowNode.data.invmonth;
+            }}
           />
-        </div>
-      )}
-
-      {selectedMonth && (
-        <div className="mt-4">
-          <h2 className="text-2xl font-bold text-gray-800">Data for {selectedMonth}</h2>
-          <div
-            className="ag-theme-alpine"
-            style={{ height: "200px", width: "100%", overflowY: "auto" }}
-          >
-            <AgGridReact
-              rowData={monthData}
-              columnDefs={[
-                { headerName: "ID", field: "id" },
-                { headerName: "PO ID", field: "poid" },
-                { headerName: "Invoice Number", field: "invoicenumber" },
-                { headerName: "Start Date", field: "startdate" },
-                { headerName: "End Date", field: "enddate" },
-                { headerName: "Invoice Date", field: "invoicedate" },
-                { headerName: "Invoice Month", field: "invmonth" },
-                { headerName: "Quantity", field: "quantity" },
-                { headerName: "OT Quantity", field: "otquantity" },
-                { headerName: "Rate", field: "rate" },
-                { headerName: "Overtime Rate", field: "overtimerate" },
-                { headerName: "Status", field: "status" },
-                { headerName: "Emp Paid Date", field: "emppaiddate" },
-                { headerName: "Cand Payment Status", field: "candpaymentstatus" },
-                { headerName: "Reminders", field: "reminders" },
-                { headerName: "Amount Expected", field: "amountexpected" },
-                { headerName: "Expected Date", field: "expecteddate" },
-                { headerName: "Amount Received", field: "amountreceived" },
-                { headerName: "Received Date", field: "receiveddate" },
-                { headerName: "Released Date", field: "releaseddate" },
-                { headerName: "Check Number", field: "checknumber" },
-                { headerName: "Invoice URL", field: "invoiceurl" },
-                { headerName: "Check URL", field: "checkurl" },
-                { headerName: "Freq Type", field: "freqtype" },
-                { headerName: "Invoice Net", field: "invoicenet" },
-                { headerName: "Company Name", field: "companyname" },
-                { headerName: "Vendor Fax", field: "vendorfax" },
-                { headerName: "Vendor Phone", field: "vendorphone" },
-                { headerName: "Vendor Email", field: "vendoremail" },
-                { headerName: "Timesheet Email", field: "timsheetemail" },
-                { headerName: "HR Name", field: "hrname" },
-                { headerName: "HR Email", field: "hremail" },
-                { headerName: "HR Phone", field: "hrphone" },
-                { headerName: "Manager Name", field: "managername" },
-                { headerName: "Manager Email", field: "manageremail" },
-                { headerName: "Manager Phone", field: "managerphone" },
-                { headerName: "Secondary Name", field: "secondaryname" },
-                { headerName: "Secondary Email", field: "secondaryemail" },
-                { headerName: "Secondary Phone", field: "secondaryphone" },
-                { headerName: "Candidate Name", field: "candidatename" },
-                { headerName: "Candidate Phone", field: "candidatephone" },
-                { headerName: "Candidate Email", field: "candidateemail" },
-                { headerName: "WRK Email", field: "wrkemail" },
-                { headerName: "WRK Phone", field: "wrkphone" },
-                { headerName: "Recruiter Name", field: "recruitername" },
-                { headerName: "Recruiter Phone", field: "recruiterphone" },
-                { headerName: "Recruiter Email", field: "recruiteremail" },
-                { headerName: "Notes", field: "notes" },
-              ]}
-              pagination={false}
-              domLayout="normal"
-              defaultColDef={{
-                sortable: true,
-                filter: true,
-                cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-                minWidth: 60,
-                maxWidth: 1200,
-              }}
-              rowHeight={30}
-              headerHeight={35}
-            />
-          </div>
         </div>
       )}
 

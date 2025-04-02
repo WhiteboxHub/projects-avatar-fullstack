@@ -207,11 +207,11 @@
     position: absolute;
     top: 10%;
     left: 10%;
-    width: 25%; /* Adjust width for a smaller size */
+    width: 85%; /* Adjust width for a smaller size */
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px; /* Adjust padding as needed */
+    padding: 20px; /* Adjust padding as needed */
     overflow-y: auto;
     max-height: 70vh; /* Adjust max height for better visibility */
     z-index: 1000; /* Ensure modal content is above the overlay */
@@ -450,5 +450,24 @@
   
   
   
+  .main-container {
+    width: 80%; /* Adjust the width as needed */
+    margin: 0 auto; /* Center the container */
+    padding: 20px; /* Add padding if necessary */
+  }
   
+  .table-container {
+    width: 100%; /* Ensure the table takes the full width of the container */
+  }
+  
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
   

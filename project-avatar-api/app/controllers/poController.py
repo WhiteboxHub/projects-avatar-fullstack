@@ -20,7 +20,6 @@ def get_po_list(db: Session, skip: int, limit: int):
         LIMIT :limit OFFSET :skip
     """)
 
-
     result = db.execute(query, {"limit": limit, "skip": skip}).mappings().all()
     return result
 

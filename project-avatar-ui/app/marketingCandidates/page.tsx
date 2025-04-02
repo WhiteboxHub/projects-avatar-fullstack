@@ -969,7 +969,7 @@ import * as XLSX from "xlsx";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import EditRowModal from "../../modals/Marketing/CurrentMarketing/EditCandidateMarketing";
+import EditRowModal from "../../modals/Marketing/MarketingCandidate/EditCandidateMarketing";
 import ViewRowModal from "../../modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import { MdDelete } from "react-icons/md";
@@ -977,7 +977,7 @@ import { debounce } from "lodash";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
 import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
-import { CandidateMarketing } from "@/types";
+// import { CandidateMarketing } from "@/types";
 
 interface RowData {
   id: number;
@@ -994,7 +994,7 @@ interface RowData {
   relocation: string;
   locationpreference: string;
   skypeid: string;
-  ipemailid: number;
+  ipemail: string;
   resumeid: number;
   coverletter: string;
   intro: string;
@@ -1125,6 +1125,14 @@ const MarketingCandidates = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        console.log("Selected Row:", selectedRows[0]); // Add this line
+
+      //   // Make sure candidateid is included in the selected row
+      // if (!selectedRows[0].candidateid) {
+      //   setAlertMessage("Selected row is missing candidate ID");
+      //   setTimeout(() => setAlertMessage(null), 3000);
+      //   return; 
+      // }      
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
@@ -1203,7 +1211,7 @@ const MarketingCandidates = () => {
           row.relocation,
           row.locationpreference,
           row.skypeid,
-          row.ipemailid,
+          row.ipemail,
           row.resumeid,
           row.coverletter,
           row.intro,
@@ -1229,7 +1237,7 @@ const MarketingCandidates = () => {
               "Relocation",
               "Location Preference",
               "Skype ID",
-              "IP Email ID",
+              "IP Email ",
               "Resume ID",
               "Cover Letter",
               "Intro",
@@ -1433,14 +1441,14 @@ const MarketingCandidates = () => {
         <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow as RowData}
+          rowData={selectedRow}
           onSave={fetchData}
           employees={employees}
         />
         <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
-          rowData={selectedRow ?? {} as CandidateMarketing}
+          rowData={selectedRow}
         />
       </div>
     </div>

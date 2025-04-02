@@ -6,7 +6,7 @@ import axios from 'axios';
 
 interface EditRowRecruiterProps {
   isOpen: boolean;
-  onClose: () => voiad;
+  onClose: () => void;
   initialData: Recruiter;
   onSubmit: ()=> void;
 }

@@ -1,6 +1,6 @@
 from pydantic import BaseModel,constr, conint, EmailStr, Field, validator, HttpUrl, field_validator
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List 
 from pydantic_settings import BaseSettings
 
 
@@ -16,14 +16,14 @@ class Token(BaseModel):
     access_token: str  
     token_type: str  
     
-class Batch(BaseModel):
-    batchname: str
-    courseid: str
-    created_at: Optional[datetime]  
-    updated_at: Optional[datetime]  
+# class Batch(BaseModel):
+#     batchname: str
+#     courseid: str
+#     created_at: Optional[datetime]  
+#     updated_at: Optional[datetime]  
 
-    class Config:
-        from_attributes = True  
+#     class Config:
+#         from_attributes = True  
 
 class UserCreate(BaseModel):
     uname: str
@@ -43,100 +43,91 @@ class UserResponse(BaseModel):
 
 
 class LeadBase(BaseModel):
-    name: str
-    email: str
+    name: Optional[str] = None
+    startdate: Optional[datetime] = None
     phone: Optional[str] = None
+    email: Optional[str] = None
+    priority: Optional[str] = None
+    workstatus: Optional[str] = None
+    source: Optional[str] = None
+    workexperience: Optional[str] = None
+    sourcename: Optional[str] = None
+    course: Optional[str] = 'QA'
+    intent: Optional[str] = None
+    attendedclass: Optional[str] = None
+    siteaccess: Optional[str] = None
+    assignedto: Optional[str] = None
+    status: Optional[str] = 'Open'
+    secondaryemail: Optional[str] = None
+    secondaryphone: Optional[str] = None
+    address: Optional[str] = None
+    spousename: Optional[str] = None
+    spouseemail: Optional[str] = None
+    spousephone: Optional[str] = None
+    spouseoccupationinfo: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    faq: Optional[str] = None
+    callsmade: Optional[int] = 0
+    closedate: Optional[date] = None
+    notes: Optional[str] = None
+    lastmoddatetime: Optional[datetime] = None
+
+    @validator('startdate', 'lastmoddatetime', pre=True)
+    def parse_datetime(cls, value):
+        if value in ('0000-00-00 00:00:00', None):
+            return None
+        return value
+
+    @validator('closedate', pre=True)
+    def parse_date(cls, value):
+        if value in ('0000-00-00', None):
+            return None
+        return value
 
 class LeadCreate(LeadBase):
-    pass
+    name: str
+    email: str
+
+    @validator('startdate', 'closedate', pre=True)
+    def parse_dates(cls, value):
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value  # Already a datetime object, no need to convert
+        try:
+            return datetime.fromisoformat(value.replace("Z", ""))  # Remove 'Z' before parsing
+        except ValueError:
+            raise ValueError(f"Invalid datetime format: {value}. Expected format: YYYY-MM-DD HH:MM:SS")
 
 class LeadUpdate(LeadBase):
-    pass
+    # ... other fields ...
+    startdate: Optional[str] = None
+    closedate: Optional[str] = None
+    
+    @validator('startdate', 'closedate', pre=True)
+    def parse_dates(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value
 
 class LeadResponse(LeadBase):
     leadid: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Replaces orm_mode in Pydantic V2
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None,
+            date: lambda v: v.isoformat() if v else None
+        }
 
-
-class LeadBase(BaseModel):
-    name: str
-    phone: str
-    email: str
-    sourcename: Optional[str] = None
-    course: Optional[str] = None
-    status: Optional[str] = None
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-
-class LeadInDB(BaseModel):
-    leadid: int 
-    name: str
-    email: str
-    phone: str
-    sourcename: str
-    course: str
-    status: str
-    secondaryemail: str
-    secondaryphone: str
-    address: str
-    spousename: str
-    spouseemail: str
-    spousephone: str
-    spouseoccupationinfo: str
-    city: str
-    state: str
-    country: str
-    class Config:
-        from_attributes = True
-
-class LeadCreate(BaseModel):
-    name: str
-    email: str
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-class LeadResponse(BaseModel):
-    id: int
-    name: str
-    email: str
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
-class LeadSearchResponse(BaseModel): 
-    data: List[LeadBase]  
-    class Config:
-        orm_mode = True
-
+class LeadSearchResponse(BaseModel):
+    data: list[LeadResponse]
+    totalRows: int
 
 
 class UserCreate(BaseModel):
@@ -151,13 +142,13 @@ class Token(BaseModel):
     access_token: str  
     token_type: str  
 
-class Batch(BaseModel):
-    batchname: str
-    courseid: str
-    created_at: Optional[datetime]  
-    updated_at: Optional[datetime]  
-    class Config:
-        from_attributes = True  
+# class Batch(BaseModel):
+#     batchname: str
+#     courseid: str
+#     created_at: Optional[datetime]  
+#     updated_at: Optional[datetime]  
+#     class Config:
+#         from_attributes = True  
 
 class UserCreate(BaseModel):
     uname: str
@@ -229,17 +220,20 @@ class CandidateResponse(CandidateBase):
 
 class BatchCreate(BaseModel):
     batchname: constr(max_length=100)
-    current: constr(min_length=1, max_length=1)  
+    current: constr(min_length=1, max_length=1)
     orientationdate: Optional[date] = None
     subject: constr(max_length=45)
     startdate: date
     enddate: Optional[date] = None
-    exams: Optional[conint(ge=0)] = None
-    instructor1: Optional[int] = None
-    instructor2: Optional[int] = None
-    instructor3: Optional[int] = None
-    topicscovered: Optional[str] = None
-    topicsnotcovered: Optional[str] = None
+    courseid: Optional[int] = None  
+
+class BatchUpdate(BaseModel):
+    batchname: Optional[constr(max_length=100)] = None
+    current: Optional[constr(min_length=1, max_length=1)] = None
+    orientationdate: Optional[date] = None
+    subject: Optional[constr(max_length=45)] = None
+    startdate: Optional[date] = None
+    enddate: Optional[date] = None
     courseid: Optional[int] = None
 
 
@@ -334,6 +328,8 @@ class CandidateMarketingBase(BaseModel):
 class CandidateMarketingCreateSchema(CandidateMarketingBase):
     pass
 class CandidateMarketingUpdateSchema(CandidateMarketingBase):
+    
+    id: Optional[int] = None
     manager_name: Optional[str] = None  
     instructor_name: Optional[str] = None
     submitter_name: Optional[str] = None
@@ -343,7 +339,7 @@ class CandidateMarketingUpdateSchema(CandidateMarketingBase):
     technology: Optional[str] = None
     resumeid: Optional[int] = None
     minrate: Optional[int] = None 
-    ipemailid: Optional[int] = None
+    ipemail: Optional[str] = None 
     currentlocation: Optional[str] = None
     relocation: Optional[str] = None
     closedate: Optional[datetime] = None
@@ -386,7 +382,10 @@ class AuthUserBase(BaseModel):
 class AuthUserCreateSchema(AuthUserBase):
     passwd: str
 class AuthUserUpdateSchema(AuthUserBase):
-    pass
+    level: Optional[str] = ''
+    instructor: Optional[str] = 'Y'
+    override: Optional[str] = 'N'
+    status: Optional[str] = 'inactive'
 
 class AuthUserSchema(AuthUserBase):
     id: int
@@ -452,12 +451,10 @@ class CurrentMarketingUpdateSchema(CurrentMarketingBase):
        
 class Config:
         orm_mode = True
-
+        from_attributes = True
 class CurrentMarketingSchema(CurrentMarketingBase):
     id: int
-
-    class Config:
-        from_attributes = True
+       
         
     
 class OverdueUpdateSchema(BaseModel):

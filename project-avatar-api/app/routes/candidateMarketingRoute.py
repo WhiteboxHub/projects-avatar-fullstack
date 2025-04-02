@@ -74,7 +74,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database.db import get_db
 from app.controllers.candidateMarketingController import (
-    get_candidate_marketing_list, get_candidate_marketing_by_id, update_candidate_marketing, delete_candidate_marketing, get_employees
+    get_candidate_marketing_list, get_candidate_marketing_by_id, update_candidate_marketing, delete_candidate_marketing, get_employees ,get_ipemails_dropdown
 )
 from app.schemas import CandidateMarketingSchema, CandidateMarketingCreateSchema, CandidateMarketingUpdateSchema
 from datetime import datetime, date
@@ -122,3 +122,14 @@ def delete_candidate_marketing_entry(candidate_marketing_id: int, db: Session = 
 def get_employees_list(db: Session = Depends(get_db)):
     employees = get_employees(db)
     return JSONResponse(content=[convert_to_dict(row) for row in employees])
+
+
+# @router.get("/api/admin/ipemails")
+# def get_ipemails_dropdown(db: Session = Depends(get_db)):
+#     ipemails = get_ipemails_dropdown(db)
+#     return JSONResponse(content=[dict(row) for row in ipemails])
+
+@router.get("/api/admin/ipemails")
+def get_ip_emails_for_dropdown(db: Session = Depends(get_db)):
+    ipemails = get_ipemails_dropdown(db)
+    return JSONResponse(content=ipemails)
