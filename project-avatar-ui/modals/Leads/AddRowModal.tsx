@@ -7,7 +7,7 @@ import { Lead } from '@/types/index';
 
 interface FormData {
   name: string;
-  startdate:string;
+  startdate: string;
   course: string;
   workexperience: string;
   email: string;
@@ -47,7 +47,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
   const [formData, setFormData] = useState<FormData>({
     name: '',
     course: 'QA',
-    startdate:'',
+    startdate: '',
     workexperience: '',
     email: '',
     phone: '',
@@ -128,7 +128,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
       </div>
       <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">Add New Lead</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="modal-field">
           <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
@@ -144,6 +144,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
+
         <div className="modal-field">
           <label htmlFor="startdate" className="block text-sm font-semibold text-gray-700 mb-1">
             Start Date
@@ -157,6 +158,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
+
         <div className="modal-field">
           <label htmlFor="course" className="block text-sm font-semibold text-gray-700 mb-1">
             Course *
@@ -188,7 +190,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           />
         </div>
 
-        {/* Contact Information */}
         <div className="modal-field">
           <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
             Email *
@@ -247,7 +248,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           />
         </div>
 
-        {/* Status Information */}
         <div className="modal-field">
           <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-1">
             Status *
@@ -316,7 +316,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           </select>
         </div>
 
-        {/* Spouse Information */}
         <div className="modal-field">
           <label htmlFor="spousename" className="block text-sm font-semibold text-gray-700 mb-1">
             Spouse Name
@@ -373,23 +372,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           />
         </div>
 
-        {/* Class Information */}
-        {/* <div className="modal-field">
-          <label htmlFor="attendedclass" className="block text-sm font-semibold text-gray-700 mb-1">
-            Class *
-          </label>
-          <select
-            id="attendedclass"
-            name="attendedclass"
-            value={formData.attendedclass}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          >
-            <option value="N">N</option>
-            <option value="Y">Y</option>
-          </select>
-        </div> */}
-
         <div className="modal-field">
           <label htmlFor="siteaccess" className="block text-sm font-semibold text-gray-700 mb-1">
             Access *
@@ -422,7 +404,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           </select>
         </div>
 
-        {/* Additional Information */}
         <div className="modal-field">
           <label htmlFor="closedate" className="block text-sm font-semibold text-gray-700 mb-1">
             Close Date
@@ -499,7 +480,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           />
         </div>
 
-        {/* Address Information */}
         <div className="modal-field">
           <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-1">
             Address
@@ -570,7 +550,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
           />
         </div>
 
-        {/* Notes */}
         <div className="modal-field md:col-span-2">
           <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1">
             Notes

@@ -1,5 +1,3 @@
-// // new-projects-avatar-fullstack/project-avatar-ui/app/leads/page.tsx
-
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
@@ -13,7 +11,6 @@ import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } 
 import EditRowModal from "../../modals/Leads/EditRowModal";
 import ViewRowModal from "../../modals/Leads/ViewRowModal";
 import { MdDelete } from "react-icons/md";
-// import { debounce } from "lodash";
 import jsPDF from "jspdf";
 import { faFilePdf, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import withAuth from "@/modals/withAuth";
@@ -27,7 +24,13 @@ import { MdAdd } from "react-icons/md";
 import { Lead } from "../../types/index";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-interface jsPDFPageData {
+interface ModalState {
+  add: boolean;
+  edit: boolean;
+  view: boolean;
+}
+
+interface AutoTableData {
   settings: {
     margin: {
       left: number;
@@ -116,7 +119,7 @@ const Leads = () => {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
         setSelectedRow(selectedRows[0]);
-        setModalState((prevState:any) => ({ ...prevState, view: true }));
+        setModalState((prevState: ModalState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
         setTimeout(() => setAlertMessage(null), 3000);
@@ -166,87 +169,88 @@ const Leads = () => {
     setCurrentPage(newPage);
   };
 
-  const handleDownloadPDF = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length === 1) {
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-        doc.text("Selected Lead Data", 15, 10);
+const handleDownloadPDF = () => {
+  if (gridRef.current) {
+    const selectedRows = gridRef.current.api.getSelectedRows();
+    if (selectedRows.length === 1) {
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      doc.text("Selected Lead Data", 15, 10);
 
-        const row = selectedRows[0];
-        const pdfData = [
-          {
-            Name: row.name,
-            Email: row.email,
-            Phone: row.phone,
-            Address: row.address,
-            City: row.city,
-            State: row.state,
-            Country: row.country,
-            Zip: row.zip,
-            Course: row.course,
-            Status: row.status,
-            "Spouse Name": row.spousename,
-            "Spouse Email": row.spouseemail,
-            "Spouse Phone": row.spousephone,
-            FAQ: row.faq,
-            "Calls Made": row.callsmade,
-            "Close Date": row.closedate,
-            Notes: row.notes,
-          },
-        ];
+      const row = selectedRows[0];
+      const pdfData = [
+        {
+          Name: row.name,
+          Email: row.email,
+          Phone: row.phone,
+          Address: row.address,
+          City: row.city,
+          State: row.state,
+          Country: row.country,
+          Zip: row.zip,
+          Course: row.course,
+          Status: row.status,
+          "Spouse Name": row.spousename,
+          "Spouse Email": row.spouseemail,
+          "Spouse Phone": row.spousephone,
+          FAQ: row.faq,
+          "Calls Made": row.callsmade,
+          "Close Date": row.closedate,
+          Notes: row.notes,
+        },
+      ];
 
-        (doc as any).autoTable({
-          head: [
-            [
-              "Name", "Email", "Phone", "Address", "City", "State", "Country", 
-              "Zip", "Course", "Status", "Spouse Name", "Spouse Email", 
-              "Spouse Phone", "FAQ", "Calls Made", "Close Date", "Notes"
-            ],
+      doc.autoTable(doc, {
+        head: [
+          [
+            "Name", "Email", "Phone", "Address", "City", "State", "Country", 
+            "Zip", "Course", "Status", "Spouse Name", "Spouse Email", 
+            "Spouse Phone", "FAQ", "Calls Made", "Close Date", "Notes"
           ],
-          body: pdfData.map((data) => Object.values(data)),
-          styles: {
-            fontSize: 8,
-            cellPadding: 4,
-            overflow: 'linebreak',
-          },
-          columnStyles: {
-            0: { cellWidth: 15 },
-            1: { cellWidth: 25 },
-            2: { cellWidth: 20 },
-            3: { cellWidth: 30 },
-            4: { cellWidth: 20 },
-            5: { cellWidth: 20 },
-            6: { cellWidth: 20 },
-            7: { cellWidth: 15 },
-            8: { cellWidth: 20 },
-            9: { cellWidth: 20 },
-            10: { cellWidth: 25 },
-            11: { cellWidth: 25 },
-            12: { cellWidth: 20 },
-            13: { cellWidth: 20 },
-            14: { cellWidth: 20 },
-            15: { cellWidth: 20 },
-            16: { cellWidth: 40 },
-          },
-          margin: { top: 15, left: 15, right: 15 },
-          pageBreak: "avoid",
-          didDrawPage: function (data: jsPDFPageData) {
-            doc.setFontSize(10);
-            doc.text(
-              "Page " + (doc as any).internal.pages.length,
-              data.settings.margin.left,
-              data.settings.margin.top + 10
-            );
-          },
-        });
+        ],
+        body: pdfData.map((data) => Object.values(data)),
+        styles: {
+          fontSize: 8,
+          cellPadding: 4,
+          overflow: 'linebreak',
+        },
+        columnStyles: {
+          0: { cellWidth: 15 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 15 },
+          8: { cellWidth: 20 },
+          9: { cellWidth: 20 },
+          10: { cellWidth: 25 },
+          11: { cellWidth: 25 },
+          12: { cellWidth: 20 },
+          13: { cellWidth: 20 },
+          14: { cellWidth: 20 },
+          15: { cellWidth: 20 },
+          16: { cellWidth: 40 },
+        },
+        margin: { top: 15, left: 15, right: 15 },
+        pageBreak: "avoid",
+        didDrawPage: function (data: AutoTableData) {
+          doc.setFontSize(10);
+          doc.text(
+            "Page " + doc.internal.pages.length,
+            data.settings.margin.left,
+            data.settings.margin.top + 10
+          );
+        },
+      });
 
-        doc.save("Selected_Lead_data.pdf");
-      } else {
-        alert("Please select exactly one row to download.");
-      }
+      doc.save("Selected_Lead_data.pdf");
+    } else {
+      alert("Please select exactly one row to download.");
     }
-  };
+  }
+};
+
 
   const handleExportToExcel = () => {
     if (gridRef.current) {

@@ -26,6 +26,7 @@ from app.routes.byClientRoute import router as by_client_router
 from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
 from app.routes.byDetailedRoute import router as by_detailed_router
+from app.routes.placementsRoute import router as placement_router
 app = FastAPI()
 
 origins = ["*"]
@@ -59,6 +60,7 @@ app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
 app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
+app.include_router(placement_router, prefix="/api/admin", tags=["placement"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Avatar"}

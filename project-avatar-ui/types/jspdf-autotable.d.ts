@@ -1,7 +1,8 @@
 import { jsPDF } from 'jspdf';
+import { UserOptions } from 'jspdf-autotable';
 
 declare module 'jspdf' {
     interface jsPDF {
-        autoTable: typeof import('jspdf-autotable')['default'];
+        autoTable: (d: jsPDF, options: UserOptions) => void;
     }
 }

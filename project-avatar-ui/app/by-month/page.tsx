@@ -688,9 +688,8 @@ const ByMonth = () => {
         const data = response.data;
         console.log("Fetched Month Data:", data);
         setMonthData(data);
-        
         // Get the current row node
-        const rowNode = gridRef.current?.api.getRowNode(params.data.id);
+        const rowNode = gridRef.current?.api.getRowNode(params.data.id as string);
         if (rowNode) {
           // Set the expanded state
           rowNode.setExpanded(!rowNode.expanded);
