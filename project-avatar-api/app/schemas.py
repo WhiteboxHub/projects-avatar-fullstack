@@ -760,3 +760,266 @@ class MktSubmissionInDB(Mkt_submissionBase):
     
     class Config:
         orm_mode = True
+        
+        
+# new schemas
+
+# from pydantic import BaseModel, EmailStr, HttpUrl, validator
+# from datetime import date, datetime
+# from typing import Optional
+
+# URL Schemas
+class UrlBase(BaseModel):
+    url: str
+
+class UrlCreate(UrlBase):
+    pass
+
+class UrlUpdate(UrlBase):
+    pass
+
+class UrlInDB(UrlBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+# Employee Schemas
+class EmployeeBase(BaseModel):
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    status: Optional[str] = None
+    startdate: Optional[date] = None
+    mgrid: Optional[int] = None
+    designationid: Optional[int] = None
+    personalemail: Optional[EmailStr] = None
+    personalphone: Optional[str] = None
+    dob: Optional[date] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    skypeid: Optional[str] = None
+    salary: Optional[float] = None
+    commission: Optional[bool] = None
+    commissionrate: Optional[float] = None
+    type: Optional[str] = None
+    empagreementurl: Optional[HttpUrl] = None
+    offerletterurl: Optional[HttpUrl] = None
+    dlurl: Optional[HttpUrl] = None
+    workpermiturl: Optional[HttpUrl] = None
+    contracturl: Optional[HttpUrl] = None
+    enddate: Optional[date] = None
+    loginid: Optional[int] = None
+    responsibilities: Optional[str] = None
+    notes: Optional[str] = None
+
+class EmployeeCreate(EmployeeBase):
+    pass
+
+class EmployeeUpdate(EmployeeBase):
+    pass
+
+class EmployeeInDB(EmployeeBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+# Vendor Schemas
+class VendorBase(BaseModel):
+    companyname: str
+    status: str
+    tier: Optional[str] = None
+    culture: Optional[str] = None
+    solicited: Optional[str] = None
+    minrate: Optional[float] = None
+    hirebeforeterm: Optional[str] = None
+    hireafterterm: Optional[str] = None
+    latepayments: Optional[str] = None
+    totalnetterm: Optional[int] = None
+    defaultedpayment: Optional[str] = None
+    agreementstatus: Optional[str] = None
+    url: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    fax: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[str] = None
+    hrphone: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    linkedin: Optional[str] = None
+    accountnumber: Optional[str] = None
+    managername: Optional[str] = None
+    manageremail: Optional[str] = None
+    managerphone: Optional[str] = None
+    secondaryname: Optional[str] = None
+    secondaryemail: Optional[str] = None
+    secondaryphone: Optional[str] = None
+    timsheetemail: Optional[str] = None
+    agreementname: Optional[str] = None
+    agreementlink: Optional[str] = None
+    subcontractorlink: Optional[str] = None
+    nonsolicitationlink: Optional[str] = None
+    nonhirelink: Optional[str] = None
+    clients: Optional[str] = None
+    notes: Optional[str] = None
+
+    @validator('tier', 'status', 'culture', pre=True)
+    def coerce_numbers_to_str(cls, v):
+        if isinstance(v, (int, float)):
+            return str(v)
+        return v
+
+    class Config:
+        anystr_strip_whitespace = True
+
+class VendorCreate(VendorBase):
+    pass
+
+class VendorUpdate(VendorBase):
+    pass
+
+class VendorInDB(VendorBase):
+    id: int
+
+# Client Schemas
+class ClientBase(BaseModel):
+    companyname: str
+
+class ClientCreate(ClientBase):
+    pass
+
+class ClientUpdate(ClientBase):
+    pass
+
+class ClientInDB(ClientBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+# Recruiter Schemas
+class RecruiterBase(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    designation: Optional[str] = None
+    vendorid: Optional[int] = None
+    status: Optional[str] = None
+    dob: Optional[date] = None
+    personalemail: Optional[str] = None
+    skypeid: Optional[str] = None
+    linkedin: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    review: Optional[str] = None
+    notes: Optional[str] = None
+    clientid: Optional[int] = None
+
+    @validator("review")
+    def validate_review(cls, value):
+        if value and len(value) != 1:
+            raise ValueError("Review must be exactly one character long.")
+        return value
+
+    @validator("status")
+    def validate_status(cls, value):
+        if value and len(value) != 1:
+            raise ValueError("Status must be exactly one character long.")
+        return value
+
+    @validator("dob", pre=True)
+    def validate_dob(cls, value):
+        if value is None or value == "0000-00-00":
+            return None
+        if isinstance(value, date):
+            return value
+        if isinstance(value, str):
+            try:
+                return datetime.strptime(value, "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date format. Expected YYYY-MM-DD.")
+        raise ValueError(f"Invalid type for date: {type(value)}")
+
+class RecruiterCreate(RecruiterBase):
+    pass
+
+class RecruiterUpdate(RecruiterBase):
+    pass
+
+class RecruiterInDB(RecruiterBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class RecruiterByVendorBase(BaseModel):
+     name: str
+     email: str
+     phone: str
+     designation: Optional[str] = None 
+     vendorid: Optional[int] = None
+     status: str
+ 
+     @validator("email")
+     def validate_email(cls, v):
+         # Basic email validation (fallback to placeholder if invalid)
+         if "@" not in v or "." not in v.split("@")[-1]:
+             return "invalid@example.com"
+         return v
+ 
+ 
+class RecruiterByVendorCreate(RecruiterByVendorBase):
+     clientid: int = 0  
+class RecruiterByVendorUpdate(RecruiterByVendorBase):
+     clientid: int = 0  
+class RecruiterByVendorInDB(RecruiterByVendorBase):
+     id: int
+     comp: Optional[str] = None 
+ 
+ 
+class RecruiterByPlacementInDB(RecruiterByVendorInDB):
+     pass
+ 
+
+class PlacementRecruiterBase(BaseModel):
+     name: str
+     email: str
+     phone: str
+     designation: Optional[str] = None   # Allow NULL/None values
+     vendorid: Optional[int] = None
+     status: str
+     comp: Optional[str] = None 
+ 
+     @validator("email")
+     def validate_email(cls, v):
+         # Basic email validation (fallback to placeholder if invalid)
+         if "@" not in v or "." not in v.split("@")[-1]:
+             return "invalid@example.com"
+         return v
+     # ... other fields (dob, skypeid, etc.) ...
+ 
+class PlacementRecruiterCreate(PlacementRecruiterBase):
+     clientid: int = 0  # Force clientid = 0
+ 
+class PlacementRecruiterUpdate(PlacementRecruiterBase):
+     pass
+class RecruiterByPlacementInDB(PlacementRecruiterBase):
+     id: int
+     comp: Optional[str] = None
+ 
+class PlacementRecruiterInDB(PlacementRecruiterBase):
+     id: int
+     comp: Optional[str] = None  # Vendor company name
+ 
+     class Config:
+         from_attributes = True 
