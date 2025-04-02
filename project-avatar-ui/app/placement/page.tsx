@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // "use client";
 
 // import React, { useState, useEffect, useRef } from "react";
@@ -424,16 +425,41 @@
 
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+=======
+"use client";
+import React, { useState, useRef, useEffect } from "react";
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+<<<<<<< HEAD
 import { FaDownload, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight, FaTimes } from "react-icons/fa";
 import { AiOutlinePlus, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import axios from "axios";
 import { MktSubmission, CandidateOption, EmployeeOption } from "@/types/mkl_submissions";
 import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
+=======
+import { FaDownload } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaAngleDoubleLeft,
+  FaAngleDoubleRight,
+  FaTimes
+} from "react-icons/fa";
+import {
+  AiOutlinePlus,
+  AiOutlineEdit,
+  AiOutlineEye,
+  AiOutlineSearch
+} from "react-icons/ai";
+import { MdAdd, MdDelete } from "react-icons/md";
+import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
+import axios from "axios";
+import { MktSubmission, CandidateOption, EmployeeOption } from "@/types/mkl_submissions";
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
 
 const PlacementPage = () => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -448,6 +474,11 @@ const PlacementPage = () => {
   const [employeeOptions, setEmployeeOptions] = useState<EmployeeOption[]>([]);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+<<<<<<< HEAD
+=======
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [selectedPlacement, setSelectedPlacement] = useState<MktSubmission | null>(null);
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -460,7 +491,11 @@ const PlacementPage = () => {
 
   const fetchPlacements = async () => {
     try {
+<<<<<<< HEAD
       const response = await axios.get(`${API_URL}/placements`, {
+=======
+      const response = await axios.get(`${API_URL}/mkt-submissions`, {
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
         headers: { AuthToken: localStorage.getItem("token") },
         params: {
           page: currentPage,
@@ -502,6 +537,10 @@ const PlacementPage = () => {
     }
   };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
   const handleSearch = () => {
     fetchPlacements();
   };
@@ -534,6 +573,10 @@ const PlacementPage = () => {
 
   const handleRowClick = (row: MktSubmission) => {
     setSelectedRow(row);
+<<<<<<< HEAD
+=======
+    // Not showing details immediately on row click
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
   };
 
   const handleViewDetails = () => {
@@ -651,10 +694,17 @@ const PlacementPage = () => {
               headerName: "Candidate Name", 
               field: "candidate_name", 
               width: 150,
+<<<<<<< HEAD
               // valueGetter: (params: any) => {
               //   const candidateId = params.data.candidateid;
               //   return getCandidateName(candidateId);
               // }
+=======
+              valueGetter: (params: any) => {
+                const candidateId = params.data.candidateid;
+                return getCandidateName(candidateId);
+              }
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
             },
             { headerName: "Course", field: "course", width: 100 },
             { headerName: "Client Name", field: "name", width: 150 },
@@ -666,10 +716,17 @@ const PlacementPage = () => {
               headerName: "Employee Name", 
               field: "employee_name", 
               width: 150,
+<<<<<<< HEAD
               // valueGetter: (params: any) => {
               //   const employeeId = params.data.employeeid;
               //   return getEmployeeName(employeeId);
               // }
+=======
+              valueGetter: (params: any) => {
+                const employeeId = params.data.employeeid;
+                return getEmployeeName(employeeId);
+              }
+>>>>>>> a9385fe7f370ff17031408577a9aaae61c0dbb18
             },
             { headerName: "Feedback", field: "feedback", width: 200 },
             { headerName: "Notes", field: "notes", width: 200 }

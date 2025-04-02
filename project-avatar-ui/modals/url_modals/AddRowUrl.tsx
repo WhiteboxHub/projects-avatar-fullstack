@@ -8,15 +8,21 @@ interface Url {
   url?: string;
 }
 
+
+
 interface AddRowModalProps {
   isOpen: boolean;
   onClose: () => void;
   refreshData: () => void;
 }
 
+
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<Url>({
-    id: '',
+    // id: '',
     url: '',
   });
 
@@ -31,7 +37,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('/api/url', formData);
+      await axios.post(`${API_URL}/urls/insert`, formData);
       refreshData();
       onClose();
     } catch (error) {
@@ -76,7 +82,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* ID */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
           <input
             type="text"
@@ -86,7 +92,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter ID"
           />
-        </div>
+        </div> */}
 
         {/* URL */}
         <div>

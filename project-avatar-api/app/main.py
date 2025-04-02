@@ -1,5 +1,3 @@
-# new-projects-avatar-fullstack/project-avatar-api/app/main.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import engine, Base
@@ -27,6 +25,18 @@ from app.routes.byPlacementRoute import router as by_placement_router
 from app.routes.byAllListRoute import router as by_allList_router
 from app.routes.byDetailedRoute import router as by_detailed_router
 from app.routes.placementsRoute import router as placement_router
+
+from app.routes.urlsRoute import router as urls_router
+from app.routes.vendordetailsRoute import router as all_vendor_details_router
+from app.routes.allVendorRoute import router as all_vendor_list_router
+from app.routes.vendorListRoute import router as vendorList_router
+from app.routes.vendorByPlacement import router as vendorByPlacement_router
+from app.routes.byvendorRoute import router as byvendor_route
+from app.routes.employeeRoute import router as employee
+from app.routes.vendorSearchRoute import router as vendorSearch_router
+
+from app.routes.mkl_placementsRoute import router as mkl_placements_router
+
 app = FastAPI()
 
 origins = ["*"]
@@ -60,7 +70,18 @@ app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
 app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
-app.include_router(placement_router, prefix="/api/admin", tags=["placement"])
+
+
+app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
+app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
+app.include_router(all_vendor_list_router, prefix="/api/admin",tags=["alllistvendordetails"])
+app.include_router(vendorList_router,prefix="/api/admin",tags=["vendorList"])
+app.include_router(vendorByPlacement_router, prefix="/api/admin",tags=["vendorByPlacement"])
+app.include_router(byvendor_route, prefix="/api/admin", tags=["byvendor"])
+app.include_router(employee, prefix="/api/admin", tags=["employees"])
+app.include_router(vendorSearch_router, prefix="/api/admin", tags=["vendorSearch"])
+
+app.include_router(mkl_placements_router, prefix="/api/admin", tags=["placements"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Avatar"}

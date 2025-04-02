@@ -51,7 +51,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const fetchData = useCallback(
     async (searchQuery = "", page = 1) => {
       try {
-        const response = await axios.get(`${API_URL}/employees/search`, {
+        const response = await axios.get(`${API_URL}/employee`, {
           params: {
             page: page,
             pageSize: paginationPageSize,

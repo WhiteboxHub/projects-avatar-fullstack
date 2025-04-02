@@ -1,55 +1,30 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
+import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
+import { AiOutlineClose } from "react-icons/ai";
+import { Recruiter } from "@/types/byClient";
 
-interface Recruiter {
-  id?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  designation?: string;
-  vendorid?: string;
-  comp?: string;
-  status?: string;
-  dob?: string;
-  personalemail?: string;
-  skypeid?: string;
-  linkedin?: string;
-  twitter?: string;
-  facebook?: string;
-  review?: string;
-  notes?: string;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface AddRowModalProps {
+interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshData: () => void;
+  onSubmit: (data: Recruiter) => void;
+  initialData: Recruiter;
 }
 
-const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
-  const [formData, setFormData] = useState<Recruiter>({
-    name: '',
-    email: '',
-    phone: '',
-    designation: '',
-    vendorid: '',
-    comp: '',
-    status: '',
-    dob: '',
-    personalemail: '',
-    skypeid: '',
-    linkedin: '',
-    twitter: '',
-    facebook: '',
-    review: '',
-    notes: '',
-  });
+const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+}) => {
+  const [formData, setFormData] = useState<Recruiter>(initialData);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -57,15 +32,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await axios.post(`${API_URL}/allvendors/add`, formData);
-      refreshData();
-      onClose();
-    } catch (error) {
-      console.error('Error adding recruiter:', error);
-    }
+    onSubmit(formData);
+    onClose();
   };
 
   return (
@@ -74,39 +44,40 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
       onRequestClose={onClose}
       style={{
         content: {
-          top: '55%',
-          left: '50%',
-          right: 'auto',
-          bottom: 'auto',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: '400px',
-          width: '90%',
-          maxHeight: '80vh',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-          overflowY: 'auto',
-          fontFamily: 'Arial, sans-serif',
+          top: "50%",
+          left: "50%",
+          right: "auto",
+          bottom: "auto",
+          transform: "translate(-50%, -50%)",
+          maxWidth: "400px",
+          width: "90%",
+          maxHeight: "80vh",
+          padding: "24px",
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+          overflowY: "auto",
+          fontFamily: "Arial, sans-serif",
         },
         overlay: {
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
         },
       }}
     >
+      a
       <div className="relative">
         <button
           onClick={onClose}
-          className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
+          className="absolute toap-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
         >
-          &times;
+          <AiOutlineClose />
         </button>
       </div>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">Add New Recruiter</h2>
-
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Recruiter</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Name
+          </label>
           <input
             type="text"
             name="name"
@@ -117,9 +88,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             name="email"
@@ -130,9 +102,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Phone
+          </label>
           <input
             type="text"
             name="phone"
@@ -143,48 +116,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Designation */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-          <input
-            type="text"
-            name="designation"
-            value={formData.designation}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter designation"
-          />
-        </div>
-
-        {/* Vendor ID */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
-          <input
-            type="text"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter vendor ID"
-          />
-        </div>
-
-        {/* Company Name */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>
-          <input
-            type="text"
-            name="comp"
-            value={formData.comp}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter company name"
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Status
+          </label>
           <input
             type="text"
             name="status"
@@ -195,21 +130,38 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Date of Birth */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Designation
+          </label>
+          <input
+            type="text"
+            name="designation"
+            value={formData.designation}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter designation"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Date of Birth
+          </label>
           <input
             type="date"
             name="dob"
             value={formData.dob}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter date of birth"
           />
         </div>
 
-        {/* Personal Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Personal Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Personal Email
+          </label>
           <input
             type="email"
             name="personalemail"
@@ -220,9 +172,24 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Skype ID */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Employee ID
+          </label>
+          <input
+            type="number"
+            name="employeeid"
+            value={formData.employeeid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter employee ID"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Skype ID
+          </label>
           <input
             type="text"
             name="skypeid"
@@ -233,50 +200,53 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* LinkedIn */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            LinkedIn
+          </label>
           <input
-            type="text"
+            type="url"
             name="linkedin"
             value={formData.linkedin}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter LinkedIn"
+            placeholder="Enter LinkedIn URL"
           />
         </div>
 
-        {/* Twitter */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Twitter</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Twitter
+          </label>
           <input
             type="text"
             name="twitter"
             value={formData.twitter}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter Twitter"
+            placeholder="Enter Twitter handle"
           />
         </div>
 
-        {/* Facebook */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Facebook
+          </label>
           <input
             type="text"
             name="facebook"
             value={formData.facebook}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter Facebook"
+            placeholder="Enter Facebook URL"
           />
         </div>
 
-        {/* Review */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-          <input
-            type="text"
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Review
+          </label>
+          <textarea
             name="review"
             value={formData.review}
             onChange={handleChange}
@@ -285,11 +255,39 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           />
         </div>
 
-        {/* Notes */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Vendor ID
+          </label>
           <input
-            type="text"
+            type="number"
+            name="vendorid"
+            value={formData.vendorid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter vendor ID"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Client ID
+          </label>
+          <input
+            type="number"
+            name="clientid"
+            value={formData.clientid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter client ID"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Notes
+          </label>
+          <textarea
             name="notes"
             value={formData.notes}
             onChange={handleChange}
@@ -302,11 +300,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
           type="submit"
           className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
         >
-          Save Recruiter
+          Save Changes
         </button>
       </form>
     </Modal>
   );
 };
-
-export default AddRowModal;
+export default EditRowRecruiter;

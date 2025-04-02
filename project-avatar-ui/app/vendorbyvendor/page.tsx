@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { AgGridReact } from "ag-grid-react";
@@ -7,6 +7,8 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -16,14 +18,16 @@ import {
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch
+  AiOutlineSearch,
   // AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+import { Recruiter } from "@/types/byClient";
+import axios from "axios";
 
 jsPDF.prototype.autoTable = autoTable;
 
-const RecruiterByClient = () => {
+const VendorByClient = () => {
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
@@ -32,7 +36,26 @@ const RecruiterByClient = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [rowData, setRowData] = useState<Recruiter[]>([]);
+  const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
   const gridRef = useRef<AgGridReact>(null);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  useEffect(() => {
+    fetchRecruiters();
+  }, []);
+
+  const fetchRecruiters = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/byvendor`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      setRowData(response.data);
+    } catch (error) {
+      console.error("Error fetching recruiters:", error);
+    }
+  };
 
   const handleAddRow = () =>
     setModalState((prevState) => ({ ...prevState, add: true }));
@@ -41,6 +64,7 @@ const RecruiterByClient = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         setAlertMessage("Please select a row to edit.");
@@ -65,6 +89,7 @@ const RecruiterByClient = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -76,7 +101,29 @@ const RecruiterByClient = () => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Recruiter Data", 20, 10);
-    // Add PDF generation logic
+    autoTable(doc, {
+      head: [["ID", "Name", "Email", "Phone", "Status", "Designation", "DOB", "Personal Email", "Employee ID", "Skype ID", "LinkedIn", "Twitter", "Facebook", "Review", "Vendor ID", "Client ID", "Notes", "Last Modified DateTime"]],
+      body: rowData.map((row) => [
+        row.id,
+        row.name,
+        row.email,
+        row.phone || "",
+        row.status || "",
+        row.designation || "",
+        row.dob || "",
+        row.personalemail || "",
+        row.employeeid || "",
+        row.skypeid || "",
+        row.linkedin || "",
+        row.twitter || "",
+        row.facebook || "",
+        row.review || "",
+        row.vendorid || "",
+        row.clientid || "",
+        row.notes || "",
+        row.lastmoddatetime || "",
+      ]),
+    });
     doc.save("recruiter_data.pdf");
   };
 
@@ -143,8 +190,27 @@ const RecruiterByClient = () => {
       >
         <AgGridReact
           ref={gridRef}
-          rowData={[]} // Placeholder for row data
-          columnDefs={[]} // Placeholder for column definitions
+          rowData={rowData}
+          columnDefs={[
+            { headerName: "ID", field: "id" },
+            { headerName: "Name", field: "name" },
+            { headerName: "Email", field: "email" },
+            { headerName: "Phone", field: "phone" },
+            { headerName: "Status", field: "status" },
+            { headerName: "Designation", field: "designation" },
+            { headerName: "DOB", field: "dob" },
+            { headerName: "Personal Email", field: "personalemail" },
+            { headerName: "Employee ID", field: "employeeid" },
+            { headerName: "Skype ID", field: "skypeid" },
+            { headerName: "LinkedIn", field: "linkedin" },
+            { headerName: "Twitter", field: "twitter" },
+            { headerName: "Facebook", field: "facebook" },
+            { headerName: "Review", field: "review" },
+            { headerName: "Vendor ID", field: "vendorid" },
+            { headerName: "Client ID", field: "clientid" },
+            { headerName: "Notes", field: "notes" },
+            { headerName: "Last Modified DateTime", field: "lastmoddatetime" },
+          ]}
           pagination={false}
           domLayout="normal"
           rowSelection="multiple"
@@ -153,7 +219,7 @@ const RecruiterByClient = () => {
             filter: true,
             cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
             minWidth: 60,
-            maxWidth: 100,
+            maxWidth: 200,
           }}
           rowHeight={30}
           headerHeight={35}
@@ -185,9 +251,25 @@ const RecruiterByClient = () => {
           }}
         />
       )}
-      {/* Add EditRowModal and ViewRowModal similarly */}
+      {modalState.edit && selectedRow && (
+        <EditRowModal
+          isOpen={modalState.edit}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+          initialData={selectedRow}
+          onSubmit={() => {
+            // Handle edit logic
+          }}
+        />
+      )}
+      {modalState.view && selectedRow && (
+        <ViewRowModal
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          recruiter={selectedRow}
+        />
+      )}
     </div>
   );
 };
 
-export default RecruiterByClient;
+export default VendorByClient;
