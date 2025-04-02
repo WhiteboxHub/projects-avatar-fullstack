@@ -227,6 +227,7 @@ class CandidateResponse(CandidateBase):
     class Config:
         orm_mode = True
 
+
 class BatchCreate(BaseModel):
     batchname: constr(max_length=100)
     current: constr(min_length=1, max_length=1)  
@@ -657,28 +658,28 @@ class RecruiterResponse(RecruiterBase):
         orm_mode = True
         from_attributes = True
         
-# class Mkt_submissionBase(BaseModel):
-#     candidateid: int
-#     employeeid: int
-#     submitter: Optional[int]=None
-#     submissiondate:str
-#     type: str
-#     name: Optional[str]=None
-#     email: Optional[str]=None
-#     phone: Optional[str]=None
-#     url: Optional[str]=None
-#     location: Optional[str]=None
-#     notes: Optional[str]= None
-#     feedback: Optional[str]=None
+class Mkt_submissionBase(BaseModel):
+    candidateid: int
+    employeeid: int
+    submitter: Optional[int]=None
+    submissiondate:str
+    type: str
+    name: Optional[str]=None
+    email: Optional[str]=None
+    phone: Optional[str]=None
+    url: Optional[str]=None
+    location: Optional[str]=None
+    notes: Optional[str]= None
+    feedback: Optional[str]=None
     
-# class Mkt_SubmissionCreate(Mkt_submissionBase):
-#     pass
+class Mkt_SubmissionCreate(Mkt_submissionBase):
+    pass
 
-# class Mkt_SubmissionUpdate(Mkt_submissionBase):
-#     pass
+class Mkt_SubmissionUpdate(Mkt_submissionBase):
+    pass
 
-# class Mkt_SubmissionResponse(Mkt_submissionBase):
-#     id : int
+class Mkt_SubmissionResponse(Mkt_submissionBase):
+    id : int
     
 #     class config:
 #         orm_mode = True
