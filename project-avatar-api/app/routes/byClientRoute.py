@@ -29,7 +29,7 @@ def get_recruiter(recruiter_id: int, db: Session = Depends(get_db)):
     if not recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
     
-    return RecruiterSchema.model_validate(recruiter)  # Convert to Pydantic schema
+    return RecruiterSchema.model_validate(recruiter)
 
 
 @router.post("/recruiters/byClient/add", response_model=RecruiterResponse)

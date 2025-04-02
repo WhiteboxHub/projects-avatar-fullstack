@@ -74,36 +74,36 @@ const Clients = () => {
     }
   };
 
-  const fetchClients = async (searchQuery = "") => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/client/search`, {
-        params: {
-          page: currentPage,
-          pageSize: paginationPageSize,
-          search: searchQuery,
-        },
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
+  // const fetchClients = async (searchQuery = "") => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.get(`${API_URL}/client/search`, {
+  //       params: {
+  //         page: currentPage,
+  //         pageSize: paginationPageSize,
+  //         search: searchQuery,
+  //       },
+  //       headers: { AuthToken: localStorage.getItem("token") },
+  //     });
 
-      const { data, total } = response.data;
-      setRowData(data);
-      setTotalRows(total);
-      setupColumns(data);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     const { data, total } = response.data;
+  //     setRowData(data);
+  //     setTotalRows(total);
+  //     setupColumns(data);
+  //   } catch (error) {
+  //     console.error("Error loading data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // debouncing for search
-  useEffect(() => {
-    const delaySearch = setTimeout(() => {
-      fetchClients(searchValue);
-    }, 500);
-    return () => clearTimeout(delaySearch);
-  }, [searchValue]);
+  // useEffect(() => {
+  //   const delaySearch = setTimeout(() => {
+  //     fetchClients(searchValue);
+  //   }, 500);
+  //   return () => clearTimeout(delaySearch);
+  // }, [searchValue]);
 
   // const handleSearch = () => {
   //   fetchClients(searchValue);
@@ -286,7 +286,7 @@ const Clients = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={() => fetchClients(searchValue)}
+          // onClick={() => fetchClients(searchValue)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
