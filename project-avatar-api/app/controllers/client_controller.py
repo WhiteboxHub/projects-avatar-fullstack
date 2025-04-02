@@ -6,6 +6,7 @@ from ..models import Client
 from ..schemas import ClientCreate, ClientUpdate, ClientInDB
 from ..database.db import get_db
 
+
 class ClientController:
     def __init__(self, db: Session = Depends(get_db)):
         self.db = db
@@ -13,14 +14,14 @@ class ClientController:
     async def get_clients(self, page: int, page_size: int, search: Optional[str] = None):
         query = self.db.query(Client)
 
-        if search:
-            query = query.filter(
-                or_(
-                    Client.companyname.ilike(f"%{search}%"),
-                    Client.email.ilike(f"%{search}%"),
-                    Client.city.ilike(f"%{search}%")
-                )
-            )
+        # if search:
+        #     query = query.filter(
+        #         or_(
+        #             Client.companyname.ilike(f"%{search}%"),
+        #             Client.email.ilike(f"%{search}%"),
+        #             Client.city.ilike(f"%{search}%")
+        #         )
+        #     )
 
         total_query = query  # Preserve original query for count
         total = total_query.count()

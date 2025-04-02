@@ -1,7 +1,6 @@
 # avatar-app/projects-api/app/models.py
 from sqlalchemy.sql import func
-from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL, Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, Numeric
-
+from sqlalchemy import Column, Integer, Enum as SAEnum, String, DateTime, DECIMAL , Float, MetaData, Date, Boolean, Text, ForeignKey, TIMESTAMP, CHAR ,Numeric
 from app.database.db import Base
 from pydantic import BaseModel, EmailStr ,validator, ValidationError
 from sqlalchemy.orm import declarative_base, relationship
@@ -183,6 +182,9 @@ class Candidate(Base):
     diceflag = Column(CHAR(1), default='N', comment="This flag is set to 'Y' if it's a dice candidate, otherwise 'N'")
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
+    mkt_submissions = relationship("MktSubmission", back_populates="candidate")
+    placements = relationship("Placement", back_populates="candidate")
+    
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -273,13 +275,14 @@ class Placement(Base):
     po_entries = relationship("PO", back_populates="placement")
 # Client.placements = relationship("Placement", back_populates="client")
 
-class Candidate(Base):
-    __tablename__ = "candidate"
-    __table_args__ = {'extend_existing': True} 
-    candidateid = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+# class Candidate(Base):
+#     __tablename__ = "candidate"
+#     __table_args__ = {'extend_existing': True} 
+#     candidateid = Column(Integer, primary_key=True, index=True)
+#     name = Column(String, nullable=False)
 
-    placements = relationship("Placement", back_populates="candidate")
+#     placements = relationship("Placement", back_populates="candidate")
+#     mkt_submissions = relationship("MktSubmission", back_populates="candidate")
 
 class Vendor(Base):
     __tablename__ = "vendor"
@@ -383,8 +386,9 @@ class CandidateMarketing(Base):
     closedemail = Column(CHAR(1), default='N')
     notes = Column(Text)
     suspensionreason = Column(CHAR(1), default='A')
-    yearsofexperience = Column(CHAR(3))
-
+    yearsofexperience = Column(CHAR(3)) 
+    
+    
 class AuthUser(Base):
     __tablename__ = "authuser"
 
@@ -518,69 +522,99 @@ class Invoice(Base):
 
 # Adding recruiter model
 
-class Recruiter(Base):
-    __tablename__ = 'recruiter'
+
+
+# Adding mkl_submission 
+
+class MktSubmission(Base):
+    __tablename__ = "mkt_submission"
     
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(150), index=True)
-    email = Column(String(150), unique=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    candidateid = Column(Integer, ForeignKey("candidate.candidateid"), nullable=False)
+    employeeid = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    submitter = Column(Integer, ForeignKey("employee.id"), nullable=True)
+    submissiondate = Column(Date, nullable=False)
+    type = Column(String(45), nullable=False)
+    name = Column(String(150), nullable=True)
+    email = Column(String(150), nullable=True)
     phone = Column(String(150), nullable=True)
-    status = Column(CHAR(1), nullable=True)
-    designation = Column(String(300), nullable=True)
-    dob = Column(Date, nullable=True)
-    personalemail = Column(String(150), nullable=True)
-    employeeid = Column(Integer, nullable=True)
-    skypeid = Column(String(150), nullable=True)
-    linkedin = Column(String(300), nullable=True)
-    twitter = Column(String(150), nullable=True)
-    facebook = Column(String(300), nullable=True)
-    review = Column(CHAR(1), nullable=True)
-    vendorid = Column(Integer, ForeignKey('vendor.id'), nullable=True)
-    clientid = Column(Integer, ForeignKey('client.id'), nullable=True)
+    url = Column(String(300), nullable=True)
+    location = Column(String(300), nullable=True)
     notes = Column(Text, nullable=True)
-    lastmoddatetime = Column(TIMESTAMP, nullable=True)
-
-    client = relationship("Client", back_populates="recruiters")
-    vendor = relationship("Vendor", back_populates="recruiters")
-
-class Config:
-    orm_mode = True
-
-@validator('dob', pre=True, always=True)
-def validate_dob(cls, v):
-    if isinstance(v, date):
-        return v 
-    if v in ('0000-00-00', None):
-        return None
-    try:
-        return datetime.strptime(v, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        raise ValueError("Invalid date format for dob")
-
-Client.recruiters = relationship("Recruiter", order_by=Recruiter.id, back_populates="client")
-
-
-# class Submission(Base):
-#     __tablename__ = 'mkt_submission'
+    feedback = Column(Text, nullable=True)
+    lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=func.now())
     
-#     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-#     candidateid = Column(Integer, nullable=False)
-#     employeeid = Column(Integer, nullable=False)
-#     submitter = Column(Integer, nullable=True)
-#     submissiondate = Column(Date, nullable=False)
-#     type = Column(String(45), nullable=False)
-#     name = Column(String(150), nullable=True)
-#     email = Column(String(150), nullable=True)
-#     phone = Column(String(150), nullable=True)
-#     url = Column(String(300), nullable=True)
-#     location = Column(String(300), nullable=True)
-#     notes = Column(Text, nullable=True)
-#     feedback = Column(Text, nullable=True)
-#     lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=Text('CURRENT_TIMESTAMP'))
-    #  # Relationships
-    # candidate = relationship("Candidate", backref="mkt_submissions")
-    # employee = relationship("Employee", foreign_keys=[employeeid], backref="employee_submissions")
-    # submitter_employee = relationship("Employee", foreign_keys=[submitter], backref="submitter_submissions")
+    candidate = relationship("Candidate", back_populates="mkt_submissions")
+    employee = relationship("Employee", foreign_keys=[employeeid], primaryjoin="MktSubmission.employeeid == Employee.id")
+    submitter_rel = relationship("Employee", foreign_keys=[submitter], primaryjoin="MktSubmission.submitter == Employee.id")
 
-# class Config:
-#     orm_mode = True
+    
+    @validator('submissiondate', pre=True, always=True)
+    def validate_submission_date(cls, v):
+        if isinstance(v, date):
+            return v
+        if v in ('0000-00-00', None):
+            return None
+        try:
+            return datetime.strptime(v, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            raise ValueError("Invalid date format for submissiondate")
+
+
+
+
+
+
+
+
+
+class Url(Base):
+    __tablename__ = "sales_url_db"
+
+    
+    url = Column(String(255), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    lastmoddatetime = Column(DateTime, nullable=False, server_default=func.now())  
+# Recruiter Model
+class Recruiter(Base):
+    __tablename__ = "recruiter"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    phone = Column(String, nullable=False)
+    designation = Column(String, nullable=False)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    status = Column(String, nullable=False)
+    dob = Column(Date, nullable=True)
+    personalemail = Column(String, nullable=True)
+    skypeid = Column(String, nullable=True)
+    linkedin = Column(String, nullable=True)
+    twitter = Column(String, nullable=True)
+    facebook = Column(String, nullable=True)
+    review = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    clientid = Column(Integer, ForeignKey("client.id"), nullable=True)
+
+    # Relationships
+    vendor = relationship("Vendor", back_populates="recruiters")
+    client = relationship("Client", back_populates="recruiters")
+
+
+
+
+
+
+class PlacementRecruiter(Base):
+    __tablename__ = "placement_recruiter"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    designation = Column(String, nullable=False)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=False)
+    status = Column(String, nullable=False)
+    clientid = Column(Integer, default=0)  # Force clientid = 0
+    # ... other fields (dob, skypeid, etc.) ...
+
+    vendor = relationship("Vendor")

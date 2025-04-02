@@ -22,6 +22,8 @@ interface Recruiter {
   notes?: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface AddRowModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,7 +60,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('/api/recruiter', formData);
+      await axios.post(`${API_URL}/allvendors/add`, formData);
       refreshData();
       onClose();
     } catch (error) {

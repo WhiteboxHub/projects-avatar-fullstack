@@ -15,6 +15,7 @@ interface EditRowModalProps {
   initialData: Url;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
   const [formData, setFormData] = useState<Url>({});
 
@@ -39,7 +40,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, onSave, in
       return;
     }
     try {
-      await axios.put(`/api/url/${formData.id}`, formData);
+      await axios.put(`${API_URL}/urls/update/${formData.id}`, formData);
       await onSave();
       onClose();
     } catch (error) {

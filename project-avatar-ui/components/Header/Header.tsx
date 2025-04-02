@@ -487,7 +487,7 @@ const menuItems: MenuItem[] = [
     name: 'HR',
     href: '',
     subMenu: [
-      { name: 'Po', href: '/Po' },
+      { name: 'PO', href: '/Po' },
       { name: 'Employees', href: '/employee' },
       { name: 'Invoice',
         href: '',
@@ -518,7 +518,7 @@ const menuItems: MenuItem[] = [
           { name: 'URLs', href: '/urls' },
           { name: 'Recruiters', href: '',
             subMenu: [
-              { name: 'By Vendor', href: '/byvendor' },
+              { name: 'By Vendor', href: '/by-vendor' },
               { name: 'By palcement', href: '/byplacementv' },
               { name: 'All list', href: '/all_list_vendor' },
               { name: 'Detailed', href: '/detailedvendor' }
