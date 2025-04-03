@@ -283,8 +283,8 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+// import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
+// import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -299,17 +299,18 @@ import axios from "axios";
 jsPDF.prototype.autoTable = autoTable;
 
 const VendorByPlacement = () => {
-  const [modalState, setModalState] = useState<{
-    add: boolean;
-    edit: boolean;
-    view: boolean;
-  }>({ add: false, edit: false, view: false });
+  // const [modalState, setModalState] = useState<{
+  //   add: boolean;
+  //   edit: boolean;
+  //   view: boolean;
+  // }>({ add: false, edit: false, view: false });
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<Recruiter[]>([]);
   const [filteredData, setFilteredData] = useState<Recruiter[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  // const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -339,21 +340,21 @@ const VendorByPlacement = () => {
     );
   }, [rowData, searchValue]);
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+  // const handleAddRow = () =>
+  //   setModalState((prevState) => ({ ...prevState, add: true }));
 
-  const handleEditRow = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, edit: true }));
-      } else {
-        setAlertMessage("Please select a row to edit.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+  // const handleEditRow = () => {
+  //   if (gridRef.current) {
+  //     const selectedRows = gridRef.current.api.getSelectedRows();
+  //     if (selectedRows.length > 0) {
+  //       setSelectedRow(selectedRows[0]);
+  //       setModalState((prevState) => ({ ...prevState, edit: true }));
+  //     } else {
+  //       setAlertMessage("Please select a row to edit.");
+  //       setTimeout(() => setAlertMessage(null), 3000);
+  //     }
+  //   }
+  // };
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
@@ -377,18 +378,18 @@ const VendorByPlacement = () => {
     }
   };
 
-  const handleViewRow = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, view: true }));
-      } else {
-        setAlertMessage("Please select a row to view.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+  // const handleViewRow = () => {
+  //   if (gridRef.current) {
+  //     const selectedRows = gridRef.current.api.getSelectedRows();
+  //     if (selectedRows.length > 0) {
+  //       setSelectedRow(selectedRows[0]);
+  //       setModalState((prevState) => ({ ...prevState, view: true }));
+  //     } else {
+  //       setAlertMessage("Please select a row to view.");
+  //       setTimeout(() => setAlertMessage(null), 3000);
+  //     }
+  //   }
+  // };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -418,35 +419,35 @@ const VendorByPlacement = () => {
     doc.save("recruiter_data.pdf");
   };
 
-  const handleAddRowSubmit = async (newRow: Recruiter) => {
-    try {
-      await axios.post(`${API_URL}/VendorByPlacement`, newRow, {
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-      fetchRecruiters();
-      setModalState((prev) => ({ ...prev, add: false }));
-      setAlertMessage("Row added successfully.");
-    } catch (error) {
-      console.error("Error adding row:", error);
-      setAlertMessage("Failed to add row.");
-    }
-    setTimeout(() => setAlertMessage(null), 3000);
-  };
+  // const handleAddRowSubmit = async (newRow: Recruiter) => {
+  //   try {
+  //     await axios.post(`${API_URL}/VendorByPlacement`, newRow, {
+  //       headers: { AuthToken: localStorage.getItem("token") },
+  //     });
+  //     fetchRecruiters();
+  //     setModalState((prev) => ({ ...prev, add: false }));
+  //     setAlertMessage("Row added successfully.");
+  //   } catch (error) {
+  //     console.error("Error adding row:", error);
+  //     setAlertMessage("Failed to add row.");
+  //   }
+  //   setTimeout(() => setAlertMessage(null), 3000);
+  // };
 
-  const handleEditRowSubmit = async (updatedRow: Recruiter) => {
-    try {
-      await axios.put(`${API_URL}/VendorByPlacement/${updatedRow.id}`, updatedRow, {
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-      fetchRecruiters();
-      setModalState((prev) => ({ ...prev, edit: false }));
-      setAlertMessage("Row updated successfully.");
-    } catch (error) {
-      console.error("Error updating row:", error);
-      setAlertMessage("Failed to update row.");
-    }
-    setTimeout(() => setAlertMessage(null), 3000);
-  };
+  // const handleEditRowSubmit = async (updatedRow: Recruiter) => {
+  //   try {
+  //     await axios.put(`${API_URL}/VendorByPlacement/${updatedRow.id}`, updatedRow, {
+  //       headers: { AuthToken: localStorage.getItem("token") },
+  //     });
+  //     fetchRecruiters();
+  //     setModalState((prev) => ({ ...prev, edit: false }));
+  //     setAlertMessage("Row updated successfully.");
+  //   } catch (error) {
+  //     console.error("Error updating row:", error);
+  //     setAlertMessage("Failed to update row.");
+  //   }
+  //   setTimeout(() => setAlertMessage(null), 3000);
+  // };
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
@@ -459,13 +460,13 @@ const VendorByPlacement = () => {
         <h1 className="text-3xl font-bold text-gray-800">Recruiter Management</h1>
         <div className="flex space-x-2">
           <button
-            onClick={handleAddRow}
+            // onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
           >
             <MdAdd className="mr-2" />
           </button>
           <button
-            onClick={handleEditRow}
+            // onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
           >
             <AiOutlineEdit className="mr-2" />
@@ -477,7 +478,7 @@ const VendorByPlacement = () => {
             <MdDelete className="mr-2" />
           </button>
           <button
-            onClick={handleViewRow}
+            // onClick={handleViewRow}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
           >
             <AiOutlineEye className="mr-2" />
@@ -562,21 +563,21 @@ const VendorByPlacement = () => {
           </button>
         </div>
       </div>
-      {modalState.add && (
+      {/* {modalState.add && (
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={handleAddRowSubmit}
         />
-      )}
-      {modalState.edit && selectedRow && (
+      )} */}
+      {/* {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
           onSubmit={handleEditRowSubmit}
         />
-      )}
+      )} */}
     </div>
   );
 };
