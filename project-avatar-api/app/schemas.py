@@ -519,17 +519,17 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    tier: int
-    status: str
-    email: EmailStr
-    phone: str
-    fax: str
+    tier: Optional[int] = None
+    status: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    fax: Optional[str] = None
     address: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    url: Optional[HttpUrl]  
+    url: Optional[HttpUrl] = None
     manager1name: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
@@ -548,17 +548,27 @@ class ClientBase(BaseModel):
     @classmethod
     def validate_url(cls, v):
         if v is None or v.strip() == "":
-            return None  
-        sanitized_url = sanitize_input(v)
-        return sanitized_url
+            return None
+        try:
+            sanitized_url = sanitize_input(v)
+            if not sanitized_url.startswith(('http://', 'https://')):
+                sanitized_url = 'https://' + sanitized_url
+            return sanitized_url
+        except Exception:
+            return None
 
     @field_validator("email", "hmemail", "hremail", mode="before")
     @classmethod
     def validate_email(cls, v):
         if v is None or v.strip() == "":
-            return None  
-        sanitized_email = sanitize_input(v)
-        return sanitized_email
+            return None
+        try:
+            sanitized_email = sanitize_input(v)
+            if '@' not in sanitized_email:
+                return None
+            return sanitized_email
+        except Exception:
+            return None
 
 class ClientInDB(ClientBase):
     id: int

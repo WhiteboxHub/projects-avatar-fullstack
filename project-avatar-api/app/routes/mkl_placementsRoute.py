@@ -99,7 +99,7 @@ async def get_marketing_submissions(
                 detail="Sort order must be 'asc' or 'desc'"
             )
 
-        result = get_mkt_submission_details(
+        result = get_submission_details(
             db=db,
             page=page,
             rows=rows,
