@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List,Dict
+from sqlalchemy import func  # Added import for func
+from typing import List, Dict
 from app.controllers.vendor_details_controller import (
     get_recruiters_for_work,  # Correct function name
     create_recruiter,
     update_recruiter,
     delete_recruiter,
 )
-from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterInDB
+from app.schemas import Recruiter, RecruiterCreate, RecruiterUpdate, RecruiterInDB
 from app.database.db import get_db
 
 router = APIRouter()

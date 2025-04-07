@@ -39,14 +39,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData}
     subject: 'ML',
     startdate: '',
     enddate: '',
-    exams: '',
-    instructor1: '',
-    instructor2: '',
-    instructor3: '',
-    topicscovered: '',
-    topicsnotcovered: '',
-    lastmoddatetime: '',
-    batchid: '',
     courseid: '',
   });
 
@@ -75,7 +67,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData}
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/batches/insert`, formData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/batches/batches/insert`, formData, {
         headers: { AuthToken: localStorage.getItem('token') },
       });
       
@@ -452,110 +444,6 @@ return (
           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
         />
       </div>
-
-      {/* Exams */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Exams</label>
-        <input
-          type="text"
-          name="exams"
-          value={formData.exams}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter exams info"
-        />
-      </div>
-
-      {/* Instructor 1 */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Instructor 1</label>
-        <input
-          type="text"
-          name="instructor1"
-          value={formData.instructor1}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter instructor 1 name"
-        />
-      </div>
-
-      {/* Instructor 2 */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Instructor 2</label>
-        <input
-          type="text"
-          name="instructor2"
-          value={formData.instructor2}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter instructor 2 name"
-        />
-      </div>
-
-      {/* Instructor 3 */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Instructor 3</label>
-        <input
-          type="text"
-          name="instructor3"
-          value={formData.instructor3}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter instructor 3 name"
-        />
-      </div>
-
-      {/* Topics Covered */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Topics Covered</label>
-        <input
-          type="text"
-          name="topicscovered"
-          value={formData.topicscovered}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter topics covered"
-        />
-      </div>
-
-      {/* Topics Not Covered */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Topics Not Covered</label>
-        <input
-          type="text"
-          name="topicsnotcovered"
-          value={formData.topicsnotcovered}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter topics not covered"
-        />
-      </div>
-
-      {/* Last Modification Date */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Last Modification Date</label>
-        <input
-          type="date"
-          name="lastmoddatetime"
-          value={formData.lastmoddatetime}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-        />
-      </div>
-
-      {/* Batch ID */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Batch ID</label>
-        <input
-          type="text"
-          name="batchid"
-          value={formData.batchid}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter batch ID"
-        />
-      </div>
-
       {/* Course ID */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">Course ID</label>

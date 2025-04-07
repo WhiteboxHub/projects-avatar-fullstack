@@ -166,7 +166,7 @@ const Batches = () => {
           if (!confirmation) return;
 
           try {
-            await axios.delete(`${API_URL}/batches/delete/${batchId}`, {
+            await axios.delete(`${API_URL}/batches/batches/delete/${batchId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert("Batch deleted successfully.");
@@ -237,20 +237,18 @@ const handleDownloadPDF = () => {
   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
 
   return (
-    <div className="relative">
-    
+    <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md  relative max-w-7xl ">
     {alertMessage && ( // Conditional rendering of alert message
       <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
         {alertMessage}
       </div>
     )}
-    <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md ">
-      <div className="flex flex-col md:flex-row  items-center mb-4">
+    <div className="flex flex-col md:flex-row justify-between items-center mb-4">
         <h1 className="text-3xl font-bold text-gray-800">Batch Management</h1>
       </div>
          {/* Search Functionality */}
-         <div className="flex flex-col md:flex-row mb-4 justify-between   items-center">
-          <div className="flex w-full md:w-auto mb-2 md:mb-0">
+         <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
+         <div className="flex w-full md:w-auto mb-2 md:mb-0">
             <input
               type="text"
               placeholder="Search..."
@@ -414,7 +412,7 @@ const handleDownloadPDF = () => {
           rowData={selectedRow}
         />
       )}
-    </div>
+    
     </div>
   );
 };

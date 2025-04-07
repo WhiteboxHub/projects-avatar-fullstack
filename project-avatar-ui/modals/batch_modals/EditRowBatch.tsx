@@ -65,7 +65,7 @@ const EditRowBatch: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
     if (formData) {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL; // Ensure the API URL is set correctly
-        await axios.put(`${API_URL}/batches/update/${formData.batchid}`, formData, {
+        await axios.put(`${API_URL}/batches/batches/update/${formData.batchid}`, formData, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave(); // Call the onSave callback to refresh data or handle post-update actions

@@ -39,48 +39,7 @@
 #     query = query.offset(offset).limit(pageSize)
 
 #     return query.all()
-
-
-# from sqlalchemy.orm import Session
-# from app.models import MktSubmission, Candidate
-# from typing import List
-# from app.database.db import get_db
-# from app.schemas import MktSubmissionResponse, MktSubmissionWithCandidateResponse
-
-# def get_mkt_submission_details(db: Session, page: int = 1, pageSize: int = 200) -> List[MktSubmissionWithCandidateResponse]:
-#     """
-#     Retrieve marketing submissions for candidates with status in Marketing, Placed, or OnProject-Mkt
-#     with pagination support
-#     """
-#     # Query the full MktSubmission objects with their related Candidate
-#     submissions = db.query(MktSubmission).join(
-#         Candidate, 
-#         MktSubmission.candidateid == Candidate.candidateid
-#     ).filter(
-#         Candidate.status.in_(["Marketing", "Placed", "OnProject-Mkt"])
-#     ).offset(
-#         (page - 1) * pageSize
-#     ).limit(pageSize).all()
-
-#     # Convert to response model
-#     return [
-#         MktSubmissionWithCandidateResponse(
-#             id=submission.id,
-#             submissiondate=submission.submissiondate,
-#             candidateid=submission.candidateid,
-#             employeeid=submission.employeeid,
-#             submitter=submission.submitter,
-#             course=submission.candidate.course,
-#             email=submission.email,
-#             phone=submission.phone,
-#             url=submission.url,
-#             name=submission.name,
-#             location=submission.location,
-#             notes=submission.notes,
-#             feedback=submission.feedback
-#         ) for submission in submissions
-#     ]
-
+from app.models import MktSubmission, Candidate
 
 from sqlalchemy import desc, asc
 from sqlalchemy.orm import Session, joinedload
@@ -90,7 +49,7 @@ from app.database.db import get_db
 from typing import Dict, Any
 from datetime import datetime
 
-def get_mkt_submission_details(
+def get_submission_details(
     db: Session,
     page: int = 1,
     rows: int = 100,

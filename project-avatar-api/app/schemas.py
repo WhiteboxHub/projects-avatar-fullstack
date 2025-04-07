@@ -1,6 +1,6 @@
 from pydantic import BaseModel,constr, conint, EmailStr, Field, validator, HttpUrl, field_validator
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List 
 from pydantic_settings import BaseSettings
 
 
@@ -16,14 +16,14 @@ class Token(BaseModel):
     access_token: str  
     token_type: str  
     
-class Batch(BaseModel):
-    batchname: str
-    courseid: str
-    created_at: Optional[datetime]  
-    updated_at: Optional[datetime]  
+# class Batch(BaseModel):
+#     batchname: str
+#     courseid: str
+#     created_at: Optional[datetime]  
+#     updated_at: Optional[datetime]  
 
-    class Config:
-        from_attributes = True  
+#     class Config:
+#         from_attributes = True  
 
 class UserCreate(BaseModel):
     uname: str
@@ -43,100 +43,91 @@ class UserResponse(BaseModel):
 
 
 class LeadBase(BaseModel):
-    name: str
-    email: str
+    name: Optional[str] = None
+    startdate: Optional[datetime] = None
     phone: Optional[str] = None
+    email: Optional[str] = None
+    priority: Optional[str] = None
+    workstatus: Optional[str] = None
+    source: Optional[str] = None
+    workexperience: Optional[str] = None
+    sourcename: Optional[str] = None
+    course: Optional[str] = 'QA'
+    intent: Optional[str] = None
+    attendedclass: Optional[str] = None
+    siteaccess: Optional[str] = None
+    assignedto: Optional[str] = None
+    status: Optional[str] = 'Open'
+    secondaryemail: Optional[str] = None
+    secondaryphone: Optional[str] = None
+    address: Optional[str] = None
+    spousename: Optional[str] = None
+    spouseemail: Optional[str] = None
+    spousephone: Optional[str] = None
+    spouseoccupationinfo: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    faq: Optional[str] = None
+    callsmade: Optional[int] = 0
+    closedate: Optional[date] = None
+    notes: Optional[str] = None
+    lastmoddatetime: Optional[datetime] = None
+
+    @validator('startdate', 'lastmoddatetime', pre=True)
+    def parse_datetime(cls, value):
+        if value in ('0000-00-00 00:00:00', None):
+            return None
+        return value
+
+    @validator('closedate', pre=True)
+    def parse_date(cls, value):
+        if value in ('0000-00-00', None):
+            return None
+        return value
 
 class LeadCreate(LeadBase):
-    pass
+    name: str
+    email: str
+
+    @validator('startdate', 'closedate', pre=True)
+    def parse_dates(cls, value):
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value  # Already a datetime object, no need to convert
+        try:
+            return datetime.fromisoformat(value.replace("Z", ""))  # Remove 'Z' before parsing
+        except ValueError:
+            raise ValueError(f"Invalid datetime format: {value}. Expected format: YYYY-MM-DD HH:MM:SS")
 
 class LeadUpdate(LeadBase):
-    pass
+    # ... other fields ...
+    startdate: Optional[str] = None
+    closedate: Optional[str] = None
+    
+    @validator('startdate', 'closedate', pre=True)
+    def parse_dates(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value
 
 class LeadResponse(LeadBase):
     leadid: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Replaces orm_mode in Pydantic V2
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None,
+            date: lambda v: v.isoformat() if v else None
+        }
 
-
-class LeadBase(BaseModel):
-    name: str
-    phone: str
-    email: str
-    sourcename: Optional[str] = None
-    course: Optional[str] = None
-    status: Optional[str] = None
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-
-class LeadInDB(BaseModel):
-    leadid: int 
-    name: str
-    email: str
-    phone: str
-    sourcename: str
-    course: str
-    status: str
-    secondaryemail: str
-    secondaryphone: str
-    address: str
-    spousename: str
-    spouseemail: str
-    spousephone: str
-    spouseoccupationinfo: str
-    city: str
-    state: str
-    country: str
-    class Config:
-        from_attributes = True
-
-class LeadCreate(BaseModel):
-    name: str
-    email: str
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-class LeadResponse(BaseModel):
-    id: int
-    name: str
-    email: str
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    address: Optional[str] = None
-    spousename: Optional[str] = None
-    spouseemail: Optional[str] = None
-    spousephone: Optional[str] = None
-    spouseoccupationinfo: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
-class LeadSearchResponse(BaseModel): 
-    data: List[LeadBase]  
-    class Config:
-        orm_mode = True
-
+class LeadSearchResponse(BaseModel):
+    data: list[LeadResponse]
+    totalRows: int
 
 
 class UserCreate(BaseModel):
@@ -151,13 +142,13 @@ class Token(BaseModel):
     access_token: str  
     token_type: str  
 
-class Batch(BaseModel):
-    batchname: str
-    courseid: str
-    created_at: Optional[datetime]  
-    updated_at: Optional[datetime]  
-    class Config:
-        from_attributes = True  
+# class Batch(BaseModel):
+#     batchname: str
+#     courseid: str
+#     created_at: Optional[datetime]  
+#     updated_at: Optional[datetime]  
+#     class Config:
+#         from_attributes = True  
 
 class UserCreate(BaseModel):
     uname: str
@@ -230,17 +221,20 @@ class CandidateResponse(CandidateBase):
 
 class BatchCreate(BaseModel):
     batchname: constr(max_length=100)
-    current: constr(min_length=1, max_length=1)  
+    current: constr(min_length=1, max_length=1)
     orientationdate: Optional[date] = None
     subject: constr(max_length=45)
     startdate: date
     enddate: Optional[date] = None
-    exams: Optional[conint(ge=0)] = None
-    instructor1: Optional[int] = None
-    instructor2: Optional[int] = None
-    instructor3: Optional[int] = None
-    topicscovered: Optional[str] = None
-    topicsnotcovered: Optional[str] = None
+    courseid: Optional[int] = None  
+
+class BatchUpdate(BaseModel):
+    batchname: Optional[constr(max_length=100)] = None
+    current: Optional[constr(min_length=1, max_length=1)] = None
+    orientationdate: Optional[date] = None
+    subject: Optional[constr(max_length=45)] = None
+    startdate: Optional[date] = None
+    enddate: Optional[date] = None
     courseid: Optional[int] = None
 
 
@@ -335,6 +329,8 @@ class CandidateMarketingBase(BaseModel):
 class CandidateMarketingCreateSchema(CandidateMarketingBase):
     pass
 class CandidateMarketingUpdateSchema(CandidateMarketingBase):
+    
+    id: Optional[int] = None
     manager_name: Optional[str] = None  
     instructor_name: Optional[str] = None
     submitter_name: Optional[str] = None
@@ -344,7 +340,7 @@ class CandidateMarketingUpdateSchema(CandidateMarketingBase):
     technology: Optional[str] = None
     resumeid: Optional[int] = None
     minrate: Optional[int] = None 
-    ipemailid: Optional[int] = None
+    ipemail: Optional[str] = None 
     currentlocation: Optional[str] = None
     relocation: Optional[str] = None
     closedate: Optional[datetime] = None
@@ -387,7 +383,10 @@ class AuthUserBase(BaseModel):
 class AuthUserCreateSchema(AuthUserBase):
     passwd: str
 class AuthUserUpdateSchema(AuthUserBase):
-    pass
+    level: Optional[str] = ''
+    instructor: Optional[str] = 'Y'
+    override: Optional[str] = 'N'
+    status: Optional[str] = 'inactive'
 
 class AuthUserSchema(AuthUserBase):
     id: int
@@ -453,12 +452,10 @@ class CurrentMarketingUpdateSchema(CurrentMarketingBase):
        
 class Config:
         orm_mode = True
-
+        from_attributes = True
 class CurrentMarketingSchema(CurrentMarketingBase):
     id: int
-
-    class Config:
-        from_attributes = True
+       
         
     
 class OverdueUpdateSchema(BaseModel):
@@ -684,88 +681,7 @@ class Mkt_SubmissionResponse(Mkt_submissionBase):
 #     class config:
 #         orm_mode = True
 #         from_attributes = True
-        
-    
-# class MktSubmissionBase(BaseModel):
-#     candidateid: int
-#     employeeid: int
-#     submitter: Optional[int] = None
-#     submissiondate: Optional[date] = None
-#     type: Optional[str] = None
-#     name: Optional[str] = None
-#     email: Optional[EmailStr] = None
-#     phone: Optional[str] = None
-#     url: Optional[str] = None
-#     location: Optional[str] = None
-#     notes: Optional[str] = None
-#     feedback: Optional[str] = None
-    
-#     @validator('email', pre=True)
-#     def validate_empty_email(cls, v):
-#         if v == '' or v is None:
-#             return None
-#         return v
-    
-#     @validator('submissiondate', pre=True)
-#     def validate_submission_date(cls, v):
-#         if isinstance(v, date):
-#             return v
-#         if v in ('0000-00-00', None, ''):
-#             return None
-#         try:
-#             return datetime.strptime(v, '%Y-%m-%d').date()
-#         except (ValueError, TypeError):
-#             return None
-    
-# class MktSubmissionCreate(MktSubmissionBase):
-#     pass
 
-# class MktSubmissionUpdate(MktSubmissionBase):
-#     pass
-
-# class MktSubmissionResponse(MktSubmissionBase):
-#     id: int
-#     lastmoddatetime: Optional[datetime] = None
-#     candidate: Optional["CandidateResponse"] = None
-    
-#     class Config:
-#         orm_mode = True
-#         from_attributes = True
-
-# class MktSubmissionWithCandidateResponse(BaseModel):
-#     id: int
-#     submissiondate: Optional[date] = None
-#     candidateid: int
-#     employeeid: int
-#     submitter: Optional[int] = None
-#     course: Optional[str] = None
-#     email: Optional[str] = None
-#     phone: Optional[str] = None
-#     url: Optional[str] = None
-#     name: Optional[str] = None
-#     location: Optional[str] = None
-#     notes: Optional[str] = None
-#     feedback: Optional[str] = None
-    
-#     @validator('submissiondate', pre=True)
-#     def validate_submission_date(cls, v):
-#         if isinstance(v, date):
-#             return v
-#         if v in ('0000-00-00', None, ''):
-#             return None
-#         try:
-#             return datetime.strptime(v, '%Y-%m-%d').date()
-#         except (ValueError, TypeError):
-#             return None
-    
-#     class Config:
-#         orm_mode = True
-#         from_attributes = True
-
-
-# from pydantic import BaseModel, EmailStr, validator
-# from typing import Optional, List
-# from datetime import date, datetime
 
 class EmployeeResponse(BaseModel):
     id: int
@@ -804,7 +720,7 @@ class MktSubmissionWithCandidateResponse(BaseModel):
             return datetime.strptime(v, '%Y-%m-%d').date()
         except (ValueError, TypeError):
             return None
-    
+
     class Config:
         orm_mode = True
 
@@ -813,12 +729,47 @@ class GridResponse(BaseModel):
     total: int
     records: List[MktSubmissionWithCandidateResponse]
     total_records: int
+
+    class Config:
+        orm_mode = True
+        
+class Mkt_submissionBase(BaseModel):
+    candidateid: int
+    employeeid: int
+    submitter: Optional[int]=None
+    submissiondate:str
+    type: str
+    name: Optional[str]=None
+    email: Optional[str]=None
+    phone: Optional[str]=None
+    url: Optional[str]=None
+    location: Optional[str]=None
+    notes: Optional[str]= None
+    feedback: Optional[str]=None
+    
+class Mkt_SubmissionCreate(Mkt_submissionBase):
+    pass
+
+class Mkt_SubmissionUpdate(Mkt_submissionBase):
+    pass
+
+class Mkt_SubmissionResponse(Mkt_submissionBase):
+    id : int
+    
+class MktSubmissionInDB(Mkt_submissionBase):
+    id: int
     
     class Config:
         orm_mode = True
+        
+        
+# new schemas
 
-    
+# from pydantic import BaseModel, EmailStr, HttpUrl, validator
+# from datetime import date, datetime
+# from typing import Optional
 
+# URL Schemas
 class UrlBase(BaseModel):
     url: str
 
@@ -832,12 +783,9 @@ class UrlInDB(UrlBase):
     id: int
 
     class Config:
-       from_attributes = True 
+        from_attributes = True
 
-
-
-
-
+# Employee Schemas
 class EmployeeBase(BaseModel):
     name: str
     email: EmailStr
@@ -880,125 +828,8 @@ class EmployeeInDB(EmployeeBase):
 
     class Config:
         orm_mode = True
-       
-       
 
 # Vendor Schemas
-class VendorBase(BaseModel):
-    companyname: str
-
-class VendorCreate(VendorBase):
-    pass
-
-class VendorUpdate(VendorBase):
-    pass
-
-class VendorInDB(VendorBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-# Client Schemas
-class ClientBase(BaseModel):
-    companyname: str
-
-class ClientCreate(ClientBase):
-    pass
-
-class ClientUpdate(ClientBase):
-    pass
-
-class ClientInDB(ClientBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
-
-# Recruiter Schemas
-class RecruiterBase(BaseModel):
-    name: Optional[str] = None
-    email:  Optional[str] = None
-    phone: Optional[str] = None
-    designation: Optional[str] = None
-    vendorid: Optional[int] = None
-    status: Optional[str] = None
-    dob: Optional[date] = None
-    personalemail: Optional[str] = None
-    skypeid: Optional[str] = None
-    linkedin: Optional[str] = None
-    twitter: Optional[str] = None
-    facebook: Optional[str] = None
-    review: Optional[str] = None
-    notes: Optional[str] = None
-    clientid: Optional[int] = None
-    
-    
-    @validator("review")
-    def validate_review(cls, value):
-        # Ensure the review field is exactly one character long
-        if value and len(value) != 1:
-            raise ValueError("Review must be exactly one character long.")
-        return value
-
-    
-    @validator("status")
-    def validate_status(cls, value):
-        # Ensure the status field is exactly one character long
-        if value and len(value) != 1:
-            raise ValueError("Status must be exactly one character long.")
-        return value
-    
-    @validator("dob", pre=True)
-    def validate_dob(cls, value):
-        if value is None or value == "0000-00-00":
-            return None  # Replace invalid date with None
-        
-        # If the value is already a date object, return it directly
-        if isinstance(value, date):
-            return value
-        
-        # If the value is a string, parse it into a date object
-        if isinstance(value, str):
-            try:
-                return datetime.strptime(value, "%Y-%m-%d").date()
-            except ValueError:
-                raise ValueError("Invalid date format. Expected YYYY-MM-DD.")
-        
-        # If the value is of an unexpected type, raise an error
-        raise ValueError(f"Invalid type for date: {type(value)}")
-   
-    @validator("designation", pre=True)
-    def validate_designation(cls, value):
-        # If the value is None, return an empty string
-        if value is None:
-            return ""
-        # Ensure the value is a string
-        return str(value)
-    
-    # @validator("email", "personalemail", pre=True)
-    # def clean_and_validate_email(cls, value):
-    #     # If the value is None or an empty string, return None
-    #     if not value:
-    #         return None
-        
-    #     # Skip validation if the email is invalid (e.g., missing @)
-    #     if "@" not in value:
-    #         return None
-        
-    #     return value
-        
-
-class RecruiterCreate(RecruiterBase):
-    pass
-
-class RecruiterUpdate(RecruiterBase):
-    pass
-
-class RecruiterInDB(RecruiterBase):
-    id: int
-
 class VendorBase(BaseModel):
     companyname: str
     status: str
@@ -1043,7 +874,6 @@ class VendorBase(BaseModel):
     clients: Optional[str] = None
     notes: Optional[str] = None
 
-
     @validator('tier', 'status', 'culture', pre=True)
     def coerce_numbers_to_str(cls, v):
         if isinstance(v, (int, float)):
@@ -1062,68 +892,136 @@ class VendorUpdate(VendorBase):
 class VendorInDB(VendorBase):
     id: int
 
+# Client Schemas
+class ClientBase(BaseModel):
+    companyname: str
 
-class RecruiterByVendorBase(BaseModel):
-    name: str
-    email: str
-    phone: str
-    designation: Optional[str] = None 
-    vendorid: Optional[int] = None
-    status: str
-
-    @validator("email")
-    def validate_email(cls, v):
-        # Basic email validation (fallback to placeholder if invalid)
-        if "@" not in v or "." not in v.split("@")[-1]:
-            return "invalid@example.com"
-        return v
-
-
-class RecruiterByVendorCreate(RecruiterByVendorBase):
-    clientid: int = 0  
-class RecruiterByVendorUpdate(RecruiterByVendorBase):
-    clientid: int = 0  
-class RecruiterByVendorInDB(RecruiterByVendorBase):
-    id: int
-    comp: Optional[str] = None 
-
-
-class RecruiterByPlacementInDB(RecruiterByVendorInDB):
+class ClientCreate(ClientBase):
     pass
 
-
-class PlacementRecruiterBase(BaseModel):
-    name: str
-    email: str
-    phone: str
-    designation: Optional[str] = None   # Allow NULL/None values
-    vendorid: Optional[int] = None
-    status: str
-    comp: Optional[str] = None 
-
-    @validator("email")
-    def validate_email(cls, v):
-        # Basic email validation (fallback to placeholder if invalid)
-        if "@" not in v or "." not in v.split("@")[-1]:
-            return "invalid@example.com"
-        return v
-    # ... other fields (dob, skypeid, etc.) ...
-
-class PlacementRecruiterCreate(PlacementRecruiterBase):
-    clientid: int = 0  # Force clientid = 0
-
-class PlacementRecruiterUpdate(PlacementRecruiterBase):
+class ClientUpdate(ClientBase):
     pass
-class RecruiterByPlacementInDB(PlacementRecruiterBase):
-    id: int
-    comp: Optional[str] = None
 
-class PlacementRecruiterInDB(PlacementRecruiterBase):
+class ClientInDB(ClientBase):
     id: int
-    comp: Optional[str] = None  # Vendor company name
 
     class Config:
-        from_attributes = True 
+        orm_mode = True
+        from_attributes = True
 
+# Recruiter Schemas
+class RecruiterBase(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    designation: Optional[str] = None
+    vendorid: Optional[int] = None
+    status: Optional[str] = None
+    dob: Optional[date] = None
+    personalemail: Optional[str] = None
+    skypeid: Optional[str] = None
+    linkedin: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    review: Optional[str] = None
+    notes: Optional[str] = None
+    clientid: Optional[int] = None
 
+    @validator("review")
+    def validate_review(cls, value):
+        if value and len(value) != 1:
+            raise ValueError("Review must be exactly one character long.")
+        return value
 
+    @validator("status")
+    def validate_status(cls, value):
+        if value and len(value) != 1:
+            raise ValueError("Status must be exactly one character long.")
+        return value
+
+    @validator("dob", pre=True)
+    def validate_dob(cls, value):
+        if value is None or value == "0000-00-00":
+            return None
+        if isinstance(value, date):
+            return value
+        if isinstance(value, str):
+            try:
+                return datetime.strptime(value, "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date format. Expected YYYY-MM-DD.")
+        raise ValueError(f"Invalid type for date: {type(value)}")
+
+class RecruiterCreate(RecruiterBase):
+    pass
+
+class RecruiterUpdate(RecruiterBase):
+    pass
+
+class RecruiterInDB(RecruiterBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class RecruiterByVendorBase(BaseModel):
+     name: str
+     email: str
+     phone: str
+     designation: Optional[str] = None 
+     vendorid: Optional[int] = None
+     status: str
+ 
+     @validator("email")
+     def validate_email(cls, v):
+         # Basic email validation (fallback to placeholder if invalid)
+         if "@" not in v or "." not in v.split("@")[-1]:
+             return "invalid@example.com"
+         return v
+ 
+ 
+class RecruiterByVendorCreate(RecruiterByVendorBase):
+     clientid: int = 0  
+class RecruiterByVendorUpdate(RecruiterByVendorBase):
+     clientid: int = 0  
+class RecruiterByVendorInDB(RecruiterByVendorBase):
+     id: int
+     comp: Optional[str] = None 
+ 
+ 
+class RecruiterByPlacementInDB(RecruiterByVendorInDB):
+     pass
+ 
+
+class PlacementRecruiterBase(BaseModel):
+     name: str
+     email: str
+     phone: str
+     designation: Optional[str] = None   # Allow NULL/None values
+     vendorid: Optional[int] = None
+     status: str
+     comp: Optional[str] = None 
+ 
+     @validator("email")
+     def validate_email(cls, v):
+         # Basic email validation (fallback to placeholder if invalid)
+         if "@" not in v or "." not in v.split("@")[-1]:
+             return "invalid@example.com"
+         return v
+     # ... other fields (dob, skypeid, etc.) ...
+ 
+class PlacementRecruiterCreate(PlacementRecruiterBase):
+     clientid: int = 0  # Force clientid = 0
+ 
+class PlacementRecruiterUpdate(PlacementRecruiterBase):
+     pass
+class RecruiterByPlacementInDB(PlacementRecruiterBase):
+     id: int
+     comp: Optional[str] = None
+ 
+class PlacementRecruiterInDB(PlacementRecruiterBase):
+     id: int
+     comp: Optional[str] = None  # Vendor company name
+ 
+     class Config:
+         from_attributes = True 

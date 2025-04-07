@@ -1,70 +1,87 @@
+# # new-projects-avatar-fullstack/project-avatar-api/app/routes/leadsRoute.py
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List
-from app.controllers.leads_controller import get_leads, insert_lead, update_lead, delete_lead
-from app.models import Lead  
-from app.schemas import LeadCreate, LeadInDB, LeadUpdate  
+from typing import List, Optional
+from datetime import datetime
+from app.controllers.leads_controller import (
+    get_leads, 
+    get_lead_by_id,
+    insert_lead, 
+    update_lead, 
+    delete_lead
+)
+from app.schemas import (
+    LeadCreate, 
+    LeadResponse, 
+    LeadUpdate,
+    LeadSearchResponse
+)
 from app.database.db import get_db
 
 router = APIRouter()
 
+# @router.get("/", response_model=LeadSearchResponse)
+# async def get_leads_route(
+#     page: int = Query(1, ge=1, description="Page number"),
+#     page_size: int = Query(20, le=200, description="Number of leads per page"),
+#     search: str = Query(None, description="Search term"),
+#     db: Session = Depends(get_db),
+# ):
+#     offset = (page - 1) * page_size
+#     leads_data = get_leads(db, search=search, page_size=page_size, offset=offset)
+#     return leads_data
 
-@router.get("/search")
-async def get_leads(
-    page: int = Query(1, description="Page number"),
-    page_size: int = Query(200, description="Number of leads per page"),
-    search: str = Query(None, description="Search term"), 
+@router.get("/api/admin/leads", response_model=LeadSearchResponse)
+async def get_leads_route(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, le=200, description="Number of leads per page"),
     db: Session = Depends(get_db),
 ):
-    """
-    Retrieve leads with pagination. If search is provided, filter by name.
-    If search is empty, return all leads with pagination.
-    """
     offset = (page - 1) * page_size
-    query = db.query(Lead)
+    leads_data = get_leads(db, page_size=page_size, offset=offset)
+    return leads_data
 
-    if len(search)>2:
-        query = query.filter(Lead.name.ilike(f"%{search}%"))
+@router.get("/api/admin/leads/search/{leadid}", response_model=LeadResponse)
+async def get_lead(leadid: int, db: Session = Depends(get_db)):
+    lead = get_lead_by_id(db, leadid=leadid)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return lead
 
-    total_rows = query.count()  
-    leads = query.offset(offset).limit(page_size).all()
+# @router.post("/api/admin/leads/insert", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
+# async def create_lead(lead: LeadCreate, db: Session = Depends(get_db)):
+#     try:
+#         return insert_lead(db, new_lead=lead)
+#     except Exception as e:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=str(e)
+#         )
 
-    return {"data": leads, "totalRows": total_rows}
-    
-
-@router.post("/leads/insert", response_model=LeadCreate)
+@router.post("/api/admin/insert", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
 async def create_lead(lead: LeadCreate, db: Session = Depends(get_db)):
-   
-    db_lead = Lead(**lead.dict())
-    db.add(db_lead)
-    db.commit()
-    db.refresh(db_lead)
-    return db_lead
+    try:
+        return insert_lead(db, new_lead=lead)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
-@router.put("/leads/update/{id}", response_model=LeadUpdate)
-async def update_lead(id: int, lead: LeadUpdate, db: Session = Depends(get_db)):
-    
-    db_lead = db.query(Lead).filter(Lead.leadid  == id).first()
+
+@router.put("/api/admin/leads/update/{leadid}", response_model=LeadResponse)
+async def update_lead_route(leadid: int, lead: LeadUpdate, db: Session = Depends(get_db)):
+    db_lead = get_lead_by_id(db, leadid=leadid)
     if not db_lead:
         raise HTTPException(status_code=404, detail="Lead not found")
-    for key, value in lead.dict().items():
-        setattr(db_lead, key, value)
-    db.commit()
-    db.refresh(db_lead) 
-    return db_lead
+    return update_lead(db, leadid=leadid, updated_lead=lead)
 
-@router.delete("/leads/delete/{id}", response_model=LeadInDB)
-async def delete_lead(id: int, db: Session = Depends(get_db)):
-   
-    db_lead = db.query(Lead).filter(Lead.leadid == id).first()
-    if not db_lead:
+@router.delete("/api/admin/leads/delete/{leadid}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_lead_route(leadid: int, db: Session = Depends(get_db)):
+    lead = get_lead_by_id(db, leadid=leadid)
+    if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
-    db.delete(db_lead)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT) 
-
-
-
-   
+    delete_lead(db, leadid=leadid)
+    return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=None)

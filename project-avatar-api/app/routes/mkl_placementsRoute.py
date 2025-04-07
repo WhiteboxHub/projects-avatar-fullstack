@@ -4,7 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 from app.database.db import get_db
 from app.schemas import GridResponse, MktSubmissionWithCandidateResponse
-from app.controllers.placementController import get_mkt_submission_details, add_placement
+from app.controllers.placementController import get_submission_details, add_placement
 from app.models import Candidate, Employee
 
 router = APIRouter()

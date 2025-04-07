@@ -171,45 +171,45 @@ def get_current_marketing_list(db: Session, skip: int, limit: int):
     Retrieve a paginated list of current marketing records with custom SQL query.
     """
     query = text("""
-        SELECT
+        SELECT 
             cm.id,
+            c.name AS candidate_name,
             cm.startdate,
-            c.candidateid,
-            c.name,
             c.email,
             c.phone,
-            cm.mmid,
-            cm.instructorid,
-            cm.submitterid,
+            mm.name AS manager,
+            ins.name AS instructor,
+            sub.name AS submitter,
             c.secondaryemail,
             c.secondaryphone,
             c.workstatus,
             cm.status,
+            cm.locationpreference,
             cm.priority,
-            cm.yearsofexperience,
             cm.technology,
             cm.resumeid,
             cm.minrate,
-            cm.ipemailid,
+            ip.email AS ipemail,          -- Displaying the email instead of ipemailid
             cm.currentlocation,
-            cm.locationpreference,
             cm.relocation,
             cm.skypeid,
             (SELECT link FROM resume WHERE id = cm.resumeid) AS resumelink,
-            (SELECT phone FROM ipemail WHERE id = cm.ipemailid) AS ipphone,
+            ip.phone AS ipphone,
             cm.closedate,
             cm.suspensionreason,
             cm.intro,
             cm.notes
-        FROM
-            candidatemarketing cm,
-            candidate c
-        WHERE
-            cm.candidateid = c.candidateid
-            AND c.status IN ('Marketing', 'Placed', 'OnProject-Mkt')
-            AND cm.status NOT IN ('6-Suspended', '5-Closed')
+        FROM candidatemarketing cm
+        JOIN candidate c ON cm.candidateid = c.candidateid  -- Fixed duplicated 'candidate' table reference
+        LEFT JOIN employee mm ON cm.mmid = mm.id AND mm.status = '0Active'
+        LEFT JOIN employee ins ON cm.instructorid = ins.id AND ins.status = '0Active'
+        LEFT JOIN employee sub ON cm.submitterid = sub.id AND sub.status = '0Active'
+        LEFT JOIN ipemail ip ON cm.ipemailid = ip.id         -- Join with ipemail to show the email
+        WHERE 
+            c.status IN ('Marketing', 'Placed', 'OnProject-Mkt')  -- Filter by candidate status
+            AND cm.status NOT IN ('6-Suspended', '5-Closed')       -- Exclude suspended/closed candidates
         ORDER BY cm.id DESC
-        LIMIT :limit OFFSET :skip
+        LIMIT :limit OFFSET :skip;
     """)
 
     result = db.execute(query, {"skip": skip, "limit": limit})
@@ -222,16 +222,16 @@ def get_current_marketing_by_candidate_name(db: Session, name: str):
     Retrieve a single current marketing record by candidate name with custom SQL query.
     """
     query = text("""
-        SELECT
+        SELECT 
             cm.id,
             c.candidateid,
             cm.startdate,
-            c.name,
+            c.name AS candidate_name,
             c.email,
             c.phone,
-            cm.mmid,
-            cm.instructorid,
-            cm.submitterid,
+            mm.name AS manager,                   -- Manager name
+            ins.name AS instructor,               -- Instructor name
+            sub.name AS submitter,                -- Submitter name
             c.secondaryemail,
             c.secondaryphone,
             c.workstatus,
@@ -241,25 +241,28 @@ def get_current_marketing_by_candidate_name(db: Session, name: str):
             cm.technology,
             cm.resumeid,
             cm.minrate,
-            cm.ipemailid,
+            ip.email AS ipemail,                  -- Displaying the email instead of ipemailid
             cm.currentlocation,
             cm.locationpreference,
             cm.relocation,
             cm.skypeid,
-            (SELECT link FROM resume WHERE id = cm.resumeid) AS resumelink,
-            (SELECT phone FROM ipemail WHERE id = cm.ipemailid) AS ipphone,
+            (SELECT link FROM resume WHERE id = cm.resumeid) AS resumelink,   -- Resume link
+            ip.phone AS ipphone,                  -- IP email phone
             cm.closedate,
             cm.suspensionreason,
             cm.intro,
             cm.notes
-        FROM
-            candidatemarketing cm
-        JOIN
-            candidate c ON cm.candidateid = c.candidateid
-        WHERE
+        FROM candidatemarketing cm
+        JOIN candidate c ON cm.candidateid = c.candidateid
+        LEFT JOIN employee mm ON cm.mmid = mm.id AND mm.status = '0Active'
+        LEFT JOIN employee ins ON cm.instructorid = ins.id AND ins.status = '0Active'
+        LEFT JOIN employee sub ON cm.submitterid = sub.id AND sub.status = '0Active'
+        LEFT JOIN ipemail ip ON cm.ipemailid = ip.id
+        WHERE 
             c.name LIKE :name
-            AND c.status IN ('Marketing', 'Placed', 'OnProject-Mkt')
+            AND c.status IN ('Marketing', 'Placed', 'OnProject-Mkt')   -- Filter by candidate status
             AND cm.status NOT IN ('6-Suspended', '5-Closed')
+        ORDER BY cm.id DESC;
     """)
     result = db.execute(query, {"name": f"%{name}%"})
     row = result.fetchone()

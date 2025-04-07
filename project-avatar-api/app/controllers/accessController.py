@@ -41,10 +41,31 @@ def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
     db.refresh(authuser)
     return authuser
 
+# def update_authuser(db: Session, authuser_id: int, authuser_data: AuthUserUpdateSchema):
+#     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
+#     if not authuser:
+#         return {"error": "AuthUser not found"}
+
+#     # for key, value in authuser_data.dict(exclude_unset=True).items():
+#     #     if key == "lastlogin" and value == "0000-00-00 00:00:00":
+#     #         # Set to None or a valid date
+#     #         value = None  # or use datetime.now() for current date
+#         setattr(authuser, key, value)
+
+#     db.commit()
+#     db.refresh(authuser)
+#     return {"message": "AuthUser updated successfully"}
+
+
 def update_authuser(db: Session, authuser_id: int, authuser_data: AuthUserUpdateSchema):
     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
     if not authuser:
         return {"error": "AuthUser not found"}
+
+    # Check for invalid lastlogin value in the input data
+    if "lastlogin" in authuser_data.dict(exclude_unset=True):
+        if authuser_data.lastlogin in ["0000-00-00 00:00:00", None]:
+            authuser_data.lastlogin = None  # or set to a valid date
 
     for key, value in authuser_data.dict(exclude_unset=True).items():
         setattr(authuser, key, value)
