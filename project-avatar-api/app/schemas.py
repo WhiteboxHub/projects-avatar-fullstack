@@ -914,6 +914,7 @@ class ClientInDB(ClientBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 # Recruiter Schemas
 class RecruiterBase(BaseModel):

@@ -54,7 +54,7 @@ const Clients = () => {
   const fetchData = async (page: number = currentPage) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/client`, {
+      const response = await axios.get(`${API_URL}/client/client/get`, {
         params: {
           page: page,
           pageSize: paginationPageSize,
