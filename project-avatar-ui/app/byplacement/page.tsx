@@ -8,6 +8,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byPlacement_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -318,13 +319,13 @@ const RecruiterByPlacement = () => {
           }}
         />
       )}
-      {/* {modalState.view && selectedRow && (
+      {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )} */}
+      )}
     </div>
   );
 };
