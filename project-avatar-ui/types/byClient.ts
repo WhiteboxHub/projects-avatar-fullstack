@@ -16,7 +16,7 @@ export interface Recruiter {
     twitter?: string;
     facebook?: string;
     review?: string;
-    vendorid?: number;
+    // vendorid?: number;
     clientid?: number;
     notes?: string;
     lastmoddatetime?: string;

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from app.models import Recruiter
-from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterResponse
+from app.models import Recruiter, Client
+from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterResponse, ClientResponseFetch
 from sqlalchemy import func
 
 def get_recruiters_by_client(db: Session, page: int, page_size: int):
@@ -49,3 +49,6 @@ def get_recruiter_by_id(db: Session, recruiter_id: int):
     if not db_recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
     return db_recruiter
+
+def get_clients(db: Session):
+    return db.query(Client).all()

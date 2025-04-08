@@ -4,12 +4,13 @@ from app.controllers.byClientController import (
     get_recruiters_by_client,
     create_recruiter,
     update_recruiter,
-    delete_recruiter
+    delete_recruiter,
+    get_clients
 )
 from typing import Any
-from app.models import Recruiter
+from app.models import Recruiter, Client
 from app.database.db import get_db
-from app.schemas import RecruiterCreate, RecruiterUpdate, Recruiter, RecruiterResponse
+from app.schemas import RecruiterCreate, RecruiterUpdate, Recruiter, RecruiterResponse, ClientResponse, ClientResponseFetch, ClientInDB
 
 router = APIRouter()
 
@@ -44,3 +45,8 @@ def edit_recruiter(recruiter_id: int, recruiter: RecruiterUpdate, db: Session = 
 def remove_recruiter(recruiter_id: int, db: Session = Depends(get_db)):
     delete_recruiter(db, recruiter_id)
     return {"message": "Recruiter deleted successfully"}
+
+@router.get("/recruiters/byClient/clients", response_model=list[ClientResponseFetch])
+def get_clients_for_dropdown(db: Session = Depends(get_db)):
+    clients = db.query(Client).all()
+    return [ClientResponseFetch(id=client.id, name=client.companyname) for client in clients]
