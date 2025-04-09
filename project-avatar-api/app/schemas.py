@@ -842,7 +842,7 @@ class EmployeeInDB(EmployeeBase):
 # Vendor Schemas
 class VendorBase(BaseModel):
     companyname: str
-    status: str
+    status: str = "inactive" 
     tier: Optional[str] = None
     culture: Optional[str] = None
     solicited: Optional[str] = None

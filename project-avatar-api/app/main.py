@@ -27,7 +27,7 @@ from app.routes.byDetailedRoute import router as by_detailed_router
 from app.routes.placementsRoute import router as placement_router
 
 from app.routes.urlsRoute import router as urls_router
-# from app.routes.vendordetailsRoute import router as all_vendor_details_router
+from app.routes.vendordetailsRoute import router as all_vendor_details_router
 from app.routes.allVendorRoute import router as all_vendor_list_router
 from app.routes.vendorListRoute import router as vendorList_router
 from app.routes.vendorByPlacement import router as vendorByPlacement_router
@@ -73,7 +73,7 @@ app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters
 
 
 app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
-# app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
+app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
 app.include_router(all_vendor_list_router, prefix="/api/admin",tags=["alllistvendordetails"])
 app.include_router(vendorList_router,prefix="/api/admin",tags=["vendorList"])
 app.include_router(vendorByPlacement_router, prefix="/api/admin",tags=["vendorByPlacement"])
