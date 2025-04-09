@@ -609,6 +609,14 @@ class ClientResponseFetch(BaseModel):
         name: str
         class Config:
             orm_mode = True
+            
+class ClientOption(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 class RecruiterBase(BaseModel):
      name:  Optional[str] = None
      email: str
