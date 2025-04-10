@@ -1,6 +1,7 @@
 // types/byclient.ts
 
 export interface Recruiter {
+    vendorid: string;
     company?: string;
     id: number;
     name: string;
@@ -16,7 +17,7 @@ export interface Recruiter {
     twitter?: string;
     facebook?: string;
     review?: string;
-    vendorid?: number;
+    // vendorid?: number;
     clientid?: number;
     notes?: string;
     lastmoddatetime?: string;

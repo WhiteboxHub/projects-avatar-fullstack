@@ -595,7 +595,20 @@ class ClientCreate(ClientBase):
 class ClientUpdate(ClientBase):
     class Config:
         from_attributes = True    
-    
+
+class ClientResponseFetch(BaseModel):
+        id: int
+        name: str
+        class Config:
+            orm_mode = True
+            
+class ClientOption(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 class RecruiterBase(BaseModel):
      name:  Optional[str] = None
      email: str
