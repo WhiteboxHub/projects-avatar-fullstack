@@ -1,6 +1,7 @@
 // types/byclient.ts
 
 export interface Recruiter {
+    vendorid: string;
     company?: string;
     id: number;
     name: string;
