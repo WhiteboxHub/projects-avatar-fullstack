@@ -1,7 +1,8 @@
 
 "use client";
-import React, { useState, useRef, useEffect } from "react";
 
+import React, { useState, useEffect, useRef } from "react";
+// import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { AgGridReact } from "ag-grid-react";
@@ -49,7 +50,7 @@ const PlacementPage = () => {
 
     const fetchPlacements = async () => {
         try {
-            const response = await axios.get(`${API_URL}/placements`, {
+            const response = await axios.get(`${API_URL}/mkt-submissions`, {
                 headers: { AuthToken: localStorage.getItem("token") },
                 params: {
                     page: currentPage,

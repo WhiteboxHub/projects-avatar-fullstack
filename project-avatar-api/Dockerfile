@@ -15,7 +15,6 @@ COPY . .
 # Set environment variable to control which .env file to use
 COPY .env .env
 
-
 # Expose the FastAPI default port
 EXPOSE 8005
 

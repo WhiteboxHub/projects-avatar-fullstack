@@ -269,7 +269,6 @@ export interface ErrorResponse {
 
   
   export interface Placement {
-    // Existing properties
     id?: string;
     Candidate_Name?: string;
     Manager?: string;

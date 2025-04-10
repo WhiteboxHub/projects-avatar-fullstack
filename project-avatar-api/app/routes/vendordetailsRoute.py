@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func  # Added import for func
-from typing import List, Dict
+from typing import Dict
+from sqlalchemy import or_
+from sqlalchemy import and_, func
+from app.models import Recruiter as RecruiterModel
 from app.controllers.vendor_details_controller import (
-    get_recruiters_for_work,  # Correct function name
+    get_recruiters_for_work,
     create_recruiter,
     update_recruiter,
     delete_recruiter,
 )
-from app.schemas import Recruiter, RecruiterCreate, RecruiterUpdate, RecruiterInDB
+from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterInDB
 from app.database.db import get_db
 
 router = APIRouter()
@@ -19,31 +21,29 @@ def get_recruiters_work_route(
     db: Session = Depends(get_db),
 ):
     """
-    Fetch recruiters for type = "work" with pagination.
-    Each page contains 200 rows.
+    Fetch recruiters for type = "work" with pagination (200 rows per page).
+    Matches the PHP type="work" functionality.
     """
-    # Pagination logic
-    page_size = 200  # Number of rows per page
+    page_size = 200
     offset = (page - 1) * page_size
 
-    # Fetch data for the requested page
+    # Fetch paginated data
     recruiters_page = get_recruiters_for_work(db, offset=offset, limit=page_size)
 
-    # Calculate total number of recruiters
-    total_recruiters = db.query(Recruiter).filter(
+    # Calculate total count with same filters
+    total_recruiters = db.query(RecruiterModel).filter(
         and_(
-            Recruiter.clientid == 0,
-            Recruiter.vendorid != 0,
-            Recruiter.name.isnot(None),
-            func.length(Recruiter.name) > 1,
-            Recruiter.phone.isnot(None),
-            func.length(Recruiter.phone) > 1,
-            Recruiter.designation.isnot(None),
-            func.length(Recruiter.designation) > 1,
+            RecruiterModel.clientid == 0,
+            RecruiterModel.vendorid != 0,
+            RecruiterModel.name.isnot(None),
+            func.length(RecruiterModel.name) > 1,
+            RecruiterModel.phone.isnot(None),
+            func.length(RecruiterModel.phone) > 1,
+            RecruiterModel.designation.isnot(None),
+            func.length(RecruiterModel.designation) > 1,
         )
     ).count()
 
-    # Calculate total pages
     total_pages = (total_recruiters + page_size - 1) // page_size
 
     return {
@@ -54,42 +54,73 @@ def get_recruiters_work_route(
         "data": recruiters_page,
     }
 
-
-# Create a new recruiter
-@router.post("/vendordetails", response_model=RecruiterInDB)
+@router.post("/vendordetails/insert", response_model=RecruiterInDB)
 async def create_recruiter_route(
     recruiter: RecruiterCreate,
     db: Session = Depends(get_db),
 ):
-    """
-    Create a new recruiter.
-    """
+    """Create a new recruiter (matches PHP add functionality)"""
     return create_recruiter(db, recruiter)
 
-# Update an existing recruiter
-@router.put("/vendordetails/{id}", response_model=RecruiterInDB)
+@router.put("/vendordetails/update/{id}", response_model=RecruiterInDB)
 async def update_recruiter_route(
     id: int,
     recruiter: RecruiterUpdate,
     db: Session = Depends(get_db),
 ):
-    """
-    Update a recruiter by ID.
-    """
+    """Update recruiter (matches PHP edit functionality)"""
     updated_recruiter = update_recruiter(db, id, recruiter)
     if not updated_recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
     return updated_recruiter
 
-# Delete a recruiter
 @router.delete("/vendordetails/{id}")
 async def delete_recruiter_route(
     id: int,
     db: Session = Depends(get_db),
 ):
-    """
-    Delete a recruiter by ID.
-    """
+    """Delete recruiter (matches PHP delete functionality)"""
     if not delete_recruiter(db, id):
         raise HTTPException(status_code=404, detail="Recruiter not found")
     return {"message": "Recruiter deleted successfully"}
+
+
+@router.get("/vendordetails/search", response_model=Dict)
+def search_recruiters_route(
+    query: str = Query(..., description="Search term for name, ID, email, or phone"),
+    page: int = Query(1, description="Page number", ge=1),
+    db: Session = Depends(get_db),
+):
+    page_size = 200
+    offset = (page - 1) * page_size
+
+    search_filter = and_(
+        RecruiterModel.clientid == 0,
+        RecruiterModel.vendorid != 0,
+        or_(
+            RecruiterModel.name.ilike(f"%{query}%"),
+            RecruiterModel.id == query if query.isdigit() else False,
+            RecruiterModel.email.ilike(f"%{query}%"),
+            RecruiterModel.phone.ilike(f"%{query}%")
+        )
+    )
+
+    # Query the database
+    recruiters_query = db.query(RecruiterModel).filter(search_filter)
+    
+    # Get paginated results
+    recruiters_page = recruiters_query.offset(offset).limit(page_size).all()
+    
+    # Convert SQLAlchemy models to Pydantic models
+    recruiters_data = [RecruiterInDB.from_orm(recruiter) for recruiter in recruiters_page]
+    
+    total_recruiters = recruiters_query.count()
+    total_pages = (total_recruiters + page_size - 1) // page_size
+
+    return {
+        "page": page,
+        "page_size": page_size,
+        "total_recruiters": total_recruiters,
+        "total_pages": total_pages,
+        "data": recruiters_data,
+    }

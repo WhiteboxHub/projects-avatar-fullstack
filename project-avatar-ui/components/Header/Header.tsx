@@ -569,14 +569,14 @@ const DropdownMenu: React.FC<{ item: MenuItem; level: number; isMobile?: boolean
           )}
         </Link>
       </div>
-      {item.subMenu && isSubMenuOpen && (
+      {item.subMenu && (
         <ul
           className={`${
             isMobile
               ? `flex flex-col pl-6 ${isSubMenuOpen ? 'max-h-screen' : 'max-h-0'} overflow-hidden`
               : `absolute bg-indigo-700 rounded-md shadow-lg w-48 transition-all duration-300 ease-in-out ${
                   level === 1 ? 'left-full top-0 ml-0' : 'top-full left-0'
-                } z-10 overflow-visible`
+                } z-10 overflow-visible ${isSubMenuOpen ? 'block' : 'hidden'}`
           }`}
         >
           {item.subMenu.map((subItem) => (

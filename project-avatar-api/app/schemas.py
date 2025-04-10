@@ -218,6 +218,7 @@ class CandidateResponse(CandidateBase):
     class Config:
         orm_mode = True
 
+
 class BatchCreate(BaseModel):
     batchname: constr(max_length=100)
     current: constr(min_length=1, max_length=1)
@@ -510,17 +511,17 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    tier: int
-    status: str
-    email: EmailStr
-    phone: str
-    fax: str
+    tier: Optional[int] = None
+    status: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    fax: Optional[str] = None
     address: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    url: Optional[HttpUrl]  
+    url: Optional[HttpUrl] = None
     manager1name: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
@@ -539,17 +540,27 @@ class ClientBase(BaseModel):
     @classmethod
     def validate_url(cls, v):
         if v is None or v.strip() == "":
-            return None  
-        sanitized_url = sanitize_input(v)
-        return sanitized_url
+            return None
+        try:
+            sanitized_url = sanitize_input(v)
+            if not sanitized_url.startswith(('http://', 'https://')):
+                sanitized_url = 'https://' + sanitized_url
+            return sanitized_url
+        except Exception:
+            return None
 
     @field_validator("email", "hmemail", "hremail", mode="before")
     @classmethod
     def validate_email(cls, v):
         if v is None or v.strip() == "":
-            return None  
-        sanitized_email = sanitize_input(v)
-        return sanitized_email
+            return None
+        try:
+            sanitized_email = sanitize_input(v)
+            if '@' not in sanitized_email:
+                return None
+            return sanitized_email
+        except Exception:
+            return None
 
 class ClientInDB(ClientBase):
     id: int
@@ -646,28 +657,28 @@ class RecruiterResponse(RecruiterBase):
         orm_mode = True
         from_attributes = True
         
-# class Mkt_submissionBase(BaseModel):
-#     candidateid: int
-#     employeeid: int
-#     submitter: Optional[int]=None
-#     submissiondate:str
-#     type: str
-#     name: Optional[str]=None
-#     email: Optional[str]=None
-#     phone: Optional[str]=None
-#     url: Optional[str]=None
-#     location: Optional[str]=None
-#     notes: Optional[str]= None
-#     feedback: Optional[str]=None
+class Mkt_submissionBase(BaseModel):
+    candidateid: int
+    employeeid: int
+    submitter: Optional[int]=None
+    submissiondate:str
+    type: str
+    name: Optional[str]=None
+    email: Optional[str]=None
+    phone: Optional[str]=None
+    url: Optional[str]=None
+    location: Optional[str]=None
+    notes: Optional[str]= None
+    feedback: Optional[str]=None
     
-# class Mkt_SubmissionCreate(Mkt_submissionBase):
-#     pass
+class Mkt_SubmissionCreate(Mkt_submissionBase):
+    pass
 
-# class Mkt_SubmissionUpdate(Mkt_submissionBase):
-#     pass
+class Mkt_SubmissionUpdate(Mkt_submissionBase):
+    pass
 
-# class Mkt_SubmissionResponse(Mkt_submissionBase):
-#     id : int
+class Mkt_SubmissionResponse(Mkt_submissionBase):
+    id : int
     
 #     class config:
 #         orm_mode = True
@@ -823,7 +834,7 @@ class EmployeeInDB(EmployeeBase):
 # Vendor Schemas
 class VendorBase(BaseModel):
     companyname: str
-    status: str
+    status: str = "inactive" 
     tier: Optional[str] = None
     culture: Optional[str] = None
     solicited: Optional[str] = None
@@ -898,6 +909,7 @@ class ClientInDB(ClientBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 # Recruiter Schemas
 class RecruiterBase(BaseModel):
