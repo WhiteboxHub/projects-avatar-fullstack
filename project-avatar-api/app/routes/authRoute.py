@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
   
-    user = db.execute(text("SELECT * FROM wblX.authuser WHERE uname = :username"), {"username": request.username}).fetchone()
+    user = db.execute(text("SELECT * FROM wbl_db.authuser WHERE uname = :username"), {"username": request.username}).fetchone()
     
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")

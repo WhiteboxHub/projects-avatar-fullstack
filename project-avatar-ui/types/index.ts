@@ -250,20 +250,19 @@ export interface ErrorResponse {
     POUrl?: string;
     Notes?: string;
 
-    // Additional properties with alternative names
-    id?: string;
-    PlacementID?: string;
-    placementDetails?: string; // Including both PlacementDetails variants if needed
-    startDate?: string;
-    endDate?: string;
-    rate?: string;
-    overtimeRate?: string;
-    freqType?: string;
-    invoiceFrequency?: string;
-    invoiceStartDate?: string;
-    invoiceNet?: string;
-    poUrl?: string;
-    notes?: string;
+    // // Additional properties with alternative names
+    // PlacementID?: string;
+    // placementDetails?: string; // Including both PlacementDetails variants if needed
+    // startDate?: string;
+    // endDate?: string;
+    // rate?: string;
+    // overtimeRate?: string;
+    // freqType?: string;
+    // invoiceFrequency?: string;
+    // invoiceStartDate?: string;
+    // invoiceNet?: string;
+    // poUrl?: string;
+    // notes?: string;
 }
 
 

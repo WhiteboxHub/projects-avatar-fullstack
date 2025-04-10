@@ -21,7 +21,41 @@ def get_authuser_list(db: Session, skip: int, limit: int):
     result = db.execute(query, {"limit": limit, "skip": skip}).mappings().all()
     return result
 
-def get_authuser_by_fullname(db: Session, authuser_fullname: str):
+# def get_authuser_by_fullname(db: Session, authuser_fullname: str):
+#     query = text("""
+#         SELECT
+#             id, uname, team, level, instructor, override, status, lastlogin, logincount,
+#             fullname, address, phone, state, zip, city, country, message, registereddate,
+#             level3date, lastmoddatetime, demo, enddate, googleId, reset_token, token_expiry, role
+#         FROM
+#             authuser
+#         WHERE
+#             fullname = :authuser_fullname   
+#     """)
+#     result = db.execute(query, {"authuser_fullname": authuser_fullname}).mappings().first()
+#     return result
+
+
+
+# def get_authuser_by_fullname(db: Session, authuser_fullname: str):
+#     query = text("""
+#         SELECT
+#             id, uname, team, level, instructor, override, status, lastlogin, logincount,
+#             fullname, address, phone, state, zip, city, country, message, registereddate,
+#             level3date, lastmoddatetime, demo, enddate, googleId, reset_token, token_expiry, role
+#         FROM
+#             authuser
+#         WHERE
+#             fullname LIKE :authuser_fullname
+#     """)
+    
+#     # Add wildcards for partial matching
+#     wildcard_name = f"%{authuser_fullname}%"
+    
+#     result = db.execute(query, {"authuser_fullname": wildcard_name}).mappings().first()
+#     return result
+
+def get_authuser_by_uname(db: Session, authuser_uname: str):
     query = text("""
         SELECT
             id, uname, team, level, instructor, override, status, lastlogin, logincount,
@@ -30,10 +64,15 @@ def get_authuser_by_fullname(db: Session, authuser_fullname: str):
         FROM
             authuser
         WHERE
-            fullname = :authuser_fullname
+            uname LIKE :authuser_uname
     """)
-    result = db.execute(query, {"authuser_fullname": authuser_fullname}).mappings().first()
+    
+    # Add wildcards for partial matching
+    wildcard_uname = f"%{authuser_uname}%"
+    
+    result = db.execute(query, {"authuser_uname": wildcard_uname}).mappings().all()
     return result
+
 
 def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
     authuser = AuthUser(**authuser_data.dict())

@@ -20,7 +20,7 @@ interface PlacementOption {
 
 const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
   const [formData, setFormData] = useState<Po>({
-    id: '', 
+    POID: '', 
     PlacementDetails: '',
     StartDate: '',
     EndDate: '',
@@ -32,7 +32,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
     InvoiceNet: '',
     POUrl: '',
     Notes: '',
-    PlacementID: '', 
   });
 
   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
@@ -44,19 +43,18 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
         console.log("Row Data:", rowData); 
         setFormData((prevData) => ({
           ...prevData,
-          id: rowData.id || rowData.POID, 
-          PlacementDetails: placementOptions.find(option => option.id === rowData.PlacementID)?.name || '',
+          POID: rowData.POID || rowData.POID, 
+          PlacementDetails: placementOptions.find(option => option.id === rowData.PlacementDetails)?.name || '',
           StartDate: rowData.StartDate || rowData.StartDate,
-          EndDate: rowData.EndDate || rowData.endDate,
-          Rate: rowData.Rate || rowData.rate,
-          OvertimeRate: rowData.OvertimeRate || rowData.overtimeRate,
-          FreqType: rowData.FreqType || rowData.freqType,
-          InvoiceFrequency: rowData.InvoiceFrequency || rowData.invoiceFrequency,
+          EndDate: rowData.EndDate || rowData.EndDate,
+          Rate: rowData.Rate || rowData.Rate,
+          OvertimeRate: rowData.OvertimeRate || rowData.OvertimeRate,
+          FreqType: rowData.FreqType || rowData.FreqType,
+          InvoiceFrequency: rowData.InvoiceFrequency || rowData.InvoiceStartDate,
           InvoiceStartDate: rowData.InvoiceStartDate || rowData.InvoiceStartDate,
           InvoiceNet: rowData.InvoiceNet || rowData.InvoiceNet,
           POUrl: rowData.POUrl || rowData.POUrl,
-          Notes: rowData.Notes || rowData.notes,
-          placementid: rowData.PlacementID,
+          Notes: rowData.Notes || rowData.Notes,
         }));
       }
     };
@@ -101,14 +99,14 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form Data on Submit:", formData); 
-    if (formData.id) {
+    if (formData.POID) {
       try {
         const payload = {
-          placementid: parseInt(formData.placementid),
+          POID: formData.POID,
           begindate: formData.StartDate,
           enddate: formData.EndDate,
-          rate: parseFloat(formData.rate),
-          overtimerate: parseFloat(formData.overtimerate),
+          Rate: formData.Rate,
+          OvertimeRate: formData.OvertimeRate,
           freqtype: formData.FreqType,
           frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
           invoicestartdate: formData.InvoiceStartDate,
@@ -117,7 +115,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
           notes: formData.Notes,
         };
   
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/${formData.id}`, payload, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/${formData.POID}`, payload, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();

@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.db import get_db
 from app.controllers.accessController import (
-    get_authuser_list, get_authuser_by_fullname, create_authuser, update_authuser, delete_authuser
+    get_authuser_list, get_authuser_by_uname, create_authuser, update_authuser, delete_authuser
 )
 from app.schemas import AuthUserCreateSchema, AuthUserUpdateSchema
 
 router = APIRouter()
 
 @router.get("/authuser")
-def read_authuser(page: int = 5, page_size: int = 10000, db: Session = Depends(get_db)):
+def read_authuser(page: int = 5, page_size: int = 100000, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size
     return get_authuser_list(db, skip, page_size)
 
@@ -22,9 +22,16 @@ def read_authuser(page: int = 5, page_size: int = 10000, db: Session = Depends(g
 #         raise HTTPException(status_code=404, detail="AuthUser not found")
 #     return authuser
 
-@router.get("/authuser-fname/{authuser_fullname}")
-def read_authuser_by_fullname(authuser_fullname: str, db: Session = Depends(get_db)):
-    authuser = get_authuser_by_fullname(db, authuser_fullname)
+# @router.get("/authuser-fname/{authuser_fullname}")
+# def read_authuser_by_fullname(authuser_fullname: str, db: Session = Depends(get_db)):
+#     authuser = get_authuser_by_fullname(db, authuser_fullname)
+#     if not authuser:
+#         raise HTTPException(status_code=404, detail="AuthUser not found")
+#     return authuser
+
+@router.get("/authuser-uname/{authuser_uname}")
+def read_authuser_by_uname(authuser_uname: str, db: Session = Depends(get_db)):
+    authuser = get_authuser_by_uname(db, authuser_uname)
     if not authuser:
         raise HTTPException(status_code=404, detail="AuthUser not found")
     return authuser
