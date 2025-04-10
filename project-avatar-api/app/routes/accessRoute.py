@@ -11,7 +11,7 @@ from app.schemas import AuthUserCreateSchema, AuthUserUpdateSchema
 router = APIRouter()
 
 @router.get("/authuser")
-def read_authuser(page: int = 5, page_size: int = 100, db: Session = Depends(get_db)):
+def read_authuser(page: int = 5, page_size: int = 10000, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size
     return get_authuser_list(db, skip, page_size)
 

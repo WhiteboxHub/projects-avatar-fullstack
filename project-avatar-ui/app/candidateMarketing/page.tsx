@@ -1,3 +1,5 @@
+// new-projects-avatar-fullstack/project-avatar-ui/app/candidateMarketing/page.tsx
+
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
@@ -11,7 +13,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import EditRowModal from "../../modals/Marketing/CurrentMarketing/EditCandidateMarketing";
 import ViewRowModal from "../../modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-import { MdDelete } from "react-icons/md";
+// import { MdDelete } from "react-icons/md";
 import { debounce } from "lodash";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
@@ -45,6 +47,15 @@ interface RowData {
   yearsofexperience: string;
 }
 
+interface Employee {
+  id: number;
+  name: string;
+}
+
+interface RowData {
+  // ... your existing RowData interface
+}
+
 interface AutoTableDoc extends jsPDF {
   autoTable: (d: jsPDF, options: UserOptions) => void;
 }
@@ -59,6 +70,7 @@ const CurrentMarketing = () => {
   const [modalState, setModalState] = useState<{ add: boolean; edit: boolean; view: boolean }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -82,10 +94,26 @@ const CurrentMarketing = () => {
         setColumnDefs([]);
       }
     } catch (error) {
-      console.error("Error loading data:", error);
-      alert("Error loading data. Please try again.");
+      // console.error("Error loading data:", error);
+      alert("No candidate with that name ");
     }
   }, [paginationPageSize, API_URL]);
+
+  // Add this useEffect with your other effects
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/currentmarketing/employees`, {
+          headers: { AuthToken: localStorage.getItem("token") },
+        });
+        setEmployees(response.data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+    fetchEmployees();
+  }, [API_URL]);
+
 
   const searchCandidatesByName = useCallback(async (searchQuery: string) => {
     try {
@@ -110,8 +138,8 @@ const CurrentMarketing = () => {
         setColumnDefs([]);
       }
     } catch (error) {
-      console.error("Error loading data:", error);
-      alert("Error loading data. Please try again.");
+      // console.error("Error loading data:", error);
+      alert("No candidate with that name .");
     }
   }, [API_URL]);
 
@@ -170,30 +198,30 @@ const CurrentMarketing = () => {
     }
   };
 
-  const handleDeleteRow = async () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        const id = selectedRows[0].id;
-        const confirmation = window.confirm(`Are you sure you want to delete entry ID ${id}?`);
-        if (!confirmation) return;
+  // const handleDeleteRow = async () => {
+  //   if (gridRef.current) {
+  //     const selectedRows = gridRef.current.api.getSelectedRows();
+  //     if (selectedRows.length > 0) {
+  //       const id = selectedRows[0].id;
+  //       const confirmation = window.confirm(`Are you sure you want to delete entry ID ${id}?`);
+  //       if (!confirmation) return;
 
-        try {
-          await axios.delete(`${API_URL}/currentmarketing/${id}`, {
-            headers: { AuthToken: localStorage.getItem("token") },
-          });
-          alert("Entry deleted successfully.");
-          fetchAllCandidates(currentPage);
-        } catch (error) {
-          console.error("Error deleting entry:", error);
-          alert(`Failed to delete entry: ${error || "Unknown error occurred"}`);
-        }
-      } else {
-        setAlertMessage("Please select a row to delete.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+  //       try {
+  //         await axios.delete(`${API_URL}/currentmarketing/${id}`, {
+  //           headers: { AuthToken: localStorage.getItem("token") },
+  //         });
+  //         alert("Entry deleted successfully.");
+  //         fetchAllCandidates(currentPage);
+  //       } catch (error) {
+  //         console.error("Error deleting entry:", error);
+  //         alert(`Failed to delete entry: ${error || "Unknown error occurred"}`);
+  //       }
+  //     } else {
+  //       setAlertMessage("Please select a row to delete.");
+  //       setTimeout(() => setAlertMessage(null), 3000);
+  //     }
+  //   }
+  // };
 
   const handleRefresh = () => {
     setSearchValue("");
@@ -354,12 +382,12 @@ const CurrentMarketing = () => {
             >
               <AiOutlineEdit className="mr-2" />
             </button>
-            <button
+            {/* <button
               onClick={handleDeleteRow}
               className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700"
             >
               <MdDelete className="mr-2" />
-            </button>
+            </button> */}
             <button
               onClick={handleViewRow}
               className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
@@ -460,7 +488,7 @@ const CurrentMarketing = () => {
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={selectedRow as RowData}
           onSave={fetchAllCandidates}
-          employees={[]} // Add your employees array here
+          employees={employees} // Pass the fetched employees here
         />
         <ViewRowModal
           isOpen={modalState.view}

@@ -448,6 +448,9 @@ class AuthUser(Base):
     token_expiry = Column(DateTime, nullable=True)
     role = Column(String(100), nullable=True)    
 
+
+
+    
 class CurrentMarketing(Base):
     __tablename__ = "currentmarketing" 
     id = Column(Integer, primary_key=True, index=True)

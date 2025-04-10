@@ -51,9 +51,9 @@ def get_candidate_marketing_list(db: Session, skip: int, limit: int):
     result = db.execute(query, {"skip": skip, "limit": limit})
     return result.fetchall()
 
-def get_candidate_marketing_by_id(db: Session, candidate_marketing_id: int):
+def get_candidate_marketing_by_name(db: Session, candidate_name: str):
     """
-    Retrieve a single candidate marketing record by ID using a raw SQL query.
+    Retrieve candidate marketing records by candidate name using a raw SQL query.
     """
     query = text("""
         SELECT 
@@ -74,12 +74,12 @@ def get_candidate_marketing_by_id(db: Session, candidate_marketing_id: int):
             cm.technology,
             cm.resumeid,
             cm.minrate,
-            ip.email AS ipemail,          -- Displaying the email instead of ipemailid
+            cm.ipemailid,
             cm.currentlocation,
             cm.relocation,
             cm.skypeid,
             (SELECT link FROM resume WHERE id = cm.resumeid) AS resumelink,
-            ip.phone AS ipphone,
+            (SELECT phone FROM ipemail WHERE id = cm.ipemailid) AS ipphone,
             cm.closedate,
             cm.suspensionreason,
             cm.intro,
@@ -89,12 +89,11 @@ def get_candidate_marketing_by_id(db: Session, candidate_marketing_id: int):
         LEFT JOIN employee mm ON cm.mmid = mm.id AND mm.status = '0Active'
         LEFT JOIN employee ins ON cm.instructorid = ins.id AND ins.status = '0Active'
         LEFT JOIN employee sub ON cm.submitterid = sub.id AND sub.status = '0Active'
-        LEFT JOIN ipemail ip ON cm.ipemailid = ip.id -- Join with ipemail to show the email
-        WHERE cm.id = :candidate_marketing_id
+        WHERE c.name LIKE :candidate_name
     """)
 
-    result = db.execute(query, {"candidate_marketing_id": candidate_marketing_id})
-    return result.fetchone()
+    result = db.execute(query, {"candidate_name": f"%{candidate_name}%"})
+    return result.fetchall()
 
 
 

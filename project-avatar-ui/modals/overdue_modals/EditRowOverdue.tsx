@@ -703,7 +703,10 @@ const EditRowOverdue: React.FC<EditRowOverdueProps> = ({ isOpen, onRequestClose,
 
   useEffect(() => {
     if (rowData) {
-      setFormData(rowData);
+      setFormData({
+        ...rowData,
+        releaseddate: rowData.releaseddate || '', // Ensure releaseddate is set correctly
+      });      
     }
   }, [rowData]);
 
@@ -728,7 +731,7 @@ const EditRowOverdue: React.FC<EditRowOverdueProps> = ({ isOpen, onRequestClose,
           releaseddate: formData.releaseddate,  // Include releaseddate in the payload
         };
 
-        await axios.put(`${API_URL}/overdue/${formData.pkid}`, payload, {
+        await axios.put(`${API_URL}/overdue/put/${formData.pkid}`, payload, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave(); 

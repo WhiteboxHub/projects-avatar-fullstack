@@ -1,6 +1,7 @@
 # avatar/projects-avatar-api/app/controllers/accessController.py
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
+from datetime import datetime
 from app.models import AuthUser
 from app.schemas import AuthUserCreateSchema, AuthUserUpdateSchema
 
@@ -46,10 +47,10 @@ def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
 #     if not authuser:
 #         return {"error": "AuthUser not found"}
 
-#     # for key, value in authuser_data.dict(exclude_unset=True).items():
-#     #     if key == "lastlogin" and value == "0000-00-00 00:00:00":
-#     #         # Set to None or a valid date
-#     #         value = None  # or use datetime.now() for current date
+#     for key, value in authuser_data.dict(exclude_unset=True).items():
+#         if key == "lastlogin" and value == "0000-00-00 00:00:00":
+#             # Set to None or a valid date
+#             value = None  # or use datetime.now() for current date
 #         setattr(authuser, key, value)
 
 #     db.commit()
@@ -58,21 +59,40 @@ def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
 
 
 def update_authuser(db: Session, authuser_id: int, authuser_data: AuthUserUpdateSchema):
+
     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
     if not authuser:
         return {"error": "AuthUser not found"}
 
-    # Check for invalid lastlogin value in the input data
-    if "lastlogin" in authuser_data.dict(exclude_unset=True):
-        if authuser_data.lastlogin in ["0000-00-00 00:00:00", None]:
-            authuser_data.lastlogin = None  # or set to a valid date
 
-    for key, value in authuser_data.dict(exclude_unset=True).items():
-        setattr(authuser, key, value)
+    update_data = authuser_data.dict(exclude_unset=True)
+    
 
+    if "lastlogin" in update_data and update_data["lastlogin"] == "0000-00-00 00:00:00":
+        update_data["lastlogin"] = None
+    
+
+    set_parts = []
+    params = {}
+    for key, value in update_data.items():
+        set_parts.append(f"{key} = :{key}")
+        params[key] = value
+    
+    if not set_parts:
+        return {"message": "No fields to update"}
+
+    params["id"] = authuser_id
+    query = text(f"""
+        UPDATE authuser 
+        SET {', '.join(set_parts)}
+        WHERE id = :id
+    """)
+    db.execute(query, params)
     db.commit()
+    # Refresh and return the updated user
     db.refresh(authuser)
-    return {"message": "AuthUser updated successfully"}
+    return {"message": "AuthUser updated successfully", "user": authuser}
+
 
 def delete_authuser(db: Session, authuser_id: int):
     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
