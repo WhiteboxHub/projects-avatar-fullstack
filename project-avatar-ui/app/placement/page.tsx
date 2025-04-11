@@ -1,14 +1,15 @@
-
 "use client";
-
-import React, { useState, useEffect, useRef } from "react";
-// import axios from "axios";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
+import React, { useEffect, useRef, useState } from "react";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
 import { FaDownload } from "react-icons/fa";
+import { CandidateOption, EmployeeOption, MktSubmission } from "@/types/mkl_submissions";
+
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -21,10 +22,6 @@ import {
     AiOutlineEye,
     AiOutlineSearch
 } from "react-icons/ai";
-import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
-import axios from "axios";
-import { MktSubmission, CandidateOption, EmployeeOption } from "@/types/mkl_submissions";
-
 const PlacementPage = () => {
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState<string>("");
@@ -38,6 +35,7 @@ const PlacementPage = () => {
     const [employeeOptions, setEmployeeOptions] = useState<EmployeeOption[]>([]);
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const gridRef = useRef<AgGridReact>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -50,7 +48,8 @@ const PlacementPage = () => {
 
     const fetchPlacements = async () => {
         try {
-            const response = await axios.get(`${API_URL}/mkt-submissions`, {
+            setLoading(true);
+            const response = await axios.get(`${API_URL}/placements/mkt-submissions`, {
                 headers: { AuthToken: localStorage.getItem("token") },
                 params: {
                     page: currentPage,
@@ -63,10 +62,12 @@ const PlacementPage = () => {
             setRowData(response.data.records);
             setTotalPages(response.data.total);
             setTotalRecords(response.data.total_records);
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching placements:", error);
             setAlertMessage("Failed to fetch placement data");
             setTimeout(() => setAlertMessage(null), 3000);
+            setLoading(false);
         }
     };
 
@@ -145,29 +146,21 @@ const PlacementPage = () => {
         return employee ? employee.name : "Unknown";
     };
 
-    const renderPageNumbers = () => {
+    const getPageNumbers = () => {
         const pageNumbers = [];
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                pageNumbers.push(
-                    <button
-                        key={i}
-                        onClick={() => handlePageChange(i)}
-                        className={`text-sm px-2 py-1 rounded-md ${
-                            currentPage === i
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-200 text-gray-800"
-                        } hidden sm:block`}
-                    >
-                        {i}
-                    </button>
-                );
-            } else if (i === currentPage - 2 || i === currentPage + 2) {
-                pageNumbers.push(
-                    <span key={i} className="px-1">...</span>
-                );
-            }
+        const maxPagesToShow = 5;
+        
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+        
         return pageNumbers;
     };
 
@@ -190,7 +183,7 @@ const PlacementPage = () => {
                         onClick={() => setIsAddModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
                     >
-                        <AiOutlinePlus className="mr-2" /> Add Placement
+                        <AiOutlinePlus className="mr-2" />
                     </button>
                     <button
                         onClick={handleViewDetails}
@@ -201,13 +194,13 @@ const PlacementPage = () => {
                         } rounded-md transition duration-300`}
                         disabled={!selectedRow}
                     >
-                        <AiOutlineEye className="mr-2" /> View Details
+                        <AiOutlineEye className="mr-2" /> 
                     </button>
                     <button
                         onClick={handleDownloadPDF}
                         className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
                     >
-                        <FaDownload className="mr-2" /> Export
+                        <FaDownload className="mr-2" />
                     </button>
                 </div>
             </div>
@@ -270,6 +263,21 @@ const PlacementPage = () => {
                     headerHeight={35}
                     onRowClicked={(event) => handleRowClick(event.data)}
                     rowClass="cursor-pointer hover:bg-gray-100"
+                    onGridReady={(params) => {
+                        params.api.sizeColumnsToFit();
+                        if (loading) {
+                            params.api.showLoadingOverlay();
+                        }
+                    }}
+                    onGridSizeChanged={(params) => {
+                        params.api.sizeColumnsToFit();
+                    }}
+                    overlayLoadingTemplate={
+                        '<span class="ag-overlay-loading-center">Loading...</span>'
+                    }
+                    overlayNoRowsTemplate={
+                        '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+                    }
                 />
             </div>
             {showDetails && selectedRow && (
@@ -347,39 +355,52 @@ const PlacementPage = () => {
                 </div>
             )}
             <div className="flex justify-between mt-4">
-                <div className="flex items-center flex-wrap gap-2 overflow-auto">
+                <div className="flex items-center space-x-2">
                     <button
                         onClick={() => handlePageChange(1)}
                         disabled={currentPage === 1}
-                        className="text-sm px-2 py-1 rounded-md"
+                        className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
                     >
                         <FaAngleDoubleLeft />
                     </button>
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="text-sm px-2 py-1 rounded-md"
+                        className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
                     >
                         <FaChevronLeft />
                     </button>
-                    {renderPageNumbers()}
+
+                    {getPageNumbers().map((page) => (
+                        <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 py-1 rounded ${currentPage === page
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                }`}
+                        >
+                            {page}
+                        </button>
+                    ))}
+
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="text-sm px-2 py-1 rounded-md"
+                        className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
                     >
                         <FaChevronRight />
                     </button>
                     <button
                         onClick={() => handlePageChange(totalPages)}
                         disabled={currentPage === totalPages}
-                        className="text-sm px-2 py-1 rounded-md"
+                        className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
                     >
                         <FaAngleDoubleRight />
                     </button>
-                </div>
-                <div className="text-sm text-gray-600">
-                    Total Records: {totalRecords}
+                    <span className="ml-4 text-sm text-gray-600">
+                        Total Records: {totalRecords}
+                    </span>
                 </div>
             </div>
         </div>

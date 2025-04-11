@@ -1,10 +1,10 @@
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "../../modals/candidate_modals/AddRowCandidate";
-import EditRowModal from "../../modals/candidate_modals/EditRowCandidate";
+import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
+import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
 import React, { useEffect, useRef, useState } from "react";
-import ViewRowModal from "../../modals/candidate_modals/ViewRowCandidate";
+import ViewRowModal from "@/modals/candidate_modals/ViewRowCandidate";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import withAuth from "@/modals/withAuth";
@@ -15,7 +15,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
-import { Candidate, TransformedCandidate } from "../../types/index";
+import { Candidate, TransformedCandidate } from "@/types/index";
 
 import {
   AiOutlineEdit,
@@ -31,9 +31,58 @@ interface GroupedData {
 const Candidates = () => {
   const [rowData, setRowData] = useState<Candidate[]>([]);
   const [, setGroupedData] = useState<GroupedData>({});
-  const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string }[]
-  >([]);
+  const [columnDefs] = useState<{ headerName: string; field: string ; width?: number;
+    cellStyle?: any;}[]>([
+    { headerName: "Batchname", field: "batchname", width: 120, cellStyle: { fontWeight: 'bold' } },
+    { headerName: "Candidateid", field: "candidateid", width: 120 },
+    { headerName: "Name", field: "name", width: 120 },
+    { headerName: "Email", field: "email", width: 120 },
+    { headerName: "Phone", field: "phone", width: 120 },
+    { headerName: "Course", field: "course", width: 120 },
+    { headerName: "Enrolleddate", field: "enrolleddate", width: 120 },
+    { headerName: "Status", field: "status", width: 120 },
+    { headerName: "Statuschangedate", field: "statuschangedate", width: 120 },
+    { headerName: "Processflag", field: "processflag", width: 120 },
+    { headerName: "Diceflag", field: "diceflag", width: 120 },
+    { headerName: "Workstatus", field: "workstatus", width: 120 },
+    { headerName: "Education", field: "education", width: 120 },
+    { headerName: "Workexperience", field: "workexperience", width: 120 },
+    { headerName: "SSN", field: "ssn", width: 120 },
+    { headerName: "DOB", field: "dob", width: 120 },
+    { headerName: "Portalid", field: "portalid", width: 120 },
+    { headerName: "WP Expiration", field: "wpexpirationdate", width: 120 },
+    { headerName: "SSN Validated", field: "ssnvalidated", width: 120 },
+    { headerName: "BGV", field: "bgv", width: 120 },
+    { headerName: "Secondary Email", field: "secondaryemail", width: 120 },
+    { headerName: "Secondary Phone", field: "secondaryphone", width: 120 },
+    { headerName: "Address", field: "address", width: 120 },
+    { headerName: "City", field: "city", width: 120 },
+    { headerName: "State", field: "state", width: 120 },
+    { headerName: "Country", field: "country", width: 120 },
+    { headerName: "ZIP", field: "zip", width: 120 },
+    { headerName: "Guarantor Name", field: "guarantorname", width: 120 },
+    { headerName: "Guarantor Designation", field: "guarantordesignation", width: 120 },
+    { headerName: "Guarantor Company", field: "guarantorcompany", width: 120 },
+    { headerName: "Emergency Contact", field: "emergcontactname", width: 120 },
+    { headerName: "Emergency Email", field: "emergcontactemail", width: 120 },
+    { headerName: "Emergency Phone", field: "emergcontactphone", width: 120 },
+    { headerName: "Emergency Address", field: "emergcontactaddrs", width: 120 },
+    { headerName: "Term", field: "term", width: 120 },
+    { headerName: "Fee Paid", field: "feepaid", width: 120 },
+    { headerName: "Fee Due", field: "feedue", width: 120 },
+    { headerName: "Referral ID", field: "referralid", width: 120 },
+    { headerName: "Salary 0", field: "salary0", width: 120 },
+    { headerName: "Salary 6", field: "salary6", width: 120 },
+    { headerName: "Salary 12", field: "salary12", width: 120 },
+    { headerName: "Original Resume", field: "originalresume", width: 120 },
+    { headerName: "Contract URL", field: "contracturl", width: 120 },
+    { headerName: "Emp Agreement URL", field: "empagreementurl", width: 120 },
+    { headerName: "Offer Letter URL", field: "offerletterurl", width: 120 },
+    { headerName: "DL URL", field: "dlurl", width: 120 },
+    { headerName: "Work Permit URL", field: "workpermiturl", width: 120 },
+    { headerName: "SSN URL", field: "ssnurl", width: 120 },
+    { headerName: "Notes", field: "notes", width: 120 }
+  ]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -53,6 +102,9 @@ const Candidates = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      if (gridRef.current?.api) {
+        gridRef.current.api.showLoadingOverlay();
+      }
       const response = await axios.get(`${API_URL}/candidates/search`, {
         params: {
           page: currentPage,
@@ -65,9 +117,12 @@ const Candidates = () => {
       setRowData(data);
       setTotalRows(totalRows);
       setTotalPages(Math.ceil(totalRows / paginationPageSize));
-      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
+      setRowData([]);
+      if (gridRef.current?.api) {
+        gridRef.current.api.showNoRowsOverlay();
+      }
     } finally {
       setLoading(false);
     }
@@ -80,6 +135,9 @@ const Candidates = () => {
   const fetchBatches = async (searchQuery = "") => {
     try {
       setLoading(true);
+      if (gridRef.current?.api) {
+        gridRef.current.api.showLoadingOverlay();
+      }
       const response = await axios.get(`${API_URL}/search`, {
         params: {
           page: currentPage,
@@ -93,35 +151,14 @@ const Candidates = () => {
       setRowData(data);
       setTotalRows(totalRows);
       setTotalPages(Math.ceil(totalRows / paginationPageSize));
-      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
+      setRowData([]);
+      if (gridRef.current?.api) {
+        gridRef.current.api.showNoRowsOverlay();
+      }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const setupColumns = (data: Candidate[]) => {
-    if (data.length > 0) {
-      const keys = Object.keys(data[0]);
-      
-      // Ensure batchname is first
-      const batchNameIndex = keys.indexOf('batchname');
-      if (batchNameIndex > -1) {
-        keys.splice(batchNameIndex, 1);
-        keys.unshift('batchname');
-      }
-
-      const columns = keys.map((key) => ({
-        headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        field: key,
-        editable: false,
-        cellStyle: key === "batchname" ? { fontWeight: 'bold' } : {},
-        width: 120,
-        suppressSizeToFit: true
-      }));
-
-      setColumnDefs(columns);
     }
   };
 
@@ -181,6 +218,8 @@ const Candidates = () => {
       if (selectedRows.length > 0) {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
+      } else {
+        alert("Please select a row to edit");
       }
     }
   };
@@ -198,7 +237,7 @@ const Candidates = () => {
           if (!confirmation) return;
 
           try {
-            await axios.delete(`${API_URL}/candidates/delete/${candidateid}`, {
+            await axios.delete(`${API_URL}/candidates/candidates/delete/${candidateid}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert(`Candidate ${candidateid} deleted successfully.`);
@@ -206,8 +245,7 @@ const Candidates = () => {
           } catch (error) {
             const axiosError = error as AxiosError;
             alert(
-              `Failed to delete candidate: ${
-                (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
+              `Failed to delete candidate: ${(axiosError.response?.data as ErrorResponse)?.message || axiosError.message
               }`
             );
           }
@@ -227,14 +265,12 @@ const Candidates = () => {
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages are less than or equal to max visible pages
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // Calculate range of visible page numbers
       let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
       let endPage = startPage + maxVisiblePages - 1;
 
@@ -318,45 +354,48 @@ const Candidates = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-48">
-          <span className="text-xl">Loading...</span>
-        </div>
-      ) : (
-        <div
-          className="ag-theme-alpine"
-          style={{ height: "400px", width: "100%" }}
-        >
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            pagination={false}
-            domLayout="normal"
-            rowSelection="multiple"
-            defaultColDef={{
-              sortable: true,
-              filter: true,
-              resizable: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              suppressSizeToFit: true
-            }}
-            rowHeight={30}
-            headerHeight={35}
-            getRowStyle={() => ({
-              paddingTop: "5px",
-              backgroundColor: '#ffffff',
-              fontWeight: 'normal',
-            })}
-            onGridReady={(params) => {
-              params.api.sizeColumnsToFit();
-            }}
-            onGridSizeChanged={(params) => {
-              params.api.sizeColumnsToFit();
-            }}
-          />
-        </div>
-      )}
+      <div
+        className="ag-theme-alpine"
+        style={{ height: "400px", width: "100%" }}
+      >
+        <AgGridReact
+          ref={gridRef}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          pagination={false}
+          domLayout="normal"
+          rowSelection="multiple"
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            resizable: true,
+            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+            suppressSizeToFit: true
+          }}
+          rowHeight={30}
+          headerHeight={35}
+          getRowStyle={() => ({
+            paddingTop: "5px",
+            backgroundColor: '#ffffff',
+            fontWeight: 'normal',
+          })}
+          onGridReady={(params) => {
+            params.api.sizeColumnsToFit();
+            if (loading) {
+              params.api.showLoadingOverlay();
+            }
+          }}
+          onGridSizeChanged={(params) => {
+            params.api.sizeColumnsToFit();
+          }}
+          overlayLoadingTemplate={
+            '<span class="ag-overlay-loading-center">Loading...</span>'
+          }
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+          }
+        />
+      </div>
 
       <div className="flex justify-between mt-4">
         <div className="flex items-center space-x-2">
@@ -374,21 +413,20 @@ const Candidates = () => {
           >
             <FaChevronLeft />
           </button>
-          
+
           {getPageNumbers().map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded ${
-                currentPage === page 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-3 py-1 rounded ${currentPage === page
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-              }`}
+                }`}
             >
               {page}
             </button>
           ))}
-          
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -419,9 +457,9 @@ const Candidates = () => {
       {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
-          onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow}
-          onSave={fetchData}
+          onClose={() => setModalState({ ...modalState, edit: false })}
+          refreshData={fetchData}
+          candidateData={selectedRow}
         />
       )}
       {modalState.view && selectedRow && (

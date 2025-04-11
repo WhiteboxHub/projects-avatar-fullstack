@@ -206,6 +206,48 @@ class CandidateBase(BaseModel):
     originalresume: Optional[str] = None
     notes: Optional[str] = None
 
+    @validator('dob', 'wpexpirationdate', pre=True)
+    def validate_dates(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('ssnvalidated', 'agreement', 'driverslicense', 'workpermit', 'diceflag', pre=True)
+    def validate_booleans(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('referralid', pre=True)
+    def validate_integers(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('salary0', 'salary6', 'salary12', pre=True)
+    def validate_floats(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+        
+    @validator('emergcontactemail', pre=True)
+    def validate_email(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('portalid', pre=True)
+    def validate_portalid(cls, value):
+        if value is None:
+            return None
+        return str(value)  # Convert integer to string
+    
+    # @validator('portalid', pre=True)
+    # def validate_portalid(cls, value):
+    #     if value is None:
+    #       return None
+    #   return str(value)  # Convert to string if it's an integer
+
 class CandidateCreate(CandidateBase):
     pass
 

@@ -71,7 +71,7 @@ app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiter
 app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
 
-
+app.include_router(placement_router, prefix="/api/admin/placements", tags=["placements"])
 app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
 # app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
 app.include_router(all_vendor_list_router, prefix="/api/admin",tags=["alllistvendordetails"])

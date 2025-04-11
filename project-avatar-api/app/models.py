@@ -215,9 +215,13 @@ class Candidate(Base):
     diceflag = Column(CHAR(1), default='N', comment="This flag is set to 'Y' if it's a dice candidate, otherwise 'N'")
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
-    mkt_submissions = relationship("MktSubmission", back_populates="candidate")
-    placements = relationship("Placement", back_populates="candidate")
-
+    # mkt_submissions = relationship("MktSubmission", back_populates="candidate")
+    # placements = relationship("Placement", back_populates="candidate")
+    # 
+    # Change these lines in Candidate model
+    mkt_submissions = relationship("MktSubmission", back_populates="candidate", viewonly=True)
+    placements = relationship("Placement", back_populates="candidate", viewonly=True)
+    
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"
@@ -297,7 +301,11 @@ class Placement(Base):
     vendorid = Column(Integer, ForeignKey("vendor.id"))
     # clientid = Column(Integer, ForeignKey("client.id"s))
     clientid = Column(Integer, ForeignKey("client.id"))
-    candidate = relationship("Candidate", back_populates="placements")
+    # candidate = relationship("Candidate", back_populates="placements")
+    # candidate = relationship("Candidate", 
+    #                     back_populates="placements",
+    #                     foreign_keys=[candidateid])
+    candidate = relationship("Candidate", back_populates="placements", viewonly=True)
     vendor = relationship("Vendor", back_populates="placements")
     client = relationship("Client", back_populates="placements")
     po_entries = relationship("PO", back_populates="placement")
@@ -571,9 +579,14 @@ class MktSubmission(Base):
     feedback = Column(Text, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=func.now())
     
-    candidate = relationship("Candidate", back_populates="mkt_submissions")
+    # candidate = relationship("Candidate", back_populates="mkt_submissions")
     employee = relationship("Employee", foreign_keys=[employeeid], primaryjoin="MktSubmission.employeeid == Employee.id")
     submitter_rel = relationship("Employee", foreign_keys=[submitter], primaryjoin="MktSubmission.submitter == Employee.id")
+    # candidate = relationship("Candidate", 
+    #                     back_populates="mkt_submissions",
+    #                     foreign_keys=[candidateid])
+    candidate = relationship("Candidate", back_populates="mkt_submissions", viewonly=True)
+
 
     
     @validator('submissiondate', pre=True, always=True)
