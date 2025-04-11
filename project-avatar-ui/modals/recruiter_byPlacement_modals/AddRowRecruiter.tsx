@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
+"use client"
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
-import axios from 'axios'; // Import axios for API calls
+import axios from "axios";
+
+interface Placement {
+  id: number;
+  name: string;
+}
 
 interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit:()=> void
+  onSubmit: (data: any) => void;
 }
+
+Modal.setAppElement('#__next'); 
 
 const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    status: '',
     designation: '',
+    placementid: '',
+    status: 'A', // Default to Active
     dob: '',
     personalemail: '',
     employeeid: '',
@@ -23,13 +32,39 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     linkedin: '',
     twitter: '',
     facebook: '',
-    review: '',
-    vendorid: '',
-    clientid: '',
+    review: 'N', // Default to No
     notes: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [placements, setPlacements] = useState<Placement[]>([]);
+  const reviewOptions = [
+    { value: 'Y', label: 'Yes' },
+    { value: 'N', label: 'No' }
+  ];
+
+  const statusOptions = [
+    { value: 'A', label: 'Active' },
+    { value: 'I', label: 'Inactive' },
+    { value: 'D', label: 'Delete' },
+    { value: 'R', label: 'Rejected' },
+    { value: 'N', label: 'Not Interested' },
+    { value: 'E', label: 'Excellent' }
+  ];
+
+  useEffect(() => {
+    const fetchPlacements = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/by/placements`);
+        setPlacements(response.data || []);
+      } catch (error) {
+        console.error("Error fetching placements:", error);
+      }
+    };
+
+    fetchPlacements();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -40,11 +75,18 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byPlacement/add`, formData); // API call to add recruiter
-      console.log(response.data); // Log the response for debugging
-      onClose(); // Close the modal after submission
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byPlacement/add`, 
+        formData,
+        {
+          headers: { AuthToken: localStorage.getItem("token") },
+        }
+      );
+      console.log(response.data.message);
+      onSubmit(formData);
+      onClose();
     } catch (error) {
-      console.error('Error adding recruiter:', error); // Handle error
+      console.error("Error adding recruiter:", error);
     }
   };
 
@@ -85,7 +127,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Name*</label>
           <input
             type="text"
             name="name"
@@ -93,11 +135,12 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email*</label>
           <input
             type="email"
             name="email"
@@ -105,30 +148,20 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone*</label>
           <input
-            type="text"
+            type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
+            required
           />
         </div>
 
@@ -145,6 +178,37 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
         </div>
 
         <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Placement*</label>
+          <select
+            name="placementid"
+            value={formData.placementid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
+          >
+            <option value="">Select Placement</option>
+            {placements.map(placement => (
+              <option key={placement.id} value={placement.id}>{placement.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Status*</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
+          >
+            {statusOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
           <input
             type="date"
@@ -152,7 +216,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.dob}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter date of birth"
           />
         </div>
 
@@ -171,7 +234,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Employee ID</label>
           <input
-            type="number"
+            type="text"
             name="employeeid"
             value={formData.employeeid}
             onChange={handleChange}
@@ -230,37 +293,16 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-          <textarea
+          <select
             name="review"
             value={formData.review}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter review"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
-          <input
-            type="number"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter vendor ID"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
-          <input
-            type="number"
-            name="clientid"
-            value={formData.clientid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter client ID"
-          />
+          >
+            {reviewOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -271,15 +313,25 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter notes"
+            rows={3}
           />
         </div>
 
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-         onClick={onSubmit}>
-          Submit
-        </button>
+        <div className="flex justify-end space-x-4 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200 font-semibold text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
+          >
+            Submit
+          </button>
+        </div>
       </form>
     </Modal>
   );
