@@ -4,10 +4,18 @@ from sqlalchemy import func
 from app.database.db import get_db
 from app.models import Recruiter, Client
 from app.schemas import RecruiterResponse
+from typing import Optional
 
 router = APIRouter()
 
-def get_recruiter_details(db: Session, page: int, page_size: int):
+def get_recruiter_details(
+    db: Session, 
+    page: int = 1,
+    page_size: int = 1000,
+    sort_field: Optional[str] = "status",
+    sort_order: Optional[str] = "asc"
+):
+    # Base query
     query = db.query(
         Recruiter.id,
         Recruiter.name,
@@ -25,16 +33,34 @@ def get_recruiter_details(db: Session, page: int, page_size: int):
         Recruiter.facebook,
         Recruiter.review,
         Recruiter.notes
-    ).outerjoin(Client, Recruiter.clientid == Client.id) \
-     .filter(Recruiter.vendorid == 0) \
-     .filter(Recruiter.clientid != 0) \
-     .filter(Recruiter.name.isnot(None), func.length(Recruiter.name) > 1) \
-     .filter(Recruiter.phone.isnot(None), func.length(Recruiter.phone) > 1) \
-     .filter(Recruiter.designation.isnot(None), func.length(Recruiter.designation) > 1)
+    ).outerjoin(Client, Recruiter.clientid == Client.id)
 
+    # Apply filters for "cwork" type
+    query = query.filter(
+        Recruiter.vendorid == 0,
+        Recruiter.clientid != 0,
+        Recruiter.name.isnot(None),
+        func.length(Recruiter.name) > 1,
+        Recruiter.phone.isnot(None),
+        func.length(Recruiter.phone) > 1,
+        Recruiter.designation.isnot(None),
+        func.length(Recruiter.designation) > 1
+    )
+
+    # Apply sorting
+    if sort_field and sort_order:
+        sort_column = getattr(Recruiter, sort_field, Recruiter.status)
+        if sort_order.lower() == 'desc':
+            sort_column = sort_column.desc()
+        query = query.order_by(sort_column)
+
+    # Get total count before pagination
     total = query.count()
+
+    # Apply pagination
     recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
     
+    # Convert to response format
     recruiter_data = [RecruiterResponse.from_orm(recruiter) for recruiter in recruiters]
     
     return {
@@ -43,28 +69,34 @@ def get_recruiter_details(db: Session, page: int, page_size: int):
         "page": page,
         "page_size": page_size,
         "pages": (total + page_size - 1) // page_size,
+        "records": len(recruiter_data)
     }
 
-def add_recruiter(db: Session, recruiter_data: Recruiter) -> RecruiterResponse:
-    new_recruiter = Recruiter(**recruiter_data.dict())
+def add_recruiter(db: Session, recruiter_data: dict) -> RecruiterResponse:
+    new_recruiter = Recruiter(**recruiter_data)
     db.add(new_recruiter)
     db.commit()
     db.refresh(new_recruiter)
     return RecruiterResponse.from_orm(new_recruiter)
 
-def update_recruiter(db: Session, recruiter_id: int, recruiter_data: Recruiter) -> RecruiterResponse:
+def update_recruiter(db: Session, recruiter_id: int, recruiter_data: dict) -> RecruiterResponse:
     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
-    for key, value in recruiter_data.dict().items():
-        setattr(recruiter, key, value)
+    
+    for key, value in recruiter_data.items():
+        if hasattr(recruiter, key):
+            setattr(recruiter, key, value)
+    
     db.commit()
+    db.refresh(recruiter)
     return RecruiterResponse.from_orm(recruiter)
 
 def delete_recruiter(db: Session, recruiter_id: int) -> dict:
     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
-    db.delete(recruiter)
+    
+    recruiter.status = 'D'  # Soft delete by setting status to 'D'
     db.commit()
     return {"message": "Recruiter deleted successfully"}

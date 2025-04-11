@@ -1,6 +1,6 @@
 export interface Recruiter {
-    lastmoddatetime: string;
-    employeeid: string;
+    lastmoddatetime?: string;
+    employeeid?: string;
     id: number;
     name?: string;
     email: string;

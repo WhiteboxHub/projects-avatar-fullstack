@@ -1,13 +1,19 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byDetailed_modals/AddRowRecruiter";
-import EditRowRecruiter from "@/modals/recruiter_byDetailed_modals/EditRowRecruiter"; 
+import EditRowRecruiter from "@/modals/recruiter_byDetailed_modals/EditRowRecruiter";
+import Modal from "react-modal";
+import React, { useEffect, useRef, useState } from "react";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
+import { AiOutlineClose } from "react-icons/ai";
+import { FaDownload } from "react-icons/fa";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { RecruiterDetails } from "@/types/byDetailed";
+
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -19,16 +25,10 @@ import {
   AiOutlineEye,
   AiOutlineSearch
 } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import axios from 'axios';
-import Modal from 'react-modal';
-import { RecruiterDetails } from '@/types/byDetailed'; 
-import { AiOutlineClose } from 'react-icons/ai';
-
 interface ViewRowRecruiterComponentProps {
   isOpen: boolean;
   onClose: () => void;
-  recruiter: RecruiterDetails | null; 
+  recruiter: RecruiterDetails | null;
 }
 
 const ViewRowRecruiterComponent: React.FC<ViewRowRecruiterComponentProps> = ({ isOpen, onClose, recruiter }) => {
@@ -102,11 +102,11 @@ const RecruiterByClient = () => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<RecruiterDetails[]>([]);
-  const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null); 
+  const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null);
   const gridRef = useRef<AgGridReact>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize] = useState(100); 
+  const [pageSize] = useState(100);
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -116,8 +116,12 @@ const RecruiterByClient = () => {
   const fetchRecruiters = async (page: number) => {
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/byDetailed`, {
-        params: { page, pageSize },
-        headers: { AuthToken: localStorage.getItem("token") }, 
+        params: { 
+          page,
+          pageSize,
+          sortField: "status",
+          sortOrder: "asc"
+        }
       });
       setRowData(response.data.data);
       setTotalPages(response.data.pages);
@@ -148,11 +152,9 @@ const RecruiterByClient = () => {
         if (confirmDelete) {
           try {
             await Promise.all(selectedRows.map(row => 
-              axios.delete(`${API_URL}/by/recruiters/byDetailed/remove/${row.id}`, {
-                headers: { AuthToken: localStorage.getItem("token") },
-              })
+              axios.delete(`${API_URL}/recruiters/byDetailed/remove/${row.id}`)
             ));
-            fetchRecruiters(currentPage); // Refresh the list after deletion
+            fetchRecruiters(currentPage);
           } catch (error) {
             console.error("Error deleting recruiters:", error);
             setAlertMessage("Error deleting recruiters.");
@@ -170,7 +172,7 @@ const RecruiterByClient = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRecruiter(selectedRows[0]); // Set the selected recruiter for viewing
+        setSelectedRecruiter(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -278,6 +280,20 @@ const RecruiterByClient = () => {
           ref={gridRef}
           rowData={rowData}
           columnDefs={[
+            { 
+              headerName: "#",
+              width: 60,
+              valueGetter: (params) => {
+                if (params.node && params.node.rowIndex !== null) {
+                  return params.node.rowIndex + 1;
+                }
+                return null;
+              },
+              pinned: 'left',
+              cellStyle: {
+                borderRight: '2px solid #ccc'
+              }
+            },
             { headerName: "ID", field: "id" },
             { headerName: "Name", field: "name" },
             { headerName: "Email", field: "email" },
@@ -294,7 +310,7 @@ const RecruiterByClient = () => {
             { headerName: "Facebook", field: "facebook" },
             { headerName: "Review", field: "review" },
             { headerName: "Notes", field: "notes" },
-          ]} 
+          ]}
           pagination={false}
           domLayout="normal"
           rowSelection="multiple"
@@ -347,21 +363,23 @@ const RecruiterByClient = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-           
+            fetchRecruiters(currentPage);
+            setModalState((prev) => ({ ...prev, add: false }));
           }}
         />
       )}
-      {modalState.edit &&(
-      <EditRowRecruiter
-       isOpen={modalState.edit}
-       onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
-       initialData={gridRef.current?.api.getSelectedRows()[0]} 
-       onSubmit={() => {
-        
-       }}
-      />
-       )}
-      {modalState.view && selectedRecruiter && ( 
+      {modalState.edit && (
+        <EditRowRecruiter
+          isOpen={modalState.edit}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+          initialData={gridRef.current?.api.getSelectedRows()[0]}
+          onSubmit={() => {
+            fetchRecruiters(currentPage);
+            setModalState((prev) => ({ ...prev, edit: false }));
+          }}
+        />
+      )}
+      {modalState.view && selectedRecruiter && (
         <ViewRowRecruiterComponent
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}

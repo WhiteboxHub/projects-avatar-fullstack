@@ -1,4 +1,17 @@
 "use client";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { Client } from "@/types/client";
+
 import React, {
   useCallback,
   useEffect,
@@ -6,15 +19,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
-import axios from "axios";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -22,9 +26,6 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
-import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import { Client } from "@/types/client";
 
 interface Company {
   clientid: number;
@@ -138,7 +139,7 @@ const RecruiterByPlacement = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byClient/clients`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/clients`);
         setClients(response.data || []);
       } catch (error) {
         console.error("Error fetching clients:", error);
