@@ -1,10 +1,10 @@
 "use client";
+import Image from "next/image";
 import React, { useState } from "react";
 import axios from "axios";
+import logo from "../../public/images/ip_logo1.jpg";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; 
-import logo from '../../public/images/ip_logo1.jpg';
-import { useAuth } from "../../components/AuthContext"; 
+import { useAuth } from "../../components/AuthContext";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -51,48 +51,50 @@ const Login = () => {
         {alertMessage}
       </div>
     )}
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"> 
-        <div className="flex justify-center mb-4 mr-8">
-          <Image src={logo} alt="Logo" width={200} height={200} /> 
+      <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full relative"> 
+        <div className="flex justify-center mb-6">
+          <Image src={logo} alt="Logo" width={180} height={180} className="rounded-lg" /> 
         </div>
-        <h2 className="text-xl font-bold text-center text-gray-800 mb-4"> 
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6"> 
           Login
         </h2>
         {loading ? (
-          <div className="flex justify-center mb-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid"></div>
+          <div className="flex justify-center mb-6">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid"></div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-gray-700">Username</label>
               <input
                 type="text"
-                className="w-full p-2 border border-gray-300 rounded-md text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                name="username"
+                className="w-full p-3 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
             <div>
-              <label className="block text-gray-700">Password</label>
               <input
                 type="password"
-                className="w-full p-2 border border-gray-300 rounded-md text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                name="password"
+                className="w-full p-3 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            <button
-              type="submit"
-              className={`w-full py-2 bg-blue-600 text-white font-bold rounded-md transition duration-300 ${
-                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-              }`}
-              disabled={loading} 
-            >
-              Login
-            </button>
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full py-3 bg-blue-500 text-white font-medium rounded-lg shadow transition-all duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+                disabled={loading}
+              >
+                Login
+              </button>
+            </div>
           </form>
         )}
         {error && !loading && <p className="text-red-500 text-center mt-4">{error}</p>}

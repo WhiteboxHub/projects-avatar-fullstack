@@ -1,8 +1,8 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import { AiOutlineClose } from 'react-icons/ai';
+"use client";
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
 
 interface Placement {
   id: number;

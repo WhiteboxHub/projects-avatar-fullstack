@@ -1,7 +1,7 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { RecruiterDetails } from '@/types/byDetailed'; 
-import { AiOutlineClose } from 'react-icons/ai';
+import Modal from "react-modal";
+import React from "react";
+import { AiOutlineClose } from "react-icons/ai";
+import { RecruiterDetails } from "@/types/byDetailed";
 
 interface ViewRowRecruiterProps {
   isOpen: boolean;

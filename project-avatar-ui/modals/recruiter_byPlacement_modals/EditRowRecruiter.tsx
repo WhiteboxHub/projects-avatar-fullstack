@@ -1,3 +1,10 @@
+"use client";
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { Recruiter } from "@/types/byPlacement";
+
 // "use client";
 // import React, { useState, useEffect } from 'react';
 // import Modal from 'react-modal';
@@ -337,11 +344,6 @@
 // export default EditRowRecruiter;
 
 
-"use client";
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import { AiOutlineClose } from 'react-icons/ai';
-import axios from 'axios';
 
 interface Client {
   clientid: number;
@@ -351,8 +353,8 @@ interface Client {
 interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: RecruiterData | null;
-  onSubmit: (formData: RecruiterData) => Promise<void>;
+  initialData: Recruiter | null;
+  onSubmit: (formData: Recruiter) => Promise<void>;
   clients: Client[];
   defaultClientId: number;
 }
@@ -365,7 +367,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
   clients,
   defaultClientId
 }) => {
-  const [formData, setFormData] = useState<RecruiterData | null>(null);
+  const [formData, setFormData] = useState<Recruiter | null>(null);
   
   const statusOptions = [
     { value: 'A', label: 'Active' },

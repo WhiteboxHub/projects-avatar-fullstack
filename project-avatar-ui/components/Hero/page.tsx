@@ -1,6 +1,6 @@
 "use client";
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
   const router = useRouter();
@@ -8,11 +8,6 @@ const Hero = () => {
   const handleLoginClick = () => {
     router.push('/login');
   };
-
-  // const handleRegisterClick = () => {
-  //   router.push('/register');
-  // };
-
   return (
     <div className="min-h-screen relative z-10 overflow-hidden pt-24 pb-16 flex flex-col items-center justify-center bg-gray-100">
       <div className="bg-gray-300 p-8 rounded-lg shadow-lg text-center max-w-lg w-full">
@@ -21,19 +16,10 @@ const Hero = () => {
         <div className="flex flex-col space-y-4">
           <button
             onClick={handleLoginClick}
-            className="my-3 block w-full rounded-3xl bg-gradient-to-tl from-indigo-900 to-purple-400 py-3  text-center text-base font-bold text-white hover:bg-gradient-to-br hover:from-indigo-900 hover:to-purple-400 sm:text-lg"
+            className="my-3 block w-full max-w-xs mx-auto rounded-lg bg-white py-3 px-6 text-center text-base font-semibold text-indigo-900 shadow-md transition-all duration-300 ease-in-out border-2 border-indigo-600 hover:bg-indigo-700 hover:text-white hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-lg"
           >
             Click here to Login
           </button>
-          {/* Uncomment below if you need a Register button */}
-          {/* 
-          <button
-            onClick={handleRegisterClick}            
-            className="my-3 block w-full rounded-3xl bg-gradient-to-tl from-indigo-900 to-purple-400 py-3  text-center text-base font-bold text-white hover:bg-gradient-to-br hover:from-indigo-900 hover:to-purple-400 sm:text-lg"
-          >
-            Register
-          </button> 
-          */}
         </div>
       </div>
 

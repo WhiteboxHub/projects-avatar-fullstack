@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import { AiOutlineClose } from 'react-icons/ai';
-import axios from 'axios';
-import { RecruiterDetails } from '@/types/byDetailed'; 
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { RecruiterDetails } from "@/types/byDetailed";
 
 interface EditRowRecruiterProps {
   isOpen: boolean;
