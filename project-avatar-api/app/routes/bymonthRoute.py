@@ -11,7 +11,7 @@ def read_invoice_months(db: Session = Depends(get_db)):
     return get_invoice_months(db)
 
 @router.get("/api/admin/invoices/month/{month}")
-def read_invoices_by_month(month: str, page: int = 1, page_size: int = 100, search: str = None, db: Session = Depends(get_db)):
+def read_invoices_by_month(month: str, page: int = 1, page_size: int = 10000, search: str = None, db: Session = Depends(get_db)):
     skip = (page - 1) * page_size
     invoices = get_invoices_by_month(db, month, search, skip, page_size)
     if not invoices:
