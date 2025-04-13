@@ -185,7 +185,7 @@ async def add_placement_route(
 ):
     """Add a new marketing submission placement"""
     try:
-        result = await placementController.add_placement(db, placement)
+        result = await add_placement(db, placement)
         return result
     except Exception as e:
         raise HTTPException(

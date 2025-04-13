@@ -725,7 +725,7 @@ class Mkt_submissionBase(BaseModel):
     employeeid: int
     submitter: Optional[int]=None
     submissiondate:str
-    type: str
+    type: Optional[str]=None  # Made type optional with a default of None
     name: Optional[str]=None
     email: Optional[str]=None
     phone: Optional[str]=None
@@ -802,8 +802,8 @@ class Mkt_submissionBase(BaseModel):
     candidateid: int
     employeeid: int
     submitter: Optional[int]=None
-    submissiondate:str
-    type: str
+    submissiondate: Optional[str]=None
+    # type: str
     name: Optional[str]=None
     email: Optional[str]=None
     phone: Optional[str]=None
@@ -811,6 +811,14 @@ class Mkt_submissionBase(BaseModel):
     location: Optional[str]=None
     notes: Optional[str]= None
     feedback: Optional[str]=None
+    
+    @validator('submissiondate', pre=True)
+    def validate_submission_date(cls, v):
+        if isinstance(v, date):
+            return v.isoformat()
+        if v in ('0000-00-00', None, ''):
+            return None
+        return v
     
 class Mkt_SubmissionCreate(Mkt_submissionBase):
     pass
@@ -826,7 +834,6 @@ class MktSubmissionInDB(Mkt_submissionBase):
     
     class Config:
         orm_mode = True
-        
         
 # new schemas
 

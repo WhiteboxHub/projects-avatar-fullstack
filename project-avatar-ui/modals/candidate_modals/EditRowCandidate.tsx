@@ -156,7 +156,7 @@ const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) {
         toast.error('Authentication token not found. Please log in again.');
         return;

@@ -1,12 +1,19 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { AxiosError } from "axios";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import AddRowModal from "@/modals/client_modals/AddRowClient";
+import EditRowModal from "@/modals/client_modals/EditRowClient";
+import React, { useEffect, useRef, useState } from "react";
+import ViewRowModal from "@/modals/client_modals/ViewRowClient";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { AxiosError } from "axios";
+import { jsPDF } from "jspdf";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { ErrorResponse } from "@/types";
+import { Client } from "@/types/client";
+
 import {
   FaDownload,
   FaChevronLeft,
@@ -20,12 +27,6 @@ import {
   AiOutlineSearch,
   AiOutlineReload,
 } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import AddRowModal from "@/modals/client_modals/AddRowClient";
-import EditRowModal from "@/modals/client_modals/EditRowClient";
-import ViewRowModal from "@/modals/client_modals/ViewRowClient";
-import { Client } from "@/types/client";
-import { ErrorResponse } from "@/types";
 
 jsPDF.prototype.autoTable = autoTable;
 
@@ -186,7 +187,6 @@ const Clients = () => {
   };
 
   // Added: Handle page change for pagination
-
   const handlePageChange = (newPage: number) => {
     if (newPage !== currentPage) {
       setCurrentPage(newPage);
@@ -195,12 +195,19 @@ const Clients = () => {
   };
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const startPage = Math.max(1, currentPage - 2);
-  const endPage = Math.min(totalPages, currentPage + 2);
-  const pageOptions = Array.from(
-    { length: endPage - startPage + 1 },
-    (_, i) => i + startPage
-  );
+  
+  const getPageNumbers = () => {
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = startPage + maxPagesToShow - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  };
 
   const handleViewRow = () => {
     if (gridRef.current) {
@@ -293,11 +300,11 @@ const Clients = () => {
         </button>
       </div>
       <div className="relative">
-        {loading && (
+        {/* {loading && (
           <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
             <span className="text-xl">Loading...</span>
           </div>
-        )}
+        )} */}
         <div
           className="ag-theme-alpine"
           style={{ height: "400px", width: "100%", overflowY: "auto" }}
@@ -318,54 +325,72 @@ const Clients = () => {
             }}
             rowHeight={30}
             headerHeight={35}
+            onGridReady={(params) => {
+              params.api.sizeColumnsToFit();
+              if (loading) {
+                params.api.showLoadingOverlay();
+              }
+            }}
+            onGridSizeChanged={(params) => {
+              params.api.sizeColumnsToFit();
+            }}
+            overlayLoadingTemplate={
+              '<span class="ag-overlay-loading-center">Loading...</span>'
+            }
+            overlayNoRowsTemplate={
+              '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+            }
           />
         </div>
       </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
-          <div className="flex space-x-1 overflow-x-auto">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            <FaAngleDoubleLeft />
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            <FaChevronLeft />
+          </button>
+
+          {getPageNumbers().map((page) => (
             <button
-              onClick={() => handlePageChange(1)}
-              disabled={currentPage === 1}
-              className="p-2 disabled:opacity-50"
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 rounded ${
+                currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
             >
-              <FaAngleDoubleLeft />
+              {page}
             </button>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-2 disabled:opacity-50"
-            >
-              <FaChevronLeft />
-            </button>
-            {pageOptions.map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-2 py-1 rounded-md ${
-                  currentPage === page
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-800"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 disabled:opacity-50"
-            >
-              <FaChevronRight />
-            </button>
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={currentPage === totalPages}
-              className="p-2 disabled:opacity-50"
-            >
-              <FaAngleDoubleRight />
-            </button>
-          </div>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            <FaChevronRight />
+          </button>
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            <FaAngleDoubleRight />
+          </button>
+          <span className="ml-4 text-sm text-gray-600">
+            Total Records: {totalRows}
+          </span>
         </div>
       </div>
       {modalState.add && (
@@ -395,3 +420,4 @@ const Clients = () => {
 };
 
 export default Clients;
+

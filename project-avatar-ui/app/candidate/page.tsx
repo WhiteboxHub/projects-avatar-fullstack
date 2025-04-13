@@ -231,11 +231,6 @@ const Candidates = () => {
         const candidateid = selectedRows[0].candidateid;
 
         if (candidateid) {
-          const confirmation = window.confirm(
-            `Are you sure you want to delete candidate ${candidateid}?`
-          );
-          if (!confirmation) return;
-
           try {
             await axios.delete(`${API_URL}/candidates/candidates/delete/${candidateid}`, {
               headers: { AuthToken: localStorage.getItem("token") },

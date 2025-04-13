@@ -2,12 +2,15 @@
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
+import EditRowModal from "@/modals/mkl_submissions_models/EditRowModal";
 import React, { useEffect, useRef, useState } from "react";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { FaDownload } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import { CandidateOption, EmployeeOption, MktSubmission } from "@/types/mkl_submissions";
 
 import {
@@ -15,7 +18,10 @@ import {
     FaChevronRight,
     FaAngleDoubleLeft,
     FaAngleDoubleRight,
-    FaTimes
+    FaTimes,
+    FaTrash,
+    FaEdit,
+    FaSync
 } from "react-icons/fa";
 import {
     AiOutlinePlus,
@@ -35,7 +41,9 @@ const PlacementPage = () => {
     const [employeeOptions, setEmployeeOptions] = useState<EmployeeOption[]>([]);
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
     const gridRef = useRef<AgGridReact>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -136,6 +144,46 @@ const PlacementPage = () => {
         }
     };
 
+    const handleEditPlacement = () => {
+        if (selectedRow) {
+            setIsEditModalOpen(true);
+        } else {
+            setAlertMessage("Please select a placement record first");
+            setTimeout(() => setAlertMessage(null), 3000);
+        }
+    };
+
+    const handleDeletePlacement = async () => {
+        if (!selectedRow) {
+            setAlertMessage("Please select a placement record first");
+            setTimeout(() => setAlertMessage(null), 3000);
+            return;
+        }
+        
+        setConfirmDelete(true);
+    };
+
+    const confirmDeletePlacement = async () => {
+        try {
+            await axios.delete(`${API_URL}/placements/mkt-submissions/${selectedRow?.id}`, {
+                headers: { AuthToken: localStorage.getItem("token") },
+            });
+            
+            setAlertMessage("Placement deleted successfully");
+            setTimeout(() => setAlertMessage(null), 3000);
+            
+            // Refresh data and reset selection
+            fetchPlacements();
+            setSelectedRow(null);
+            setConfirmDelete(false);
+        } catch (error) {
+            console.error("Error deleting placement:", error);
+            setAlertMessage("Failed to delete placement");
+            setTimeout(() => setAlertMessage(null), 3000);
+            setConfirmDelete(false);
+        }
+    };
+
     const getCandidateName = (candidateId: number) => {
         const candidate = candidateOptions.find(c => c.id === candidateId);
         return candidate ? candidate.name : "Unknown";
@@ -179,11 +227,28 @@ const PlacementPage = () => {
                         onClose={() => setIsAddModalOpen(false)}
                         refreshData={fetchPlacements}
                     />
+                    <EditRowModal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        refreshData={fetchPlacements}
+                        submission={selectedRow}
+                    />
                     <button
                         onClick={() => setIsAddModalOpen(true)}
                         className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
                     >
                         <AiOutlinePlus className="mr-2" />
+                    </button>
+                    <button
+                        onClick={handleEditPlacement}
+                        className={`flex items-center px-4 py-2 ${
+                            selectedRow
+                                ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                        } rounded-md transition duration-300`}
+                        disabled={!selectedRow}
+                    >
+                        <FaEdit className="mr-2" />
                     </button>
                     <button
                         onClick={handleViewDetails}
@@ -195,6 +260,23 @@ const PlacementPage = () => {
                         disabled={!selectedRow}
                     >
                         <AiOutlineEye className="mr-2" /> 
+                    </button>
+                    <button
+                        onClick={handleDeletePlacement}
+                        className={`flex items-center px-4 py-2 ${
+                            selectedRow
+                                ? "bg-red-600 text-white hover:bg-red-700"
+                                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                        } rounded-md transition duration-300`}
+                        disabled={!selectedRow}
+                    >
+                        <FaTrash className="mr-2" />
+                    </button>
+                    <button
+                        onClick={fetchPlacements}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
+                    >
+                        <FaSync className="mr-2" />
                     </button>
                     <button
                         onClick={handleDownloadPDF}
@@ -349,6 +431,28 @@ const PlacementPage = () => {
                                 className="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-sm"
                             >
                                 Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {confirmDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-5 rounded-lg shadow-lg max-w-md w-full">
+                        <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
+                        <p className="mb-4">Are you sure you want to delete this placement record? This action cannot be undone.</p>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={() => setConfirmDelete(false)}
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDeletePlacement}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>

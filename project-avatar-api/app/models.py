@@ -569,7 +569,7 @@ class MktSubmission(Base):
     employeeid = Column(Integer, ForeignKey("employee.id"), nullable=False)
     submitter = Column(Integer, ForeignKey("employee.id"), nullable=True)
     submissiondate = Column(Date, nullable=False)
-    type = Column(String(45), nullable=False)
+    # type = Column(String(45), nullable=False)
     name = Column(String(150), nullable=True)
     email = Column(String(150), nullable=True)
     phone = Column(String(150), nullable=True)

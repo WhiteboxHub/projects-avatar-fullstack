@@ -285,6 +285,7 @@ async def add_placement(db: Session, mkt_submission: dict):
             location=mkt_submission.get("location"),
             notes=mkt_submission.get("notes"),
             feedback=mkt_submission.get("feedback")
+            # type field is not needed as it's not in the MktSubmission model
         )
         db.add(placement)
         db.commit()
