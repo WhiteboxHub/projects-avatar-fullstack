@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from app.database.db import get_db
 from app.models import Recruiter, Client
 from app.schemas import RecruiterResponse
@@ -13,7 +13,8 @@ def get_recruiter_details(
     page: int = 1,
     page_size: int = 1000,
     sort_field: Optional[str] = "status",
-    sort_order: Optional[str] = "asc"
+    sort_order: Optional[str] = "asc",
+    search_term: Optional[str] = None
 ):
     # Base query
     query = db.query(
@@ -46,6 +47,26 @@ def get_recruiter_details(
         Recruiter.designation.isnot(None),
         func.length(Recruiter.designation) > 1
     )
+    
+    # Apply search if provided
+    if search_term and search_term.strip():
+        search_term = f"%{search_term.strip()}%"
+        query = query.filter(
+            or_(
+                Recruiter.name.ilike(search_term),
+                Recruiter.email.ilike(search_term),
+                Recruiter.phone.ilike(search_term),
+                Recruiter.designation.ilike(search_term),
+                Client.companyname.ilike(search_term),
+                Recruiter.status.ilike(search_term),
+                Recruiter.personalemail.ilike(search_term),
+                Recruiter.skypeid.ilike(search_term),
+                Recruiter.linkedin.ilike(search_term),
+                Recruiter.twitter.ilike(search_term),
+                Recruiter.facebook.ilike(search_term),
+                Recruiter.notes.ilike(search_term)
+            )
+        )
 
     # Apply sorting - matching PHP's sortname for cwork type
     if sort_field and sort_order:
@@ -65,7 +86,11 @@ def get_recruiter_details(
     recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
     
     # Convert to response format
-    recruiter_data = [RecruiterResponse.from_orm(recruiter) for recruiter in recruiters]
+    recruiter_data = []
+    for recruiter in recruiters:
+        # Convert SQLAlchemy row to dictionary
+        recruiter_dict = {column: getattr(recruiter, column) for column in recruiter._fields}
+        recruiter_data.append(recruiter_dict)
     
     return {
         "data": recruiter_data,

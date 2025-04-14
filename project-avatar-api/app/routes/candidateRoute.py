@@ -1,4 +1,3 @@
-# avatar/projects-avatar-api/app/routes/candidateRoute.py
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Dict
@@ -11,7 +10,6 @@ from fastapi.responses import Response, JSONResponse
 from fastapi import status
 
 router = APIRouter()
-
 
 # Constants for dropdown options
 COURSE_OPTIONS = ["ML", "QA", "UI", ".NET"]
@@ -76,9 +74,17 @@ def get_candidates(
 ):
     offset = (page - 1) * pageSize
     query = db.query(Candidate)
-    
+
+    # Handle search for multiple fields
     if search:
-        query = query.filter(Candidate.name.ilike(f"%{search}%"))
+        query = query.filter(
+            Candidate.name.ilike(f"%{search}%") |
+            Candidate.email.ilike(f"%{search}%") |
+            Candidate.phone.ilike(f"%{search}%") |
+            Candidate.city.ilike(f"%{search}%") |
+            Candidate.state.ilike(f"%{search}%") |
+            Candidate.country.ilike(f"%{search}%")
+        )
 
     totalRows = query.count()
     candidates = query.order_by(Candidate.candidateid.desc()).offset(offset).limit(pageSize).all()
@@ -139,28 +145,6 @@ def get_candidates(
     ]
 
     return {"data": candidates_list, "totalRows": totalRows}
-
-# @router.post("/candidates/insert", response_model=CandidateResponse)
-# def insert_candidate(
-#     candidate_create: CandidateCreate,
-#     db: Session = Depends(get_db)
-# ):
-#     try:
-#         # Convert Pydantic model to dict
-#         candidate_data = candidate_create.dict()
-        
-#         # Create new candidate object
-#         new_candidate = Candidate(**candidate_data)
-        
-#         # Add to database, commit and refresh
-#         db.add(new_candidate)
-#         db.commit()
-#         db.refresh(new_candidate)
-        
-#         return new_candidate
-#     except Exception as e:
-#         db.rollback()
-#         raise HTTPException(status_code=500, detail=f"Failed to insert candidate: {str(e)}")
 
 @router.post("/candidates/insert", response_model=CandidateResponse)
 def insert_candidate(

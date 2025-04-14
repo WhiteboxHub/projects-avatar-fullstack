@@ -13,9 +13,10 @@ def read_recruiter_details(
     page_size: int = Query(1000, alias="pageSize"),
     sort_field: Optional[str] = Query("status", alias="sortField"),
     sort_order: Optional[str] = Query("asc", alias="sortOrder"),
+    search_term: Optional[str] = Query(None, alias="searchTerm"),
     db: Session = Depends(get_db)
 ):
-    return get_recruiter_details(db, page, page_size, sort_field, sort_order)
+    return get_recruiter_details(db, page, page_size, sort_field, sort_order, search_term)
 
 @router.post("/recruiters/byDetailed/add", response_model=RecruiterResponse)
 def create_recruiter(recruiter: RecruiterCreate, db: Session = Depends(get_db)):
