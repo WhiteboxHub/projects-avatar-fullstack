@@ -1,7 +1,7 @@
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import AddRowModal from "@/modals/recruiter_byAllList_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
 import React, { useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
@@ -202,25 +202,44 @@ const RecruiterByAllList = () => {
     return pageNumbers;
   };
 
+  // const columnDefs = [
+  //   { headerName: "ID", field: "id", width: 70 },
+  //   { headerName: "Name", field: "name", width: 150 },
+  //   { headerName: "Email", field: "email", width: 180 },
+  //   { headerName: "Phone", field: "phone", width: 120 },
+  //   { headerName: "Company", field: "comp", width: 150 },
+  //   { headerName: "Status", field: "status", width: 100 },
+  //   { headerName: "Designation", field: "designation", width: 150 },
+  //   { headerName: "DOB", field: "dob", width: 100 },
+  //   { headerName: "Personal Email", field: "personalemail", width: 180 },
+  //   { headerName: "Employee ID", field: "employeeid", width: 120 },
+  //   { headerName: "Skype ID", field: "skypeid", width: 120 },
+  //   { headerName: "LinkedIn", field: "linkedin", width: 150 },
+  //   { headerName: "Twitter", field: "twitter", width: 120 },
+  //   { headerName: "Facebook", field: "facebook", width: 120 },
+  //   { headerName: "Review", field: "review", width: 100 },
+  //   { headerName: "Client ID", field: "clientid", width: 100 },
+  //   { headerName: "Notes", field: "notes", width: 200 },
+  //   { headerName: "Last Modified DateTime", field: "lastmoddatetime", width: 180 },
+  // ];
+
   const columnDefs = [
     { headerName: "ID", field: "id", width: 70 },
     { headerName: "Name", field: "name", width: 150 },
     { headerName: "Email", field: "email", width: 180 },
     { headerName: "Phone", field: "phone", width: 120 },
+    { headerName: "Designation", field: "designation", width: 150 },
+    { headerName: "Client ID", field: "clientid", width: 100 },
     { headerName: "Company", field: "comp", width: 150 },
     { headerName: "Status", field: "status", width: 100 },
-    { headerName: "Designation", field: "designation", width: 150 },
     { headerName: "DOB", field: "dob", width: 100 },
     { headerName: "Personal Email", field: "personalemail", width: 180 },
-    { headerName: "Employee ID", field: "employeeid", width: 120 },
     { headerName: "Skype ID", field: "skypeid", width: 120 },
     { headerName: "LinkedIn", field: "linkedin", width: 150 },
     { headerName: "Twitter", field: "twitter", width: 120 },
     { headerName: "Facebook", field: "facebook", width: 120 },
     { headerName: "Review", field: "review", width: 100 },
-    { headerName: "Client ID", field: "clientid", width: 100 },
     { headerName: "Notes", field: "notes", width: 200 },
-    { headerName: "Last Modified DateTime", field: "lastmoddatetime", width: 180 },
   ];
 
   return (

@@ -1,14 +1,20 @@
 import Modal from "react-modal";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
+
+interface Client {
+  id: number;
+  name: string;
+}
 
 interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit: () => void;
 }
 
-const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) => {
+const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,18 +23,36 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
     designation: '',
     dob: '',
     personalemail: '',
-    employeeid: '',
     skypeid: '',
     linkedin: '',
     twitter: '',
     facebook: '',
     review: '',
-    vendorid: '',
     clientid: '',
     notes: '',
   });
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  
+  const reviewOptions = [
+    { value: 'Y', label: 'Yes' },
+    { value: 'N', label: 'No' }
+  ];
+  
+  useEffect(() => {
+    // Fetch clients for the dropdown
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/clients`);
+        setClients(response.data || []);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+    fetchClients();
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -39,10 +63,10 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/add`, formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/add`, formData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
-      console.log(response.data.message); // Log success message
+      onSubmit(); // Notify parent component of successful submission
       onClose(); // Close modal after successful submission
     } catch (error) {
       console.error("Error adding recruiter:", error);
@@ -123,14 +147,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
+          <select
             name="status"
             value={formData.status}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
-          />
+          >
+            <option value="A">Active</option>
+            <option value="I">Inactive</option>
+            <option value="D">Delete</option>
+            <option value="R">Rejected</option>
+            <option value="N">Not Interested</option>
+            <option value="E">Excellent</option>
+          </select>
         </div>
 
         <div>
@@ -166,18 +195,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter personal email"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Employee ID</label>
-          <input
-            type="number"
-            name="employeeid"
-            value={formData.employeeid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter employee ID"
           />
         </div>
 
@@ -231,37 +248,31 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose }) =>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-          <textarea
+          <select
             name="review"
             value={formData.review}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter review"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
-          <input
-            type="number"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter vendor ID"
-          />
+          >
+            {reviewOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
-          <input
-            type="number"
+          <select
             name="clientid"
             value={formData.clientid}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter client ID"
-          />
+          >
+            <option value="">Select Client</option>
+            {clients.map(client => (
+              <option key={client.id} value={client.id}>{client.name}</option>
+            ))}
+          </select>
         </div>
 
         <div>

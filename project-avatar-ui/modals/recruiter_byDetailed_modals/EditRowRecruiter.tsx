@@ -1,43 +1,87 @@
+"use client";
 import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
 import { RecruiterDetails } from "@/types/byDetailed";
 
+interface Client {
+  id: number;
+  name: string;
+}
+
 interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: RecruiterDetails;
+  initialData: RecruiterDetails | null;
   onSubmit: () => void;
+  clients?: Client[];
+  defaultClientId?: number;
 }
 
-const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, initialData, onSubmit }) => {
-  const [formData, setFormData] = useState<RecruiterDetails>(initialData);
+const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ 
+  isOpen, 
+  onClose, 
+  initialData, 
+  onSubmit,
+  clients = [],
+  defaultClientId = 0
+}) => {
+  const [formData, setFormData] = useState<RecruiterDetails | null>(null);
+  
+  const statusOptions = [
+    { value: 'A', label: 'Active' },
+    { value: 'I', label: 'Inactive' },
+    { value: 'D', label: 'Delete' },
+    { value: 'R', label: 'Rejected' },
+    { value: 'N', label: 'Not Interested' },
+    { value: 'E', label: 'Excellent' }
+  ];
+
+  const reviewOptions = [
+    { value: 'Y', label: 'Yes' },
+    { value: 'N', label: 'No' }
+  ];
 
   useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]);
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        clientid: defaultClientId || initialData.clientid // Use default client ID if provided, otherwise keep existing
+      });
+    }
+  }, [initialData, defaultClientId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => {
+      if (prevData) {
+        return {
+          ...prevData,
+          [name]: value,
+        };
+      }
+      return null;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData) return;
+    
     try {
       const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byDetailed/update/${formData.id}`, formData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       console.log(response.data.message); // Log success message
+      onSubmit(); // Call the onSubmit callback
       onClose(); // Close modal after successful submission
     } catch (error) {
       console.error("Error updating recruiter:", error);
     }
   };
+
+  if (!formData) return null;
 
   return (
     <Modal
@@ -80,7 +124,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="text"
             name="name"
-            value={formData.name}
+            value={formData.name || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
@@ -93,7 +137,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="email"
             name="email"
-            value={formData.email}
+            value={formData.email || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
@@ -106,7 +150,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="text"
             name="phone"
-            value={formData.phone}
+            value={formData.phone || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
@@ -119,45 +163,46 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="text"
             name="designation"
-            value={formData.designation}
+            value={formData.designation || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter designation"
-            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Company</label>
           <input
-            type="number"
-            name="clientid"
-            value={formData.clientid}
+            type="text"
+            name="comp"
+            value={formData.comp || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter client ID"
-            required
+            placeholder="Enter company"
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
+          <select
             name="status"
-            value={formData.status}
+            value={formData.status || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
-          />
+            required
+          >
+            {statusOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Birth Date</label>
           <input
             type="date"
             name="dob"
-            value={formData.dob}
+            value={formData.dob || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
@@ -168,7 +213,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="email"
             name="personalemail"
-            value={formData.personalemail}
+            value={formData.personalemail || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter personal email"
@@ -176,11 +221,11 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Skype</label>
           <input
             type="text"
             name="skypeid"
-            value={formData.skypeid}
+            value={formData.skypeid || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter Skype ID"
@@ -192,7 +237,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="url"
             name="linkedin"
-            value={formData.linkedin}
+            value={formData.linkedin || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter LinkedIn URL"
@@ -204,7 +249,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="text"
             name="twitter"
-            value={formData.twitter}
+            value={formData.twitter || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter Twitter handle"
@@ -216,60 +261,56 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
           <input
             type="text"
             name="facebook"
-            value={formData.facebook}
+            value={formData.facebook || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter Facebook URL"
           />
         </div>
 
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">vendor_id</label>
-          <input
-            type="text"
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter designation"
-            required
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-          <textarea
+          <select
             name="review"
-            value={formData.review}
+            value={formData.review || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter review"
-          />
+          >
+            {reviewOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
           <textarea
             name="notes"
-            value={formData.notes}
+            value={formData.notes || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter notes"
           />
         </div>
 
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-          onClick={onSubmit}
-        >
-          Save Changes
-        </button>
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200 font-semibold text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
+          >
+            Save Changes
+          </button>
+        </div>
       </form>
     </Modal>
   );
 };
 
 export default EditRowRecruiter;
-

@@ -106,12 +106,14 @@ const RecruiterByClient = () => {
   const gridRef = useRef<AgGridReact>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageSize] = useState(100);
+  const [pageSize] = useState(1000);
+  const [sortField, setSortField] = useState("status");
+  const [sortOrder, setSortOrder] = useState("asc");
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     fetchRecruiters(currentPage);
-  }, [currentPage]);
+  }, [currentPage, sortField, sortOrder]);
 
   const fetchRecruiters = async (page: number) => {
     try {
@@ -119,9 +121,10 @@ const RecruiterByClient = () => {
         params: { 
           page,
           pageSize,
-          sortField: "status",
-          sortOrder: "asc"
-        }
+          sortField,
+          sortOrder
+        },
+        headers: { AuthToken: localStorage.getItem("token") }
       });
       setRowData(response.data.data);
       setTotalPages(response.data.pages);
@@ -136,6 +139,7 @@ const RecruiterByClient = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        setSelectedRecruiter(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         setAlertMessage("Please select a row to edit.");
@@ -152,7 +156,9 @@ const RecruiterByClient = () => {
         if (confirmDelete) {
           try {
             await Promise.all(selectedRows.map(row => 
-              axios.delete(`${API_URL}/recruiters/byDetailed/remove/${row.id}`)
+              axios.delete(`${API_URL}/by/recruiters/byDetailed/remove/${row.id}`, {
+                headers: { AuthToken: localStorage.getItem("token") }
+              })
             ));
             fetchRecruiters(currentPage);
           } catch (error) {
@@ -182,9 +188,35 @@ const RecruiterByClient = () => {
   };
 
   const handleDownloadPDF = () => {
+    if (!rowData.length) return;
+    
     const doc = new jsPDF();
-    doc.text("Recruiter Data", 20, 10);
-    doc.save("recruiter_data.pdf");
+    doc.text("Client Recruiters Data", 20, 10);
+    
+    const tableColumn = ["ID", "Name", "Email", "Phone", "Designation", "Client", "Status"];
+    const tableRows = rowData.map(item => [
+      item.id,
+      item.name,
+      item.email,
+      item.phone,
+      item.designation,
+      item.comp,
+      item.status
+    ]);
+    
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
+    });
+    
+    doc.save("client_recruiters_data.pdf");
+  };
+
+  const handleSearch = () => {
+    // Implement search functionality here
+    // This would typically involve filtering the data based on searchValue
+    console.log("Searching for:", searchValue);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -196,7 +228,7 @@ const RecruiterByClient = () => {
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pageNumbers.push(
           <button
             key={i}
@@ -210,9 +242,21 @@ const RecruiterByClient = () => {
             {i}
           </button>
         );
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pageNumbers.push(<span key={i}>...</span>);
       }
     }
     return pageNumbers;
+  };
+
+  const handleSortChanged = (params: any) => {
+    if (params.columnApi.getColumnState().length > 0) {
+      const sortModel = params.columnApi.getColumnState().find((column: any) => column.sort);
+      if (sortModel) {
+        setSortField(sortModel.colId);
+        setSortOrder(sortModel.sort);
+      }
+    }
   };
 
   return (
@@ -223,35 +267,40 @@ const RecruiterByClient = () => {
         </div>
       )}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">Recruiter Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Client Recruiter Management</h1>
         <div className="flex space-x-2">
           <button
             onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
+            title="Add Recruiter"
           >
             <MdAdd className="mr-2" />
           </button>
           <button
             onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
+            title="Edit Recruiter"
           >
             <AiOutlineEdit className="mr-2" />
           </button>
           <button
             onClick={handleDeleteRow}
             className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700"
+            title="Delete Recruiter"
           >
             <MdDelete className="mr-2" />
           </button>
           <button
             onClick={handleViewRow}
-            className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md transition duration-300 hover:bg-gray-700"
+            title="View Recruiter Details"
           >
             <AiOutlineEye className="mr-2" />
           </button>
           <button
             onClick={handleDownloadPDF}
             className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
+            title="Download PDF"
           >
             <FaDownload className="mr-2" />
           </button>
@@ -266,7 +315,7 @@ const RecruiterByClient = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={() => {}}
+          onClick={handleSearch}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
@@ -274,7 +323,7 @@ const RecruiterByClient = () => {
       </div>
       <div
         className="ag-theme-alpine"
-        style={{ height: "400px", width: "100%", overflowY: "auto" }}
+        style={{ height: "500px", width: "100%", overflowY: "auto" }}
       >
         <AgGridReact
           ref={gridRef}
@@ -294,22 +343,44 @@ const RecruiterByClient = () => {
                 borderRight: '2px solid #ccc'
               }
             },
-            { headerName: "ID", field: "id" },
-            { headerName: "Name", field: "name" },
-            { headerName: "Email", field: "email" },
-            { headerName: "Phone", field: "phone" },
-            { headerName: "Designation", field: "designation" },
-            { headerName: "Client ID", field: "clientid" },
-            { headerName: "Company", field: "comp" },
-            { headerName: "Status", field: "status" },
-            { headerName: "DOB", field: "dob" },
-            { headerName: "Personal Email", field: "personalemail" },
-            { headerName: "Skype ID", field: "skypeid" },
-            { headerName: "LinkedIn", field: "linkedin" },
-            { headerName: "Twitter", field: "twitter" },
-            { headerName: "Facebook", field: "facebook" },
-            { headerName: "Review", field: "review" },
-            { headerName: "Notes", field: "notes" },
+            { headerName: "ID", field: "id", width: 70 },
+            { headerName: "Name", field: "name", width: 150, pinned: 'left' },
+            { headerName: "Email", field: "email", width: 180 },
+            { headerName: "Phone", field: "phone", width: 120 },
+            { headerName: "Designation", field: "designation", width: 150 },
+            { headerName: "Client ID", field: "clientid", width: 100 },
+            { headerName: "Company", field: "comp", width: 150 },
+            { 
+              headerName: "Status", 
+              field: "status", 
+              width: 100,
+              cellRenderer: (params: any) => {
+                const statusMap: {[key: string]: string} = {
+                  'A': 'Active',
+                  'I': 'Inactive',
+                  'D': 'Delete',
+                  'R': 'Rejected',
+                  'N': 'Not Interested',
+                  'E': 'Excellent'
+                };
+                return statusMap[params.value] || params.value;
+              }
+            },
+            { headerName: "DOB", field: "dob", width: 110 },
+            { headerName: "Personal Email", field: "personalemail", width: 180 },
+            { headerName: "Skype ID", field: "skypeid", width: 120 },
+            { headerName: "LinkedIn", field: "linkedin", width: 120 },
+            { headerName: "Twitter", field: "twitter", width: 120 },
+            { headerName: "Facebook", field: "facebook", width: 120 },
+            { 
+              headerName: "Review", 
+              field: "review", 
+              width: 100,
+              cellRenderer: (params: any) => {
+                return params.value === 'Y' ? 'Yes' : params.value === 'N' ? 'No' : params.value;
+              }
+            },
+            { headerName: "Notes", field: "notes", width: 200 },
           ]}
           pagination={false}
           domLayout="normal"
@@ -317,10 +388,10 @@ const RecruiterByClient = () => {
           defaultColDef={{
             sortable: true,
             filter: true,
+            resizable: true,
             cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-            minWidth: 60,
-            maxWidth: 100,
           }}
+          onSortChanged={handleSortChanged}
           rowHeight={30}
           headerHeight={35}
         />
@@ -330,14 +401,14 @@ const RecruiterByClient = () => {
           <button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaChevronLeft />
           </button>
@@ -345,17 +416,20 @@ const RecruiterByClient = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaChevronRight />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaAngleDoubleRight />
           </button>
+          <span className="ml-4 text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
         </div>
       </div>
       {modalState.add && (
@@ -368,11 +442,11 @@ const RecruiterByClient = () => {
           }}
         />
       )}
-      {modalState.edit && (
+      {modalState.edit && selectedRecruiter && (
         <EditRowRecruiter
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
-          initialData={gridRef.current?.api.getSelectedRows()[0]}
+          initialData={selectedRecruiter}
           onSubmit={() => {
             fetchRecruiters(currentPage);
             setModalState((prev) => ({ ...prev, edit: false }));

@@ -23,7 +23,7 @@ def get_recruiter_details(
         Recruiter.phone,
         Recruiter.designation,
         Recruiter.clientid,
-        func.ifnull(Client.companyname, " ").label("comp"),
+        func.coalesce(Client.companyname, " ").label("comp"),
         Recruiter.status,
         Recruiter.dob,
         Recruiter.personalemail,
@@ -35,7 +35,7 @@ def get_recruiter_details(
         Recruiter.notes
     ).outerjoin(Client, Recruiter.clientid == Client.id)
 
-    # Apply filters for "cwork" type
+    # Apply filters for "cwork" type - matching the PHP code's cwork condition
     query = query.filter(
         Recruiter.vendorid == 0,
         Recruiter.clientid != 0,
@@ -47,12 +47,16 @@ def get_recruiter_details(
         func.length(Recruiter.designation) > 1
     )
 
-    # Apply sorting
+    # Apply sorting - matching PHP's sortname for cwork type
     if sort_field and sort_order:
-        sort_column = getattr(Recruiter, sort_field, Recruiter.status)
-        if sort_order.lower() == 'desc':
-            sort_column = sort_column.desc()
-        query = query.order_by(sort_column)
+        if sort_field == "status" and sort_order.lower() == "asc":
+            # Default sorting for cwork type in PHP is "status asc, email"
+            query = query.order_by(Recruiter.status.asc(), Recruiter.email.asc())
+        else:
+            sort_column = getattr(Recruiter, sort_field, Recruiter.status)
+            if sort_order.lower() == 'desc':
+                sort_column = sort_column.desc()
+            query = query.order_by(sort_column)
 
     # Get total count before pagination
     total = query.count()
@@ -73,6 +77,10 @@ def get_recruiter_details(
     }
 
 def add_recruiter(db: Session, recruiter_data: dict) -> RecruiterResponse:
+    # Set default vendorid to 0 if not provided to avoid IntegrityError
+    if 'vendorid' not in recruiter_data or recruiter_data['vendorid'] is None:
+        recruiter_data['vendorid'] = 0
+        
     new_recruiter = Recruiter(**recruiter_data)
     db.add(new_recruiter)
     db.commit()
@@ -83,6 +91,10 @@ def update_recruiter(db: Session, recruiter_id: int, recruiter_data: dict) -> Re
     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
+    
+    # Ensure vendorid is not set to None
+    if 'vendorid' in recruiter_data and recruiter_data['vendorid'] is None:
+        recruiter_data['vendorid'] = 0
     
     for key, value in recruiter_data.items():
         if hasattr(recruiter, key):
