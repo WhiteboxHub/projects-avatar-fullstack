@@ -1,4 +1,3 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
@@ -26,7 +25,6 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
-
 jsPDF.prototype.autoTable = autoTable;
 
 interface Company {
@@ -87,6 +85,7 @@ const RecruiterByClient = () => {
   });
   const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
   const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [expandedCompanies, setExpandedCompanies] = useState<{
     [key: number]: boolean;
@@ -105,6 +104,15 @@ const RecruiterByClient = () => {
     setTimeout(() => setAlertMessage(null), 3000);
   };
 
+  // Debounce search value
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -115,7 +123,7 @@ const RecruiterByClient = () => {
             page: currentPage,
             pageSize: pageSize,
             type: "client",
-            search: searchValue || undefined,
+            search: debouncedSearchValue || undefined,
           },
         }
       );
@@ -127,7 +135,7 @@ const RecruiterByClient = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchValue]);
+  }, [currentPage, debouncedSearchValue]);
 
   useEffect(() => {
     fetchData();
@@ -580,11 +588,20 @@ const RecruiterByClient = () => {
           <AiOutlineSearch className="mr-2" /> Search
         </button>
       </div>
+      
 
       <div
-        className="ag-theme-alpine"
+        className="ag-theme-alpine relative"
         style={{ height: "400px", width: "100%", overflowY: "auto" }}
       >
+
+{isLoading && (
+          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
+            <span className="ml-3 text-gray-700 font-medium">Loading...</span>
+          </div>
+        )}
+      
+       
         <AgGridReact
           ref={gridRef}
           rowData={rowData}
@@ -599,6 +616,12 @@ const RecruiterByClient = () => {
           rowSelection="single"
           rowHeight={30}
           headerHeight={35}
+          overlayLoadingTemplate={
+            '<span class="ag-overlay-loading-center">Loading...</span>'
+          }
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+          }
           onGridReady={(params) => {
             params.api.sizeColumnsToFit();
           }}
@@ -606,37 +629,54 @@ const RecruiterByClient = () => {
       </div>
 
       <div className="flex justify-between mt-4">
-        <div className="flex items-center flex-wrap gap-2 overflow-auto">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaChevronLeft />
           </button>
-          {renderPageNumbers()}
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 rounded ${
+                currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaChevronRight />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaAngleDoubleRight />
           </button>
         </div>
+        <span className="ml-4 text-sm text-gray-600">
+          Total Records: {companies.reduce((acc, company) => acc + company.recruiter_count, 0)}
+        </span>
       </div>
 
       <AddRowModal

@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byAllList_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
@@ -62,6 +62,7 @@ const RecruiterByAllList = () => {
   const [pageSize] = useState<number>(200);
   const [searchValue, setSearchValue] = useState<string>("");
   const gridRef = useRef<AgGridReact>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -69,11 +70,31 @@ const RecruiterByAllList = () => {
     fetchRecruiters(currentPage);
   }, [currentPage]);
 
-  useEffect(() => {
-    if (searchValue === '') {
-      fetchRecruiters(currentPage);
+  // Debounced search function
+  const debouncedSearch = useCallback((value: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
-  }, [searchValue]);
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (value === '') {
+        fetchRecruiters(1);
+      } else {
+        fetchRecruiters(1, value);
+      }
+    }, 500); // 500ms debounce delay
+  }, []);
+
+  // Handle search input changes with debounce
+  useEffect(() => {
+    debouncedSearch(searchValue);
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchValue, debouncedSearch]);
 
   const fetchRecruiters = async (page: number, search?: string) => {
     setLoading(true);
@@ -296,11 +317,6 @@ const RecruiterByAllList = () => {
     placeholder="Search..."
     value={searchValue}
     onChange={(e) => setSearchValue(e.target.value)}
-    onKeyPress={(e) => {
-      if (e.key === 'Enter') {
-        fetchRecruiters(1, searchValue);
-      }
-    }}
     className="border border-gray-300 rounded-md p-2 w-64"
   />
   <button

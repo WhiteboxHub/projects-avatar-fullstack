@@ -28,9 +28,23 @@ interface GroupedData {
   [batch: string]: Candidate[];
 }
 
+interface DropdownOptions {
+  courses: string[];
+  processFlag: string[];
+  diceCandidate: string[];
+  workStatus: string[];
+  ssnValid: string[];
+  bgvDone: string[];
+  salary: string[];
+  batches: string[];
+  portalIds: { id: number; name: string }[];
+  referralIds: { id: number; name: string }[];
+}
+
 const Candidates = () => {
   const [rowData, setRowData] = useState<Candidate[]>([]);
   const [, setGroupedData] = useState<GroupedData>({});
+  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions | null>(null);
   const [columnDefs] = useState<{ headerName: string; field: string ; width?: number;
     cellStyle?: any;}[]>([
     { headerName: "Batchname", field: "batchname", width: 120, cellStyle: { fontWeight: 'bold' } },
@@ -95,9 +109,21 @@ const Candidates = () => {
   }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<Candidate | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const fetchDropdownOptions = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/candidates/dropdown-options`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      setDropdownOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching dropdown options:", error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -132,39 +158,22 @@ const Candidates = () => {
     message: string;
   }
 
-  const fetchBatches = async (searchQuery = "") => {
-    try {
-      setLoading(true);
-      if (gridRef.current?.api) {
-        gridRef.current.api.showLoadingOverlay();
-      }
-      const response = await axios.get(`${API_URL}/search`, {
-        params: {
-          page: currentPage,
-          pageSize: paginationPageSize,
-          search: searchQuery,
-        },
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-
-      const { data, totalRows } = response.data;
-      setRowData(data);
-      setTotalRows(totalRows);
-      setTotalPages(Math.ceil(totalRows / paginationPageSize));
-    } catch (error) {
-      console.error("Error loading data:", error);
-      setRowData([]);
-      if (gridRef.current?.api) {
-        gridRef.current.api.showNoRowsOverlay();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSearch = () => {
     setCurrentPage(1);
-    fetchBatches(searchValue);
+    setIsSearchActive(true);
+    fetchData();
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    
+    // If search field is cleared, reset to original data
+    if (value === "" && isSearchActive) {
+      setIsSearchActive(false);
+      setCurrentPage(1);
+      fetchData();
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -185,6 +194,7 @@ const Candidates = () => {
 
   const handleRefresh = () => {
     setSearchValue("");
+    setIsSearchActive(false);
     setCurrentPage(1);
     fetchData();
   };
@@ -201,6 +211,7 @@ const Candidates = () => {
 
   useEffect(() => {
     fetchData();
+    fetchDropdownOptions();
   }, [currentPage]);
 
   useEffect(() => {
@@ -294,7 +305,7 @@ const Candidates = () => {
             type="text"
             placeholder="Search..."
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={handleSearchInputChange}
             className="border border-gray-300 rounded-md p-2 w-64"
           />
           <button
@@ -447,6 +458,7 @@ const Candidates = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           refreshData={fetchData}
+          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.edit && selectedRow && (
@@ -455,6 +467,7 @@ const Candidates = () => {
           onClose={() => setModalState({ ...modalState, edit: false })}
           refreshData={fetchData}
           candidateData={selectedRow}
+          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.view && selectedRow && (

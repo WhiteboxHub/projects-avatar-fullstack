@@ -4,11 +4,12 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byDetailed_modals/AddRowRecruiter";
 import EditRowRecruiter from "@/modals/recruiter_byDetailed_modals/EditRowRecruiter";
 import Modal from "react-modal";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
+import { debounce } from "lodash";
 import { AiOutlineClose } from "react-icons/ai";
 import { FaDownload } from "react-icons/fa";
 import { MdAdd, MdDelete } from "react-icons/md";
@@ -111,18 +112,15 @@ const RecruiterByClient = () => {
   const [sortOrder, setSortOrder] = useState("asc");
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  useEffect(() => {
-    fetchRecruiters(currentPage);
-  }, [currentPage, sortField, sortOrder]);
-
-  const fetchRecruiters = async (page: number) => {
+  const fetchRecruiters = async (page: number, search?: string) => {
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/byDetailed`, {
         params: { 
           page,
           pageSize,
           sortField,
-          sortOrder
+          sortOrder,
+          searchTerm: search || undefined
         },
         headers: { AuthToken: localStorage.getItem("token") }
       });
@@ -131,6 +129,26 @@ const RecruiterByClient = () => {
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchRecruiters(currentPage);
+  }, [currentPage, sortField, sortOrder]);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((searchTerm: string) => {
+      fetchRecruiters(1, searchTerm);
+      setCurrentPage(1);
+    }, 500),
+    []
+  );
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    debouncedSearch(value);
   };
 
   const handleAddRow = () => setModalState((prevState) => ({ ...prevState, add: true }));
@@ -160,7 +178,7 @@ const RecruiterByClient = () => {
                 headers: { AuthToken: localStorage.getItem("token") }
               })
             ));
-            fetchRecruiters(currentPage);
+            fetchRecruiters(currentPage, searchValue);
           } catch (error) {
             console.error("Error deleting recruiters:", error);
             setAlertMessage("Error deleting recruiters.");
@@ -211,12 +229,6 @@ const RecruiterByClient = () => {
     });
     
     doc.save("client_recruiters_data.pdf");
-  };
-
-  const handleSearch = () => {
-    // Implement search functionality here
-    // This would typically involve filtering the data based on searchValue
-    console.log("Searching for:", searchValue);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -311,11 +323,11 @@ const RecruiterByClient = () => {
           type="text"
           placeholder="Search..."
           value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={handleSearchChange}
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={handleSearch}
+          onClick={() => fetchRecruiters(1, searchValue)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
@@ -437,7 +449,7 @@ const RecruiterByClient = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
-            fetchRecruiters(currentPage);
+            fetchRecruiters(currentPage, searchValue);
             setModalState((prev) => ({ ...prev, add: false }));
           }}
         />
@@ -448,7 +460,7 @@ const RecruiterByClient = () => {
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRecruiter}
           onSubmit={() => {
-            fetchRecruiters(currentPage);
+            fetchRecruiters(currentPage, searchValue);
             setModalState((prev) => ({ ...prev, edit: false }));
           }}
         />

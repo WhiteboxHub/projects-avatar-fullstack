@@ -44,6 +44,8 @@ const PlacementPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
+    const [sortField, setSortField] = useState<string>("submissiondate");
+    const [sortOrder, setSortOrder] = useState<string>("desc");
     const gridRef = useRef<AgGridReact>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -52,7 +54,7 @@ const PlacementPage = () => {
         fetchPlacements();
         fetchCandidateOptions();
         fetchEmployeeOptions();
-    }, [currentPage]);
+    }, [currentPage, searchValue, sortField, sortOrder]);
 
     const fetchPlacements = async () => {
         try {
@@ -62,8 +64,12 @@ const PlacementPage = () => {
                 params: {
                     page: currentPage,
                     rows: pageSize,
-                    sidx: "submissiondate",
-                    sord: "desc"
+                    sidx: sortField,
+                    sord: sortOrder,
+                    _search: searchValue ? true : false,
+                    searchField: searchValue ? "name" : "",
+                    searchString: searchValue,
+                    searchOper: searchValue ? "cn" : ""
                 },
             });
 
@@ -102,6 +108,7 @@ const PlacementPage = () => {
     };
 
     const handleSearch = () => {
+        setCurrentPage(1);
         fetchPlacements();
     };
 
@@ -210,6 +217,16 @@ const PlacementPage = () => {
         }
         
         return pageNumbers;
+    };
+
+    const handleSortChanged = (event: any) => {
+        if (event.columnApi.getColumnState().length > 0) {
+            const sortModel = event.columnApi.getColumnState().find((column: any) => column.sort);
+            if (sortModel) {
+                setSortField(sortModel.colId);
+                setSortOrder(sortModel.sort);
+            }
+        }
     };
 
     return (
@@ -354,6 +371,7 @@ const PlacementPage = () => {
                     onGridSizeChanged={(params) => {
                         params.api.sizeColumnsToFit();
                     }}
+                    onSortChanged={handleSortChanged}
                     overlayLoadingTemplate={
                         '<span class="ag-overlay-loading-center">Loading...</span>'
                     }

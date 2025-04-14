@@ -1,10 +1,18 @@
-"use client";
-import React, { useState, useRef, useEffect } from "react";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+"use client";
+import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+import React, { useEffect, useRef, useState } from "react";
+import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { Recruiter } from "@/types/byClient";
+
 import {
   FaDownload,
   FaChevronLeft,
@@ -12,13 +20,6 @@ import {
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
 } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
-import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byClient";
-import axios from "axios";
 
 jsPDF.prototype.autoTable = autoTable;
 

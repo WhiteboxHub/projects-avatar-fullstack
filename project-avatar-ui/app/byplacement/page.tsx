@@ -85,6 +85,7 @@ const RecruiterByPlacement = () => {
   });
   const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
   const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [expandedCompanies, setExpandedCompanies] = useState<{
     [key: number]: boolean;
@@ -101,6 +102,15 @@ const RecruiterByPlacement = () => {
     setTimeout(() => setAlertMessage(null), 3000);
   };
 
+  // Debounce search value
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -110,7 +120,7 @@ const RecruiterByPlacement = () => {
           params: {
             page: currentPage,
             pageSize: pageSize,
-            search: searchValue || undefined,
+            search: debouncedSearchValue || undefined,
           },
         }
       );
@@ -122,7 +132,7 @@ const RecruiterByPlacement = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchValue]);
+  }, [currentPage, debouncedSearchValue]);
 
   useEffect(() => {
     fetchData();
