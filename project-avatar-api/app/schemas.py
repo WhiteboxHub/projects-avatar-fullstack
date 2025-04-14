@@ -561,7 +561,7 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    tier: Optional[int] = None
+    tier: Optional[str] = None
     status: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -571,18 +571,18 @@ class ClientBase(BaseModel):
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    url: Optional[HttpUrl] = None
+    url: Optional[str] = None
     manager1name: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
     linkedin: Optional[str] = None
-    manager1email: Optional[str] = None
+    manager1email: Optional[EmailStr] = None
     manager1phone: Optional[str] = None
     hmname: Optional[str] = None
-    hmemail: Optional[str] = None  
+    hmemail: Optional[EmailStr] = None  
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
-    hremail: Optional[str] = None
+    hremail: Optional[EmailStr] = None
     hrphone: Optional[str] = None
     notes: Optional[str] = None
 
@@ -599,7 +599,7 @@ class ClientBase(BaseModel):
         except Exception:
             return None
 
-    @field_validator("email", "hmemail", "hremail", mode="before")
+    @field_validator("email", "manager1email", "hmemail", "hremail", mode="before")
     @classmethod
     def validate_email(cls, v):
         if v is None or v.strip() == "":
@@ -965,21 +965,21 @@ class VendorInDB(VendorBase):
     id: int
 
 # Client Schemas
-class ClientBase(BaseModel):
-    companyname: str
+# class ClientBase(BaseModel):
+#     companyname: str
 
-class ClientCreate(ClientBase):
-    pass
+# class ClientCreate(ClientBase):
+#     pass
 
-class ClientUpdate(ClientBase):
-    pass
+# class ClientUpdate(ClientBase):
+#     pass
 
-class ClientInDB(ClientBase):
-    id: int
+# class ClientInDB(ClientBase):
+#     id: int
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+#     class Config:
+#         orm_mode = True
+#         from_attributes = True
 
 # Recruiter Schemas
 class RecruiterBase(BaseModel):

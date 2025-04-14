@@ -1,6 +1,6 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+"use client";
 import AddRowModal from "@/modals/client_modals/AddRowClient";
 import EditRowModal from "@/modals/client_modals/EditRowClient";
 import React, { useEffect, useRef, useState } from "react";
@@ -34,7 +34,7 @@ const Clients = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string }[]
+    { headerName: string; field: string; editable?: boolean; width?: number; editoptions?: any; formatter?: string; label?: string; }[]
   >([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -75,51 +75,72 @@ const Clients = () => {
     }
   };
 
-  // const fetchClients = async (searchQuery = "") => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.get(`${API_URL}/client/search`, {
-  //       params: {
-  //         page: currentPage,
-  //         pageSize: paginationPageSize,
-  //         search: searchQuery,
-  //       },
-  //       headers: { AuthToken: localStorage.getItem("token") },
-  //     });
+  const fetchClients = async (searchQuery = "") => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/client/client/search`, {
+        params: {
+          page: currentPage,
+          pageSize: paginationPageSize,
+          search: searchQuery,
+        },
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
 
-  //     const { data, total } = response.data;
-  //     setRowData(data);
-  //     setTotalRows(total);
-  //     setupColumns(data);
-  //   } catch (error) {
-  //     console.error("Error loading data:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      const { data, total } = response.data;
+      setRowData(data);
+      setTotalRows(total);
+      setupColumns(data);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // debouncing for search
-  // useEffect(() => {
-  //   const delaySearch = setTimeout(() => {
-  //     fetchClients(searchValue);
-  //   }, 500);
-  //   return () => clearTimeout(delaySearch);
-  // }, [searchValue]);
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      if (searchValue) {
+        fetchClients(searchValue);
+      }
+    }, 500);
+    return () => clearTimeout(delaySearch);
+  }, [searchValue]);
 
-  // const handleSearch = () => {
-  //   fetchClients(searchValue);
-  // };
+  const handleSearch = () => {
+    fetchClients(searchValue);
+  };
 
   const setupColumns = (data: Client[]) => {
     if (data.length > 0) {
+      // Define columns based on the PHP grid structure
       const columns = [
-        { headerName: "ID", field: "id" },
-        ...Object.keys(data[0])
-          .filter((key) => key !== "id")
-          .map((key) => ({
-            headerName: key.charAt(0).toUpperCase() + key.slice(1),
-            field: key,
-          })),
+        { headerName: "ID", field: "id", width: 40, editable: false },
+        { headerName: "Company Name", field: "companyname", width: 250, editable: true, editoptions: { size: 75, maxlength: 250, style: "text-transform: uppercase" }, label: "Company Name" },
+        { headerName: "Email", field: "email", width: 200, editable: true, editoptions: { size: 75, maxlength: 250, style: "text-transform: lowercase" }, formatter: "email", label: "Email" },
+        { headerName: "Phone", field: "phone", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Phone" },
+        { headerName: "Status", field: "status", width: 90, editable: true, label: "Status", edittype: "select" },
+        { headerName: "URL", field: "url", width: 200, editable: true, editoptions: { size: 75, maxlength: 200, style: "text-transform: lowercase" }, formatter: "link", label: "Url" },
+        { headerName: "Fax", field: "fax", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Fax" },
+        { headerName: "Address", field: "address", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Address" },
+        { headerName: "City", field: "city", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "City" },
+        { headerName: "State", field: "state", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "State" },
+        { headerName: "Country", field: "country", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Country" },
+        { headerName: "Zip", field: "zip", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Zip" },
+        { headerName: "Twitter", field: "twitter", width: 200, editable: true, label: "Twitter" },
+        { headerName: "Facebook", field: "facebook", width: 200, editable: true, label: "Facebook" },
+        { headerName: "LinkedIn", field: "linkedin", width: 200, editable: true, label: "Linkedin" },
+        { headerName: "Mgr Name", field: "manager1name", width: 200, editable: true, label: "Mgr Name" },
+        { headerName: "Mgr Email", field: "manager1email", width: 150, editable: true, formatter: "email", label: "Mgr Email" },
+        { headerName: "Mgr Phone", field: "manager1phone", width: 90, editable: true, label: "Mgr Phone" },
+        { headerName: "Hiring Mgr Name", field: "hmname", width: 200, editable: true, label: "Hiring Mgr Name" },
+        { headerName: "Hiring Mgr Email", field: "hmemail", width: 150, editable: true, formatter: "email", label: "Hiring Mgr Email" },
+        { headerName: "Hiring Mgr Phone", field: "hmphone", width: 90, editable: true, label: "Hiring Mgr Phone" },
+        { headerName: "HR Name", field: "hrname", width: 200, editable: true, label: "HR Name" },
+        { headerName: "HR Email", field: "hremail", width: 150, editable: true, formatter: "email", label: "HR Email" },
+        { headerName: "HR Phone", field: "hrphone", width: 90, editable: true, label: "HR Phone" },
+        { headerName: "Notes", field: "notes", width: 400, editable: true, edittype: "textarea", editoptions: { rows: 6, cols: 60 }, label: "Notes" }
       ];
       setColumnDefs(columns);
     }
@@ -154,7 +175,7 @@ const Clients = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const clientId = selectedRows[0].clientid || selectedRows[0].id;
+        const clientId = selectedRows[0].id;
         if (clientId) {
           const confirmation = window.confirm(
             `Are you sure you want to delete client ID ${clientId}?`
@@ -293,7 +314,7 @@ const Clients = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          // onClick={() => fetchClients(searchValue)}
+          onClick={handleSearch}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
@@ -321,7 +342,6 @@ const Clients = () => {
               filter: true,
               cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
               minWidth: 60,
-              maxWidth: 100,
             }}
             rowHeight={30}
             headerHeight={35}
@@ -420,4 +440,3 @@ const Clients = () => {
 };
 
 export default Clients;
-
