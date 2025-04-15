@@ -414,22 +414,22 @@ import axios from 'axios';
 
 interface FormData {
   poid: string;
-  invoiceNo: string;
-  startDate: string;
-  endDate: string;
-  invoiceDate: string;
+  invoicenumber: string;
+  startdate: string;
+  enddate: string;
+  invoicedate: string;
   quantity: string;
-  otQuantity: string;
+  otquantity: string;
   status: string;
-  candidatePaidDate: string;
-  candidatePaymentStatus: string;
+  emppaiddate: string;
+  candpaymentstatus: string;
   reminders: string;
-  received: string;
-  receivedDate: string;
-  releasedDate: string;
-  checkNo: string;
-  invoiceUrl: string;
-  checkUrl: string;
+  amountreceived: string;
+  receiveddate: string;
+  releaseddate: string;
+  checknumber: string;
+  invoiceurl: string;
+  checkurl: string;
   notes: string;
 }
 
@@ -442,22 +442,22 @@ interface AddRowModalProps {
 const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<FormData>({
     poid: '',
-    invoiceNo: '',
-    startDate: '',
-    endDate: '',
-    invoiceDate: '',
+    invoicenumber: '',
+    startdate: '',
+    enddate: '',
+    invoicedate: '',
     quantity: '',
-    otQuantity: '',
+    otquantity: '',
     status: 'Open',
-    candidatePaidDate: '',
-    candidatePaymentStatus: 'Open',
+    emppaiddate: '',
+    candpaymentstatus: 'Open',
     reminders: 'N',
-    received: '',
-    receivedDate: '',
-    releasedDate: '',
-    checkNo: '',
-    invoiceUrl: '',
-    checkUrl: '',
+    amountreceived: '',
+    receiveddate: '',
+    releaseddate: '',
+    checknumber: '',
+    invoiceurl: '',
+    checkurl: '',
     notes: '',
   });
 
@@ -553,14 +553,14 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         </div>
 
         <div className="modal-field">
-          <label htmlFor="invoiceNo" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="invoicenumber" className="block text-sm font-semibold text-gray-700 mb-1">
             Invoice No. *
           </label>
           <input
             type="text"
-            id="invoiceNo"
-            name="invoiceNo"
-            value={formData.invoiceNo}
+            id="invoicenumber"
+            name="invoicenumber"
+            value={formData.invoicenumber}
             onChange={handleChange}
             required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
@@ -568,42 +568,42 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         </div>
 
         <div className="modal-field">
-          <label htmlFor="startDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="startdate" className="block text-sm font-semibold text-gray-700 mb-1">
             Start Date
           </label>
           <input
             type="date"
-            id="startDate"
-            name="startDate"
-            value={formData.startDate}
+            id="startdate"
+            name="startdate"
+            value={formData.startdate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="endDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="enddate" className="block text-sm font-semibold text-gray-700 mb-1">
             End Date
           </label>
           <input
             type="date"
-            id="endDate"
-            name="endDate"
-            value={formData.endDate}
+            id="enddate"
+            name="enddate"
+            value={formData.enddate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="invoiceDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="invoicedate" className="block text-sm font-semibold text-gray-700 mb-1">
             Invoice Date
           </label>
           <input
             type="date"
-            id="invoiceDate"
-            name="invoiceDate"
-            value={formData.invoiceDate}
+            id="invoicedate"
+            name="invoicedate"
+            value={formData.invoicedate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
@@ -624,14 +624,14 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         </div>
 
         <div className="modal-field">
-          <label htmlFor="otQuantity" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="otquantity" className="block text-sm font-semibold text-gray-700 mb-1">
             OT Quantity
           </label>
           <input
             type="text"
-            id="otQuantity"
-            name="otQuantity"
-            value={formData.otQuantity}
+            id="otquantity"
+            name="otquantity"
+            value={formData.otquantity}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
@@ -656,27 +656,27 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         </div>
 
         <div className="modal-field">
-          <label htmlFor="candidatePaidDate" className="block text-sm font-semibold text-gray-700 mb-1">
-            Candidate Paid Date
+          <label htmlFor="emppaiddate" className="block text-sm font-semibold text-gray-700 mb-1">
+            Employee Paid Date
           </label>
           <input
             type="date"
-            id="candidatePaidDate"
-            name="candidatePaidDate"
-            value={formData.candidatePaidDate}
+            id="emppaiddate"
+            name="emppaiddate"
+            value={formData.emppaiddate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="candidatePaymentStatus" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="candpaymentstatus" className="block text-sm font-semibold text-gray-700 mb-1">
             Candidate Payment Status *
           </label>
           <select
-            id="candidatePaymentStatus"
-            name="candidatePaymentStatus"
-            value={formData.candidatePaymentStatus}
+            id="candpaymentstatus"
+            name="candpaymentstatus"
+            value={formData.candpaymentstatus}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
@@ -704,84 +704,84 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         </div>
 
         <div className="modal-field">
-          <label htmlFor="received" className="block text-sm font-semibold text-gray-700 mb-1">
-            Received
+          <label htmlFor="amountreceived" className="block text-sm font-semibold text-gray-700 mb-1">
+            Amount Received
           </label>
           <input
             type="text"
-            id="received"
-            name="received"
-            value={formData.received}
+            id="amountreceived"
+            name="amountreceived"
+            value={formData.amountreceived}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="receivedDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="receiveddate" className="block text-sm font-semibold text-gray-700 mb-1">
             Received Date
           </label>
           <input
             type="date"
-            id="receivedDate"
-            name="receivedDate"
-            value={formData.receivedDate}
+            id="receiveddate"
+            name="receiveddate"
+            value={formData.receiveddate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="releasedDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="releaseddate" className="block text-sm font-semibold text-gray-700 mb-1">
             Released Date
           </label>
           <input
             type="date"
-            id="releasedDate"
-            name="releasedDate"
-            value={formData.releasedDate}
+            id="releaseddate"
+            name="releaseddate"
+            value={formData.releaseddate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="checkNo" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="checknumber" className="block text-sm font-semibold text-gray-700 mb-1">
             Check No.
           </label>
           <input
             type="text"
-            id="checkNo"
-            name="checkNo"
-            value={formData.checkNo}
+            id="checknumber"
+            name="checknumber"
+            value={formData.checknumber}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="invoiceUrl" className="block text-sm font-semibold text-gray-700 mb-1">
-            Invoice Url
+          <label htmlFor="invoiceurl" className="block text-sm font-semibold text-gray-700 mb-1">
+            Invoice URL
           </label>
           <input
             type="text"
-            id="invoiceUrl"
-            name="invoiceUrl"
-            value={formData.invoiceUrl}
+            id="invoiceurl"
+            name="invoiceurl"
+            value={formData.invoiceurl}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div className="modal-field">
-          <label htmlFor="checkUrl" className="block text-sm font-semibold text-gray-700 mb-1">
-            Check Url
+          <label htmlFor="checkurl" className="block text-sm font-semibold text-gray-700 mb-1">
+            Check URL
           </label>
           <input
             type="text"
-            id="checkUrl"
-            name="checkUrl"
-            value={formData.checkUrl}
+            id="checkurl"
+            name="checkurl"
+            value={formData.checkurl}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />

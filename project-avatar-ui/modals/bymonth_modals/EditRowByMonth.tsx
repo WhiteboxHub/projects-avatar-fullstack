@@ -5,10 +5,10 @@ import { ByMonth } from '@/types';
 
 interface FormData {
   poid: string;
-  invoiceNo: string;
-  startDate: string;
-  endDate: string;
-  invoiceDate: string;
+  invoicenumber: string;  
+  startdate: string;      
+  enddate: string;        
+  invoicedate: string;    // Changed from invoiceDate
   quantity: string;
   otQuantity: string;
   status: string;
@@ -34,10 +34,10 @@ interface EditRowModalProps {
 const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
   const [formData, setFormData] = useState<FormData>({
     poid: '',
-    invoiceNo: '',
-    startDate: '',
-    endDate: '',
-    invoiceDate: '',
+    invoicenumber: '',
+    startdate: '',
+    enddate: '',
+    invoicedate: '',
     quantity: '',
     otQuantity: '',
     status: 'Open',
@@ -74,10 +74,10 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
     if (rowData) {
       setFormData({
         poid: rowData.poid || '',
-        invoiceNo: rowData.invoiceNo || '',
-        startDate: rowData.startDate || '',
-        endDate: rowData.endDate || '',
-        invoiceDate: rowData.invoiceDate || '',
+        invoicenumber: rowData.invoiceNo || '',  
+        startdate: rowData.startDate || '',     
+        enddate: rowData.endDate || '',         
+        invoicedate: rowData.invoiceDate || '', 
         quantity: rowData.quantity || '',
         otQuantity: rowData.otQuantity || '',
         status: rowData.status || 'Open',
@@ -169,63 +169,66 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
           </select>
         </div>
 
+        {/* Invoice No. field */}
         <div className="modal-field">
-          <label htmlFor="invoiceNo" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="invoicenumber" className="block text-sm font-semibold text-gray-700 mb-1">
             Invoice No. *
           </label>
           <input
             type="text"
-            id="invoiceNo"
-            name="invoiceNo"
-            value={formData.invoiceNo}
+            id="invoicenumber"
+            name="invoicenumber"
+            value={formData.invoicenumber}
             onChange={handleChange}
             required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
+        {/* Start Date field */}
         <div className="modal-field">
-          <label htmlFor="startDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="startdate" className="block text-sm font-semibold text-gray-700 mb-1">
             Start Date
           </label>
           <input
             type="date"
-            id="startDate"
-            name="startDate"
-            value={formData.startDate}
+            id="startdate"
+            name="startdate"
+            value={formData.startdate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
+        {/* End Date field */}
         <div className="modal-field">
-          <label htmlFor="endDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="enddate" className="block text-sm font-semibold text-gray-700 mb-1">
             End Date
           </label>
           <input
             type="date"
-            id="endDate"
-            name="endDate"
-            value={formData.endDate}
+            id="enddate"
+            name="enddate"
+            value={formData.enddate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
+        {/* Invoice Date field */}
         <div className="modal-field">
-          <label htmlFor="invoiceDate" className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="invoicedate" className="block text-sm font-semibold text-gray-700 mb-1">
             Invoice Date
           </label>
           <input
             type="date"
-            id="invoiceDate"
-            name="invoiceDate"
-            value={formData.invoiceDate}
+            id="invoicedate"
+            name="invoicedate"
+            value={formData.invoicedate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
-
         <div className="modal-field">
           <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1">
             Quantity
