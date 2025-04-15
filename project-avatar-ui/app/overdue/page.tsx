@@ -1319,7 +1319,7 @@ const OverdueComponent = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = useCallback(async (searchQuery = "", page = 1) => {
+  const fetchData = useCallback(async (_, page = 1) => {
     setLoading(true);
     try {
       const response = await axios.get<ApiOverdueResponse>(`${API_URL}/overdue/get`, {
@@ -1387,7 +1387,7 @@ const OverdueComponent = () => {
       console.log("API Response:", response);
   
       // Check if the response data is an array
-      let data = response.data;
+      const data = response.data;
       if (!Array.isArray(data)) {
         console.error("Expected an array but received:", data);
         setRowData([]);

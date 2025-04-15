@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.db import get_db
-from app.controllers.bymonthController import get_invoice_months, get_invoices_by_month, create_invoice, update_invoice
+from app.controllers.bymonthController import get_invoice_months, get_invoices_by_month, create_invoice, update_invoice ,get_pname_list
 from app.schemas import InvoiceCreateSchema, InvoiceUpdateSchema
 
 router = APIRouter()
@@ -18,6 +18,11 @@ def read_invoices_by_month(month: str, page: int = 1, page_size: int = 10000, se
         raise HTTPException(status_code=404, detail="Invoices not found for the specified month")
     return invoices
 
+@router.get("/api/admin/pname-list/")
+def read_pname_list(db: Session = Depends(get_db)):
+    return get_pname_list(db)
+
+
 @router.post("/api/admin/invoices")
 def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depends(get_db)):
     try:
@@ -25,9 +30,19 @@ def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depend
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+# @router.put("/api/admin/invoices/{invoice_id}")
+# def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
+#     result = update_invoice(db, invoice_id, invoice_data)
+#     if "error" in result:
+#         raise HTTPException(status_code=404, detail=result["error"])
+#     return result
+
 @router.put("/api/admin/invoices/{invoice_id}")
 def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
     result = update_invoice(db, invoice_id, invoice_data)
-    if "error" in result:
+    
+    if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
+
     return result
+

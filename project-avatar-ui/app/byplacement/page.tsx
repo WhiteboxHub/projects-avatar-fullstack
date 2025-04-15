@@ -1,6 +1,6 @@
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-"use client";
 import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
 import EditRowRecruiter from "@/modals/recruiter_byPlacement_modals/EditRowRecruiter";
 import ViewRowRecruiter from "@/modals/recruiter_byPlacement_modals/ViewRowRecruiter";

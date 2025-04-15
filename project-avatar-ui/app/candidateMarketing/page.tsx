@@ -52,9 +52,9 @@ interface Employee {
   name: string;
 }
 
-interface RowData {
-  // ... your existing RowData interface
-}
+// interface RowData {
+//   // ... your existing RowData interface
+// }
 
 interface AutoTableDoc extends jsPDF {
   autoTable: (d: jsPDF, options: UserOptions) => void;
@@ -93,8 +93,7 @@ const CurrentMarketing = () => {
         setTotalRows(0);
         setColumnDefs([]);
       }
-    } catch (error) {
-      // console.error("Error loading data:", error);
+    } catch {
       alert("No candidate with that name ");
     }
   }, [paginationPageSize, API_URL]);
@@ -137,7 +136,7 @@ const CurrentMarketing = () => {
         setTotalRows(0);
         setColumnDefs([]);
       }
-    } catch (error) {
+    } catch {
       // console.error("Error loading data:", error);
       alert("No candidate with that name .");
     }
