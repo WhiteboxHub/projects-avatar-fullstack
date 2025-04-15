@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
-import { ClientCreate } from "@/types/client"; 
+import Modal from "react-modal";
+import React, { useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { ClientCreate } from "@/types/client";
 
 interface AddRowModalProps {
   isOpen: boolean;
@@ -50,7 +50,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/client`, formData); 
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/client/client/add`, formData); 
       refreshData();
       onClose();
     } catch (error) {

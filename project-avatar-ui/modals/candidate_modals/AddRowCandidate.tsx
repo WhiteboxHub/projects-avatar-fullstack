@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { toast } from "react-toastify";
+
+interface DropdownOptions {
+  courses: string[];
+  processFlag: string[];
+  diceCandidate: string[];
+  workStatus: string[];
+  ssnValid: string[];
+  bgvDone: string[];
+  salary: string[];
+  batches: string[];
+  portalIds: Array<{id: string, name: string}>;
+  referralIds: Array<{id: string, name: string}>;
+}
 
 interface FormData {
   name: string;
@@ -14,12 +28,11 @@ interface FormData {
   education: string;
   workexperience: string;
   ssn: string;
-  agreement: string;
-  promissory: string;
-  driverslicense: string;
-  workpermit: string;
+  dob: string;
+  portalid: string;
   wpexpirationdate: string;
-  offerletter: string;
+  ssnvalidated: string;
+  bgv: string;
   secondaryemail: string;
   secondaryphone: string;
   address: string;
@@ -27,24 +40,19 @@ interface FormData {
   state: string;
   country: string;
   zip: string;
-  linkedin: string;
-  dob: string;
+  guarantorname: string;
+  guarantordesignation: string;
+  guarantorcompany: string;
   emergcontactname: string;
   emergcontactemail: string;
   emergcontactphone: string;
   emergcontactaddrs: string;
-  guidelines: string;
-  ssnvalidated: string;
-  bgv: string;
   term: string;
   feepaid: string;
   feedue: string;
   salary0: string;
   salary6: string;
   salary12: string;
-  guarantorname: string;
-  guarantordesignation: string;
-  guarantorcompany: string;
   contracturl: string;
   empagreementurl: string;
   offerletterurl: string;
@@ -52,22 +60,11 @@ interface FormData {
   workpermiturl: string;
   ssnurl: string;
   referralid: string;
-  portalid: string;
-  avatarid: string;
   notes: string;
   batchname: string;
-  coverletter: string;
-  background: string;
-  recruiterassesment: string;
-  instructorassesment: string;
   processflag: string;
-  defaultprocessflag: string;
-  originalresume: string;
-  lastmoddatetime: string;
-  statuschangedate: string;
   diceflag: string;
-  batchid: string;
-  emaillist: string;
+  originalresume: string;
 }
 
 interface AddRowCandidateProps {
@@ -76,964 +73,390 @@ interface AddRowCandidateProps {
   onClose: () => void;
 }
 
-const AddRowCandidate: React.FC<AddRowCandidateProps> = ({ isOpen, refreshData, onClose }) => {
-  const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    enrolleddate: '',
-    email: '',
-    course: '',
-    phone: '',
-    status: '',
-    workstatus: '',
-    education: '',
-    workexperience: '',
-    ssn: '',
-    agreement: '',
-    promissory: '',
-    driverslicense: '',
-    workpermit: '',
-    wpexpirationdate: '',
-    offerletter: '',
-    secondaryemail: '',
-    secondaryphone: '',
-    address: '',
-    city: '',
-    state: '',
-    country: '',
-    zip: '',
-    linkedin: '',
-    dob: '',
-    emergcontactname: '',
-    emergcontactemail: '',
-    emergcontactphone: '',
-    emergcontactaddrs: '',
-    guidelines: '',
-    ssnvalidated: '',
-    bgv: '',
-    term: '',
-    feepaid: '',
-    feedue: '',
-    salary0: '',
-    salary6: '',
-    salary12: '',
-    guarantorname: '',
-    guarantordesignation: '',
-    guarantorcompany: '',
-    contracturl: '',
-    empagreementurl: '',
-    offerletterurl: '',
-    dlurl: '',
-    workpermiturl: '',
-    ssnurl: '',
-    referralid: '',
-    portalid: '',
-    avatarid: '',
-    notes: '',
-    batchname: '',
-    coverletter: '',
-    background: '',
-    recruiterassesment: '',
-    instructorassesment: '',
-    processflag: '',
-    defaultprocessflag: '',
-    originalresume: '',
-    lastmoddatetime: '',
-    statuschangedate: '',
-    diceflag: '',
-    batchid: '',
-    emaillist: '',
-  });
+const initialFormData: FormData = {
+  name: '',
+  enrolleddate: new Date().toISOString().split('T')[0],
+  email: '',
+  course: '',
+  phone: '',
+  status: '',
+  workstatus: '',
+  education: '',
+  workexperience: '',
+  ssn: '',
+  dob: '',
+  portalid: '',
+  wpexpirationdate: '',
+  ssnvalidated: '',
+  bgv: '',
+  secondaryemail: '',
+  secondaryphone: '',
+  address: '',
+  city: '',
+  state: '',
+  country: '',
+  zip: '',
+  guarantorname: '',
+  guarantordesignation: '',
+  guarantorcompany: '',
+  emergcontactname: '',
+  emergcontactemail: '',
+  emergcontactphone: '',
+  emergcontactaddrs: '',
+  term: '',
+  feepaid: '',
+  feedue: '',
+  salary0: '',
+  salary6: '',
+  salary12: '',
+  contracturl: '',
+  empagreementurl: '',
+  offerletterurl: '',
+  dlurl: '',
+  workpermiturl: '',
+  ssnurl: '',
+  referralid: '',
+  notes: '',
+  batchname: '',
+  processflag: '',
+  diceflag: '',
+  originalresume: ''
+};
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+const AddRowCandidate: React.FC<AddRowCandidateProps> = ({ isOpen, refreshData, onClose }) => {
+  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions | null>(null);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchDropdownOptions = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error('Authentication token not found. Please log in again.');
+          return;
+        }
+        
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/candidates/dropdown-options`,
+          { headers: { AuthToken: token } }
+        );
+        setDropdownOptions(response.data);
+      } catch (error) {
+        console.error('Error fetching dropdown options:', error);
+        toast.error('Failed to load form options');
+      }
+    };
+
+    if (isOpen) {
+      fetchDropdownOptions();
+    }
+  }, [isOpen]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<FormData> = {};
+
+    // Required fields validation
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
+    if (!formData.course) newErrors.course = 'Course is required';
+    if (!formData.batchname) newErrors.batchname = 'Batch name is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when field is modified
+    if (errors[name as keyof FormData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/candidates/insert`, formData, {
-        headers: { AuthToken: localStorage.getItem('token') },
-      });
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly');
+      return;
+    }
 
-      // Here, use the newly created batch data for the refreshData
-      const newBatch = response.data; // assuming the API returns the new batch
-      refreshData(); // Pass the new batch to be added
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/candidates/candidates/insert`,
+        formData,
+        { 
+          headers: { 
+            'AuthToken': token,
+            'Content-Type': 'application/json'
+          } 
+        }
+      );
+      toast.success('Candidate added successfully');
+      refreshData();
       onClose();
+      setFormData(initialFormData);
     } catch (error) {
-      console.error('Error adding row:', error);
+      console.error('Error adding candidate:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(`Failed to add candidate: ${error.response.data.detail || 'Server error'}`);
+      } else {
+        toast.error('Failed to add candidate. Please check your connection and try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const renderField = (
+    name: keyof FormData,
+    label: string,
+    type: string = 'text',
+    required: boolean = false,
+    options?: any[],
+    placeholder?: string
+  ) => {
+    const baseClassName = `w-full px-3 py-2 text-sm border ${
+      errors[name] ? 'border-red-500' : 'border-gray-300'
+    } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`;
+
+    return (
+      <div className="modal-field">
+        <label htmlFor={name} className="block text-sm font-semibold text-gray-700 mb-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        
+        {type === 'select' ? (
+          <select
+            id={name}
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={baseClassName}
+            required={required}
+          >
+            <option value="">Select {label}</option>
+            {options?.map((opt: any) => (
+              <option key={opt.id || opt} value={opt.id || opt}>
+                {opt.name || opt}
+              </option>
+            ))}
+          </select>
+        ) : type === 'textarea' ? (
+          <textarea
+            id={name}
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={`${baseClassName} h-24`}
+            required={required}
+            placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+          />
+        ) : (
+          <input
+            type={type}
+            id={name}
+            name={name}
+            value={formData[name]}
+            onChange={handleChange}
+            className={baseClassName}
+            required={required}
+            placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+          />
+        )}
+        {errors[name] && (
+          <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
       style={{
         content: {
-          top: '55%',
+          top: '50%',
           left: '50%',
           right: 'auto',
           bottom: 'auto',
           transform: 'translate(-50%, -50%)',
-          maxWidth: '400px',
-          width: '90%',
-          maxHeight: '80vh',
+          maxWidth: '1000px',
+          width: '95%',
+          height: '85vh',
           padding: '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-          overflowY: 'auto',
-          fontFamily: 'Arial, sans-serif',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         },
         overlay: {
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       }}
+      contentLabel="Add New Candidate"
+      ariaHideApp={false}
     >
       <div className="relative">
         <button
           onClick={onClose}
           className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
         >
-          &times;
+          <AiOutlineClose />
         </button>
       </div>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">Add New Candidate</h2>
-  
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
-        <div className="modal-field">
-          <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter name"
-            required
-          />
-        </div>
-  
-        {/* Enrolled Date */}
-        <div className="modal-field">
-          <label htmlFor="enrolleddate" className="block text-sm font-semibold text-gray-700 mb-1">Enrolled Date</label>
-          <input
-            type="date"
-            id="enrolleddate"
-            name="enrolleddate"
-            value={formData.enrolleddate}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          />
-        </div>
-  
-        {/* Email */}
-        <div className="modal-field">
-          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter email"
-            required
-          />
-        </div>
-  
-        {/* Course */}
-        <div className="modal-field">
-          <label htmlFor="course" className="block text-sm font-semibold text-gray-700 mb-1">Course</label>
-          <input
-            type="text"
-            id="course"
-            name="course"
-            value={formData.course}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter course"
-          />
-        </div>
-  
-        {/* Phone */}
-        <div className="modal-field">
-          <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
-          <input
-            type="text"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter phone"
-          />
-        </div>
-  
-        {/* Status */}
-        <div className="modal-field">
-          <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
-          />
-        </div>
-  
-        {/* Work Status */}
-        <div className="modal-field">
-          <label htmlFor="workstatus" className="block text-sm font-semibold text-gray-700 mb-1">Work Status</label>
-          <input
-            type="text"
-            id="workstatus"
-            name="workstatus"
-            value={formData.workstatus}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter work status"
-          />
-        </div>
-  
-        {/* Education */}
-        <div className="modal-field">
-          <label htmlFor="education" className="block text-sm font-semibold text-gray-700 mb-1">Education</label>
-          <input
-            type="text"
-            id="education"
-            name="education"
-            value={formData.education}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter education"
-          />
-        </div>
-  
-        {/* Work Experience */}
-        <div className="modal-field">
-          <label htmlFor="workexperience" className="block text-sm font-semibold text-gray-700 mb-1">Work Experience</label>
-          <input
-            type="text"
-            id="workexperience"
-            name="workexperience"
-            value={formData.workexperience}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter work experience"
-          />
-        </div>
-  
-        {/* SSN */}
-        <div className="modal-field">
-          <label htmlFor="ssn" className="block text-sm font-semibold text-gray-700 mb-1">SSN</label>
-          <input
-            type="text"
-            id="ssn"
-            name="ssn"
-            value={formData.ssn}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter SSN"
-          />
-        </div>
-  
-        {/* Agreement */}
-        <div className="modal-field">
-          <label htmlFor="agreement" className="block text-sm font-semibold text-gray-700 mb-1">Agreement</label>
-          <input
-            type="text"
-            id="agreement"
-            name="agreement"
-            value={formData.agreement}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter agreement"
-          />
-        </div>
-  
-        {/* Promissory */}
-        <div className="modal-field">
-          <label htmlFor="promissory" className="block text-sm font-semibold text-gray-700 mb-1">Promissory</label>
-          <input
-            type="text"
-            id="promissory"
-            name="promissory"
-            value={formData.promissory}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter promissory"
-          />
-        </div>
-  
-        {/* Driver's License */}
-        <div className="modal-field">
-          <label htmlFor="driverslicense" className="block text-sm font-semibold text-gray-700 mb-1">Driver's License</label>
-          <input
-            type="text"
-            id="driverslicense"
-            name="driverslicense"
-            value={formData.driverslicense}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter driver's license"
-          />
-        </div>
-  
-        {/* Work Permit */}
-        <div className="modal-field">
-          <label htmlFor="workpermit" className="block text-sm font-semibold text-gray-700 mb-1">Work Permit</label>
-          <input
-            type="text"
-            id="workpermit"
-            name="workpermit"
-            value={formData.workpermit}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter work permit"
-          />
-        </div>
-  
-        {/* Work Permit Expiration Date */}
-        <div className="modal-field">
-          <label htmlFor="wpexpirationdate" className="block text-sm font-semibold text-gray-700 mb-1">Work Permit Expiration Date</label>
-          <input
-            type="date"
-            id="wpexpirationdate"
-            name="wpexpirationdate"
-            value={formData.wpexpirationdate}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          />
-        </div>
-  
-        {/* Offer Letter */}
-        <div className="modal-field">
-          <label htmlFor="offerletter" className="block text-sm font-semibold text-gray-700 mb-1">Offer Letter</label>
-          <input
-            type="text"
-            id="offerletter"
-            name="offerletter"
-            value={formData.offerletter}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter offer letter"
-          />
-        </div>
-  
-        {/* Secondary Email */}
-        <div className="modal-field">
-          <label htmlFor="secondaryemail" className="block text-sm font-semibold text-gray-700 mb-1">Secondary Email</label>
-          <input
-            type="email"
-            id="secondaryemail"
-            name="secondaryemail"
-            value={formData.secondaryemail}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter secondary email"
-          />
-        </div>
-  
-        {/* Secondary Phone */}
-        <div className="modal-field">
-          <label htmlFor="secondaryphone" className="block text-sm font-semibold text-gray-700 mb-1">Secondary Phone</label>
-          <input
-            type="text"
-            id="secondaryphone"
-            name="secondaryphone"
-            value={formData.secondaryphone}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter secondary phone"
-          />
-        </div>
-  
-        {/* Address */}
-        <div className="modal-field">
-          <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-1">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter address"
-          />
-        </div>
-  
-        {/* City */}
-        <div className="modal-field">
-          <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-1">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter city"
-          />
-        </div>
-  
-        {/* State */}
-        <div className="modal-field">
-          <label htmlFor="state" className="block text-sm font-semibold text-gray-700 mb-1">State</label>
-          <input
-            type="text"
-            id="state"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter state"
-          />
-        </div>
-  
-        {/* Country */}
-        <div className="modal-field">
-          <label htmlFor="country" className="block text-sm font-semibold text-gray-700 mb-1">Country</label>
-          <input
-            type="text"
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter country"
-          />
-        </div>
-  
-        {/* Zip */}
-        <div className="modal-field">
-          <label htmlFor="zip" className="block text-sm font-semibold text-gray-700 mb-1">Zip</label>
-          <input
-            type="text"
-            id="zip"
-            name="zip"
-            value={formData.zip}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter zip"
-          />
-        </div>
-  
-        {/* LinkedIn */}
-        <div className="modal-field">
-          <label htmlFor="linkedin" className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
-          <input
-            type="text"
-            id="linkedin"
-            name="linkedin"
-            value={formData.linkedin}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter LinkedIn"
-          />
-        </div>
-  
-        {/* Date of Birth */}
-        <div className="modal-field">
-          <label htmlFor="dob" className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
-          <input
-            type="date"
-            id="dob"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          />
-        </div>
-  
-        {/* Emergency Contact Name */}
-        <div className="modal-field">
-          <label htmlFor="emergcontactname" className="block text-sm font-semibold text-gray-700 mb-1">Emergency Contact Name</label>
-          <input
-            type="text"
-            id="emergcontactname"
-            name="emergcontactname"
-            value={formData.emergcontactname}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter emergency contact name"
-          />
-        </div>
-  
-        {/* Emergency Contact Email */}
-        <div className="modal-field">
-          <label htmlFor="emergcontactemail" className="block text-sm font-semibold text-gray-700 mb-1">Emergency Contact Email</label>
-          <input
-            type="email"
-            id="emergcontactemail"
-            name="emergcontactemail"
-            value={formData.emergcontactemail}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter emergency contact email"
-          />
-        </div>
-  
-        {/* Emergency Contact Phone */}
-        <div className="modal-field">
-          <label htmlFor="emergcontactphone" className="block text-sm font-semibold text-gray-700 mb-1">Emergency Contact Phone</label>
-          <input
-            type="text"
-            id="emergcontactphone"
-            name="emergcontactphone"
-            value={formData.emergcontactphone}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter emergency contact phone"
-          />
-        </div>
-  
-        {/* Emergency Contact Address */}
-        <div className="modal-field">
-          <label htmlFor="emergcontactaddrs" className="block text-sm font-semibold text-gray-700 mb-1">Emergency Contact Address</label>
-          <input
-            type="text"
-            id="emergcontactaddrs"
-            name="emergcontactaddrs"
-            value={formData.emergcontactaddrs}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter emergency contact address"
-          />
-        </div>
-  
-        {/* Guidelines */}
-        <div className="modal-field">
-          <label htmlFor="guidelines" className="block text-sm font-semibold text-gray-700 mb-1">Guidelines</label>
-          <input
-            type="text"
-            id="guidelines"
-            name="guidelines"
-            value={formData.guidelines}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter guidelines"
-          />
-        </div>
-  
-        {/* SSN Validated */}
-        <div className="modal-field">
-          <label htmlFor="ssnvalidated" className="block text-sm font-semibold text-gray-700 mb-1">SSN Validated</label>
-          <input
-            type="text"
-            id="ssnvalidated"
-            name="ssnvalidated"
-            value={formData.ssnvalidated}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter SSN validated"
-          />
-        </div>
-  
-        {/* BGV */}
-        <div className="modal-field">
-          <label htmlFor="bgv" className="block text-sm font-semibold text-gray-700 mb-1">BGV</label>
-          <input
-            type="text"
-            id="bgv"
-            name="bgv"
-            value={formData.bgv}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter BGV"
-          />
-        </div>
-  
-        {/* Term */}
-        <div className="modal-field">
-          <label htmlFor="term" className="block text-sm font-semibold text-gray-700 mb-1">Term</label>
-          <input
-            type="text"
-            id="term"
-            name="term"
-            value={formData.term}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter term"
-          />
-        </div>
-  
-        {/* Fee Paid */}
-        <div className="modal-field">
-          <label htmlFor="feepaid" className="block text-sm font-semibold text-gray-700 mb-1">Fee Paid</label>
-          <input
-            type="text"
-            id="feepaid"
-            name="feepaid"
-            value={formData.feepaid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter fee paid"
-          />
-        </div>
-  
-        {/* Fee Due */}
-        <div className="modal-field">
-          <label htmlFor="feedue" className="block text-sm font-semibold text-gray-700 mb-1">Fee Due</label>
-          <input
-            type="text"
-            id="feedue"
-            name="feedue"
-            value={formData.feedue}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter fee due"
-          />
-        </div>
-  
-        {/* Salary 0 */}
-        <div className="modal-field">
-          <label htmlFor="salary0" className="block text-sm font-semibold text-gray-700 mb-1">Salary 0</label>
-          <input
-            type="text"
-            id="salary0"
-            name="salary0"
-            value={formData.salary0}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter salary 0"
-          />
-        </div>
-  
-        {/* Salary 6 */}
-        <div className="modal-field">
-          <label htmlFor="salary6" className="block text-sm font-semibold text-gray-700 mb-1">Salary 6</label>
-          <input
-            type="text"
-            id="salary6"
-            name="salary6"
-            value={formData.salary6}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter salary 6"
-          />
-        </div>
-  
-        {/* Salary 12 */}
-        <div className="modal-field">
-          <label htmlFor="salary12" className="block text-sm font-semibold text-gray-700 mb-1">Salary 12</label>
-          <input
-            type="text"
-            id="salary12"
-            name="salary12"
-            value={formData.salary12}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter salary 12"
-          />
-        </div>
-  
-        {/* Guarantor Name */}
-        <div className="modal-field">
-          <label htmlFor="guarantorname" className="block text-sm font-semibold text-gray-700 mb-1">Guarantor Name</label>
-          <input
-            type="text"
-            id="guarantorname"
-            name="guarantorname"
-            value={formData.guarantorname}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter guarantor name"
-          />
-        </div>
-  
-        {/* Guarantor Designation */}
-        <div className="modal-field">
-          <label htmlFor="guarantordesignation" className="block text-sm font-semibold text-gray-700 mb-1">Guarantor Designation</label>
-          <input
-            type="text"
-            id="guarantordesignation"
-            name="guarantordesignation"
-            value={formData.guarantordesignation}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter guarantor designation"
-          />
-        </div>
-  
-        {/* Guarantor Company */}
-        <div className="modal-field">
-          <label htmlFor="guarantorcompany" className="block text-sm font-semibold text-gray-700 mb-1">Guarantor Company</label>
-          <input
-            type="text"
-            id="guarantorcompany"
-            name="guarantorcompany"
-            value={formData.guarantorcompany}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter guarantor company"
-          />
-        </div>
-  
-        {/* Contract URL */}
-        <div className="modal-field">
-          <label htmlFor="contracturl" className="block text-sm font-semibold text-gray-700 mb-1">Contract URL</label>
-          <input
-            type="text"
-            id="contracturl"
-            name="contracturl"
-            value={formData.contracturl}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter contract URL"
-          />
-        </div>
-  
-        {/* Employment Agreement URL */}
-        <div className="modal-field">
-          <label htmlFor="empagreementurl" className="block text-sm font-semibold text-gray-700 mb-1">Employment Agreement URL</label>
-          <input
-            type="text"
-            id="empagreementurl"
-            name="empagreementurl"
-            value={formData.empagreementurl}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter employment agreement URL"
-          />
-        </div>
-  
-        {/* Offer Letter URL */}
-        <div className="modal-field">
-          <label htmlFor="offerletterurl" className="block text-sm font-semibold text-gray-700 mb-1">Offer Letter URL</label>
-          <input
-            type="text"
-            id="offerletterurl"
-            name="offerletterurl"
-            value={formData.offerletterurl}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                      placeholder="Enter offer letter URL"
-        />
-      </div>
+      
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 pr-8">Add New Candidate</h2>
 
-      {/* Avatar ID */}
-      <div className="modal-field">
-        <label htmlFor="avatarid" className="block text-sm font-semibold text-gray-700 mb-1">Avatar ID</label>
-        <input
-          type="text"
-          id="avatarid"
-          name="avatarid"
-          value={formData.avatarid}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter avatar ID"
-        />
-      </div>
+      <div className="overflow-y-auto flex-grow pr-2" style={{ scrollbarWidth: 'thin' }}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('name', 'Name', 'text', true)}
+              {renderField('email', 'Email', 'email', true)}
+              {renderField('phone', 'Phone', 'text', true)}
+              {renderField('course', 'Course', 'select', true, dropdownOptions?.courses)}
+              {renderField('batchname', 'Batch Name', 'select', true, dropdownOptions?.batches)}
+              {renderField('enrolleddate', 'Enrolled Date', 'date', true)}
+            </div>
+          </div>
 
-      {/* Notes */}
-      <div className="modal-field">
-        <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-        <input
-          type="text"
-          id="notes"
-          name="notes"
-          value={formData.notes}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter notes"
-        />
-      </div>
+          {/* Work Status and Authorization */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Work Status & Authorization</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('workstatus', 'Work Status', 'select', false, dropdownOptions?.workStatus)}
+              {renderField('wpexpirationdate', 'Work Permit Expiration', 'date')}
+              {renderField('processflag', 'Process Flag', 'select', false, dropdownOptions?.processFlag)}
+              {renderField('diceflag', 'Dice Candidate', 'select', false, dropdownOptions?.diceCandidate)}
+            </div>
+          </div>
 
-      {/* Batch Name */}
-      <div className="modal-field">
-        <label htmlFor="batchname" className="block text-sm font-semibold text-gray-700 mb-1">Batch Name</label>
-        <input
-          type="text"
-          id="batchname"
-          name="batchname"
-          value={formData.batchname}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter batch name"
-          required
-        />
-      </div>
+          {/* Personal Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('ssn', 'SSN', 'text')}
+              {renderField('ssnvalidated', 'SSN Validated', 'select', false, dropdownOptions?.ssnValid)}
+              {renderField('dob', 'Date of Birth', 'date')}
+              {renderField('education', 'Education', 'text')}
+              {renderField('workexperience', 'Work Experience', 'text')}
+            </div>
+          </div>
 
-      {/* Cover Letter */}
-      <div className="modal-field">
-        <label htmlFor="coverletter" className="block text-sm font-semibold text-gray-700 mb-1">Cover Letter</label>
-        <input
-          type="text"
-          id="coverletter"
-          name="coverletter"
-          value={formData.coverletter}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter cover letter"
-        />
-      </div>
+          {/* Contact Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('address', 'Address', 'text')}
+              {renderField('city', 'City', 'text')}
+              {renderField('state', 'State', 'text')}
+              {renderField('country', 'Country', 'text')}
+              {renderField('zip', 'ZIP Code', 'text')}
+              {renderField('secondaryemail', 'Secondary Email', 'email')}
+              {renderField('secondaryphone', 'Secondary Phone', 'text')}
+            </div>
+          </div>
 
-      {/* Background */}
-      <div className="modal-field">
-        <label htmlFor="background" className="block text-sm font-semibold text-gray-700 mb-1">Background</label>
-        <input
-          type="text"
-          id="background"
-          name="background"
-          value={formData.background}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter background"
-        />
-      </div>
+          {/* Emergency Contact */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Emergency Contact</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {renderField('emergcontactname', 'Contact Name', 'text')}
+              {renderField('emergcontactemail', 'Contact Email', 'email')}
+              {renderField('emergcontactphone', 'Contact Phone', 'text')}
+              {renderField('emergcontactaddrs', 'Contact Address', 'text')}
+            </div>
+          </div>
 
-      {/* Recruiter Assessment */}
-      <div className="modal-field">
-        <label htmlFor="recruiterassesment" className="block text-sm font-semibold text-gray-700 mb-1">Recruiter Assessment</label>
-        <input
-          type="text"
-          id="recruiterassesment"
-          name="recruiterassesment"
-          value={formData.recruiterassesment}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter recruiter assessment"
-        />
-      </div>
+          {/* Guarantor Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Guarantor Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('guarantorname', 'Guarantor Name', 'text')}
+              {renderField('guarantordesignation', 'Guarantor Designation', 'text')}
+              {renderField('guarantorcompany', 'Guarantor Company', 'text')}
+            </div>
+          </div>
 
-      {/* Instructor Assessment */}
-      <div className="modal-field">
-        <label htmlFor="instructorassesment" className="block text-sm font-semibold text-gray-700 mb-1">Instructor Assessment</label>
-        <input
-          type="text"
-          id="instructorassesment"
-          name="instructorassesment"
-          value={formData.instructorassesment}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter instructor assessment"
-        />
-      </div>
+          {/* Financial Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Financial Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {renderField('salary0', 'Salary 0-6 Months', 'select', false, dropdownOptions?.salary)}
+              {renderField('salary6', 'Salary 6-12 Months', 'select', false, dropdownOptions?.salary)}
+              {renderField('salary12', 'Salary 12+ Months', 'select', false, dropdownOptions?.salary)}
+              {renderField('feepaid', 'Fee Paid', 'number')}
+              {renderField('feedue', 'Fee Due', 'number')}
+              {renderField('term', 'Term', 'text')}
+            </div>
+          </div>
 
-      {/* Process Flag */}
-      <div className="modal-field">
-        <label htmlFor="processflag" className="block text-sm font-semibold text-gray-700 mb-1">Process Flag</label>
-        <input
-          type="text"
-          id="processflag"
-          name="processflag"
-          value={formData.processflag}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter process flag"
-        />
-      </div>
+          {/* Documents and URLs */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Documents & URLs</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {renderField('originalresume', 'Resume URL', 'url')}
+              {renderField('contracturl', 'Contract URL', 'url')}
+              {renderField('empagreementurl', 'Employment Agreement URL', 'url')}
+              {renderField('offerletterurl', 'Offer Letter URL', 'url')}
+              {renderField('dlurl', "Driver's License URL", 'url')}
+              {renderField('workpermiturl', 'Work Permit URL', 'url')}
+              {renderField('ssnurl', 'SSN Document URL', 'url')}
+            </div>
+          </div>
 
-      {/* Default Process Flag */}
-      <div className="modal-field">
-        <label htmlFor="defaultprocessflag" className="block text-sm font-semibold text-gray-700 mb-1">Default Process Flag</label>
-        <input
-          type="text"
-          id="defaultprocessflag"
-          name="defaultprocessflag"
-          value={formData.defaultprocessflag}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter default process flag"
-        />
-      </div>
+          {/* Additional Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Additional Information</h3>
+            <div className="grid grid-cols-1 gap-4">
+              {renderField('notes', 'Notes', 'textarea')}
+              {renderField('portalid', 'Portal ID', 'select', false, dropdownOptions?.portalIds)}
+              {renderField('referralid', 'Referral ID', 'select', false, dropdownOptions?.referralIds)}
+            </div>
+          </div>
 
-      {/* Original Resume */}
-      <div className="modal-field">
-        <label htmlFor="originalresume" className="block text-sm font-semibold text-gray-700 mb-1">Original Resume</label>
-        <input
-          type="text"
-          id="originalresume"
-          name="originalresume"
-          value={formData.originalresume}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter original resume"
-        />
+          <div className="flex justify-end space-x-4 pt-6 pb-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Candidate'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Last Modification Date */}
-      <div className="modal-field">
-        <label htmlFor="lastmoddatetime" className="block text-sm font-semibold text-gray-700 mb-1">Last Modification Date</label>
-        <input
-          type="date"
-          id="lastmoddatetime"
-          name="lastmoddatetime"
-          value={formData.lastmoddatetime}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-        />
-      </div>
-
-      {/* Status Change Date */}
-      <div className="modal-field">
-        <label htmlFor="statuschangedate" className="block text-sm font-semibold text-gray-700 mb-1">Status Change Date</label>
-        <input
-          type="date"
-          id="statuschangedate"
-          name="statuschangedate"
-          value={formData.statuschangedate}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-        />
-      </div>
-
-      {/* Dice Flag */}
-      <div className="modal-field">
-        <label htmlFor="diceflag" className="block text-sm font-semibold text-gray-700 mb-1">Dice Flag</label>
-        <input
-          type="text"
-          id="diceflag"
-          name="diceflag"
-          value={formData.diceflag}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter dice flag"
-        />
-      </div>
-
-      {/* Batch ID */}
-      <div className="modal-field">
-        <label htmlFor="batchid" className="block text-sm font-semibold text-gray-700 mb-1">Batch ID</label>
-        <input
-          type="text"
-          id="batchid"
-          name="batchid"
-          value={formData.batchid}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter batch ID"
-        />
-      </div>
-
-      {/* Email List */}
-      <div className="modal-field">
-        <label htmlFor="emaillist" className="block text-sm font-semibold text-gray-700 mb-1">Email List</label>
-        <input
-          type="text"
-          id="emaillist"
-          name="emaillist"
-          value={formData.emaillist}
-          onChange={handleChange}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          placeholder="Enter email list"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-      >
-        Save Candidate
-      </button>
-    </form>
-  </Modal>
-);
- 
+    </Modal>
+  );
 };
 
 export default AddRowCandidate;
