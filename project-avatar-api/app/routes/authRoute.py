@@ -12,10 +12,12 @@ import hashlib
 import secrets
 from typing import List
 from app.controllers.auth_middleware import verify_token
+from app.controllers.auth_controller import get_user_by_uname, verify_md5_hash, create_access_token
+from app.config import settings
 
 
-# Use a strong secret key, preferably from environment variables
-SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
+# Use a strong secret key from environment variables
+SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -23,11 +25,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 ALLOWED_ORIGINS = [
     "https://www.whitebox-learning.com",
     "https://whitebox-learning.com",
-    "https://www.whitebox-learning.com/admin",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000"
+    "https://www.whitebox-learning.com/admin"
+    # "http://localhost:3000",
+    # "http://127.0.0.1:3000",
+    # "http://localhost:8000",
+    # "http://127.0.0.1:8000"
 ]
 
 router = APIRouter()
@@ -70,14 +72,14 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
                 detail="Invalid credentials"
             )
         
-        # Create token
+        # Create token with appropriate expiration
         token_data = {
             "sub": str(user.id),
             "username": user.uname,
             "team": user.team,
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-            "jti": secrets.token_hex(16)
+            "jti": secrets.token_hex(16)  # Unique token ID to prevent replay attacks
         }
         
         token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
@@ -93,7 +95,7 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         if user.team != 'admin':
             user_dict = {column: getattr(user, column) for column in user._mapping.keys()}
             if 'passwd' in user_dict:
-                del user_dict['passwd']
+                del user_dict['passwd']  # Never return password in response
             response_data["user_details"] = user_dict
             
         return response_data

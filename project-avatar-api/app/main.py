@@ -44,11 +44,11 @@ ALGORITHM = "HS256"
 ALLOWED_ORIGINS = [
     "https://www.whitebox-learning.com",
     "https://whitebox-learning.com",
-    "https://www.whitebox-learning.com/admin",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000"
+    "https://www.whitebox-learning.com/admin"
+    # "http://localhost:3000",
+    # "http://127.0.0.1:3000",
+    # "http://localhost:8000",
+    # "http://127.0.0.1:8000"
 ]
 
 app.add_middleware(
