@@ -10,9 +10,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch, AiOutlineReload } from "react-icons/ai";
 import Accordion from "../../components/Accordion";
- +
 
- 1  `-3`
 // Extend jsPDF with autoTable
 (jsPDF as { prototype: { autoTable: typeof autoTable } }).prototype.autoTable = autoTable;
 
@@ -148,7 +146,7 @@ const ByPO = () => {
   };
 
   const handleAddRow = () => {
-  
+    // Implement add row functionality
   };
 
   const handleEditRow = () => {

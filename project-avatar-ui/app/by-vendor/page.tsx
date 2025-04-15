@@ -379,11 +379,12 @@ import {
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
 } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byVendor_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byVendor_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byVendor_modals/ViewRowRecruiter";
+import AddRowModal from "@/modals/vendor_byVendor_modals/AddRowVendor";
+import EditRowModal from "@/modals/vendor_byVendor_modals/EditRowVendor";
+import ViewRowModal from "@/modals/vendor_byVendor_modals/ViewRowVendor";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+
 import { Recruiter } from "@/types/byVendor";
 import axios from "axios";
 

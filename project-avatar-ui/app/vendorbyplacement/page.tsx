@@ -282,8 +282,8 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "@/modals/recruiter_byVendorPlacement_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byVendor_modals/EditRowRecruiter";
+import AddRowModal from "@/modals/vendor_byPlacement_modals/AddRowVendor";
+import EditRowModal from "@/modals/vendor_byPlacement_modals/EditRowVendor";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -609,13 +609,13 @@ const RecruiterByVendorPlacement = () => {
           }}
         />
       )}
-      {modalState.view && selectedRow && (
+      {/* {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )}
+      )} */}
     </div>
   );
 };
