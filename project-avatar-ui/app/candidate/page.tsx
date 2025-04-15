@@ -458,7 +458,6 @@ const Candidates = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           refreshData={fetchData}
-          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.edit && selectedRow && (
@@ -467,7 +466,6 @@ const Candidates = () => {
           onClose={() => setModalState({ ...modalState, edit: false })}
           refreshData={fetchData}
           candidateData={selectedRow}
-          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.view && selectedRow && (

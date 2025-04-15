@@ -1,16 +1,20 @@
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
+import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
+import EditRowRecruiter from "@/modals/recruiter_byPlacement_modals/EditRowRecruiter";
+import ViewRowRecruiter from "@/modals/recruiter_byPlacement_modals/ViewRowRecruiter";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+import { Recruiter } from "@/types/byPlacement";
 import { Client } from "@/types/client";
+
+// import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+// import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 
 import React, {
   useCallback,
@@ -53,8 +57,9 @@ interface RecruiterData {
   notes: string;
   clientid: number;
   companyname: string;
-  employeeid?: string;
+  employeeid?: number;
   lastmoddatetime?: string;
+  vendorid: string; // Ensure this is defined correctly
 }
 
 interface RowData extends RecruiterData {
@@ -165,6 +170,7 @@ const RecruiterByPlacement = () => {
         id: company.clientid,
         name: company.companyname,
         email: "",
+        vendorid:"",
         phone: "",
         designation: "",
         status: "",
@@ -200,6 +206,7 @@ const RecruiterByPlacement = () => {
           designation: "",
           status: "",
           dob: null,
+          vendorid:"",
           personalemail: "",
           skypeid: "",
           linkedin: "",
@@ -221,7 +228,7 @@ const RecruiterByPlacement = () => {
     () => [
       {
         headerName: "Name",
-        field: "name",
+        field:"name" as keyof RowData,
         cellRenderer: (params: any) => {
           if (params.data.isGroupRow) {
             const expanded = expandedCompanies[params.data.clientid];
@@ -275,26 +282,26 @@ const RecruiterByPlacement = () => {
       },
       {
         headerName: "Email",
-        field: "email",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "email" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Phone",
-        field: "phone",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "phone" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Designation",
-        field: "designation",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "designation" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Status",
-        field: "status",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "status" as keyof RowData,
+        hide: false,
         minWidth: 100,
         cellRenderer: (params: any) => {
           const statusMap: { [key: string]: string } = {
@@ -310,66 +317,66 @@ const RecruiterByPlacement = () => {
       },
       {
         headerName: "DOB",
-        field: "dob",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "dob" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Personal Email",
-        field: "personalemail",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "personalemail" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Skype ID",
-        field: "skypeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "skypeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "LinkedIn",
-        field: "linkedin",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "linkedin" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Twitter",
-        field: "twitter",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "twitter" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Facebook",
-        field: "facebook",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "facebook" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Review",
-        field: "review",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "review" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Notes",
-        field: "notes",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "notes" as keyof RowData,
+        hide: false,
         minWidth: 200,
       },
       {
         headerName: "Employee ID",
-        field: "employeeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "employeeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Last Modified",
-        field: "lastmoddatetime",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "lastmoddatetime" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
     ],
-    [companies, expandedCompanies]
+    [expandedCompanies]
   );
 
   const handlePageChange = (newPage: number) => {
@@ -647,9 +654,9 @@ const RecruiterByPlacement = () => {
         isOpen={modalState.add}
         onClose={() => setModalState({...modalState, add: false})}
         onSubmit={handleAdd}
-        clientOptions={clients.map(c => ({ id: c.clientid, name: c.companyname }))}
+        clientOptions={clients.map(c => ({ id: c.id, name: c.name }))}
       />
-
+{/* 
       <ViewRowModal
         isOpen={modalState.view}
         onClose={() => setModalState({...modalState, view: false})}
@@ -663,6 +670,21 @@ const RecruiterByPlacement = () => {
   onSubmit={handleEdit}
   clients={clients}
   defaultClientId={selectedCompanyId || (modalState.selectedRow?.clientid || 0)}
+/> */}
+
+<EditRowRecruiter
+  isOpen={modalState.edit}
+  onClose={() => setModalState({ ...modalState, edit: false })}
+  initialData={modalState.selectedRow as Recruiter | null}
+  onSubmit={handleEdit}
+  clients={clients}
+  defaultClientId={selectedCompanyId || modalState.selectedRow?.clientid || 0}
+/>
+
+<ViewRowRecruiter
+  isOpen={modalState.view}
+  onClose={() => setModalState({ ...modalState, view: false })}
+  recruiter={modalState.selectedRow as Recruiter | null}
 />
     </div>
   );

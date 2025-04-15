@@ -222,7 +222,7 @@ const RecruiterByClient = () => {
       item.status
     ]);
     
-    doc.autoTable({
+    doc.autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 20

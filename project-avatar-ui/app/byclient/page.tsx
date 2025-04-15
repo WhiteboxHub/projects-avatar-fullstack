@@ -1,3 +1,4 @@
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
@@ -26,7 +27,6 @@ import {
   FaDownload,
 } from "react-icons/fa";
 jsPDF.prototype.autoTable = autoTable;
-
 interface Company {
   clientid: number;
   companyname: string;
@@ -43,7 +43,7 @@ interface RecruiterData {
   phone: string;
   designation: string;
   status: string;
-  dob: string | null;
+  dob?: string;
   personalemail: string;
   skypeid: string;
   linkedin: string;
@@ -53,8 +53,9 @@ interface RecruiterData {
   notes: string;
   clientid: number;
   companyname: string;
-  employeeid?: string;
+  employeeid?: number;
   lastmoddatetime?: string;
+  vendorid: string;
 }
 
 interface RowData extends RecruiterData {
@@ -173,10 +174,11 @@ const RecruiterByClient = () => {
         phone: "",
         designation: "",
         status: "",
-        dob: null,
+        dob: undefined,
         personalemail: "",
         skypeid: "",
         linkedin: "",
+        vendorid: "",
         twitter: "",
         facebook: "",
         review: "",
@@ -204,7 +206,7 @@ const RecruiterByClient = () => {
           phone: "",
           designation: "",
           status: "",
-          dob: null,
+          dob: undefined,
           personalemail: "",
           skypeid: "",
           linkedin: "",
@@ -214,6 +216,7 @@ const RecruiterByClient = () => {
           notes: "",
           clientid: -1,
           companyname: "",
+          vendorid: "",
           isGroupRow: false,
           level: 1,
         });
@@ -226,7 +229,7 @@ const RecruiterByClient = () => {
     () => [
       {
         headerName: "Name",
-        field: "name",
+        field: "name" as keyof RowData,
         cellRenderer: (params: any) => {
           if (params.data.isGroupRow) {
             const expanded = expandedCompanies[params.data.clientid];
@@ -279,26 +282,26 @@ const RecruiterByClient = () => {
       },
       {
         headerName: "Email",
-        field: "email",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "email" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Phone",
-        field: "phone",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "phone" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Designation",
-        field: "designation",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "designation" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Status",
-        field: "status",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "status" as keyof RowData,
+        hide: false,
         minWidth: 100,
         cellRenderer: (params: any) => {
           const statusMap: { [key: string]: string } = {
@@ -314,62 +317,62 @@ const RecruiterByClient = () => {
       },
       {
         headerName: "DOB",
-        field: "dob",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "dob" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Personal Email",
-        field: "personalemail",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "personalemail" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Skype ID",
-        field: "skypeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "skypeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "LinkedIn",
-        field: "linkedin",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "linkedin" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Twitter",
-        field: "twitter",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "twitter" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Facebook",
-        field: "facebook",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "facebook" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Review",
-        field: "review",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "review" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Notes",
-        field: "notes",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "notes" as keyof RowData,
+        hide: false,
         minWidth: 200,
       },
       {
         headerName: "Employee ID",
-        field: "employeeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "employeeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Last Modified",
-        field: "lastmoddatetime",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "lastmoddatetime" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
     ],
@@ -694,7 +697,7 @@ const RecruiterByClient = () => {
       <EditRowModal
         isOpen={modalState.edit}
         onClose={() => setModalState({ ...modalState, edit: false })}
-        initialData={modalState.selectedRow}
+        initialData={modalState.selectedRow as RecruiterData | null}
         onSubmit={handleEdit}
         clients={clients}
         defaultClientId={

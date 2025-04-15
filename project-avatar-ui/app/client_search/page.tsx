@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import axios from "axios";
 import withAuth from "@/modals/withAuth";
-import { FaSpinner, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { debounce } from "lodash";
+import { FaChevronDown, FaChevronRight, FaSpinner } from "react-icons/fa";
 import { Client } from "@/types/client";
 
 interface DropdownProps {
@@ -21,18 +21,16 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => (
   <div className="mt-1">
     <button
-      className={`flex items-center justify-between text-lg font-semibold focus:outline-none border-b-1 pb-1 w-full text-left p-2 rounded ${
-        isOpen ? "bg-blue-300" : "bg-blue-200"
-      }`}
+      className={`flex items-center justify-between text-lg font-semibold focus:outline-none border-b-1 pb-1 w-full text-left p-2 rounded ${isOpen ? "bg-blue-300" : "bg-blue-200"
+        }`}
       onClick={onClick}
     >
       <span className="text-gray-800">{title}</span>
       {isOpen ? <FaChevronDown /> : <FaChevronRight />}
     </button>
     <div
-      className={`overflow-hidden transition-max-height duration-300 ease-in-out ${
-        isOpen ? "max-h-96" : "max-h-0"
-      }`}
+      className={`overflow-hidden transition-max-height duration-300 ease-in-out ${isOpen ? "max-h-96" : "max-h-0"
+        }`}
     >
       <div className="mt-1 border p-3 bg-gray-200 w-full">{children}</div>
     </div>
@@ -147,8 +145,8 @@ const ClientSearch: React.FC = () => {
                     <li key={client.id} className="mb-4">
                       <Dropdown
                         title={client.companyname}
-                        isOpen={openAccordion[client.id] === "company"}
-                        onClick={() => toggleAccordion(client.id, "company")}
+                        isOpen={openAccordion[String(client.id)] === "company"} // Convert to string
+                        onClick={() => toggleAccordion(String(client.id), "company")} // Convert to string
                       >
                         <p className="font-medium">
                           <strong>Status:</strong> {client.status}
@@ -160,8 +158,8 @@ const ClientSearch: React.FC = () => {
 
                       <Dropdown
                         title="Contact"
-                        isOpen={openAccordion[client.id] === "contact"}
-                        onClick={() => toggleAccordion(client.id, "contact")}
+                        isOpen={openAccordion[String(client.id)] === "contact"} // Convert to string
+                        onClick={() => toggleAccordion(String(client.id), "contact")} // Convert to string
                       >
                         <p className="font-medium">
                           <strong>Email:</strong> {client.email}
@@ -190,8 +188,8 @@ const ClientSearch: React.FC = () => {
 
                       <Dropdown
                         title="Notes"
-                        isOpen={openAccordion[client.id] === "notes"}
-                        onClick={() => toggleAccordion(client.id, "notes")}
+                        isOpen={openAccordion[String(client.id)] === "notes"} // Convert to string
+                        onClick={() => toggleAccordion(String(client.id), "notes")} // Convert to string
                       >
                         <p className="font-medium">{client.notes}</p>
                       </Dropdown>
