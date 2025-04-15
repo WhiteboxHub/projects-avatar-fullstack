@@ -11,6 +11,7 @@ from sqlalchemy.sql import text
 import hashlib
 import secrets
 from typing import List
+from app.controllers.auth_middleware import verify_token
 
 
 # Use a strong secret key, preferably from environment variables
@@ -24,7 +25,8 @@ ALLOWED_ORIGINS = [
     "https://whitebox-learning.com",
     "https://www.whitebox-learning.com/admin",
     "http://localhost:3000/admin",
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "http://localhost:3000"
 ]
 
 router = APIRouter()
