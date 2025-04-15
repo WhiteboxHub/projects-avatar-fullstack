@@ -215,9 +215,13 @@ class Candidate(Base):
     diceflag = Column(CHAR(1), default='N', comment="This flag is set to 'Y' if it's a dice candidate, otherwise 'N'")
     batchid = Column(Integer, nullable=False)
     emaillist = Column(CHAR(1), default='Y')
-    mkt_submissions = relationship("MktSubmission", back_populates="candidate")
-    placements = relationship("Placement", back_populates="candidate")
-
+    # mkt_submissions = relationship("MktSubmission", back_populates="candidate")
+    # placements = relationship("Placement", back_populates="candidate")
+    # 
+    # Change these lines in Candidate model
+    mkt_submissions = relationship("MktSubmission", back_populates="candidate", viewonly=True)
+    placements = relationship("Placement", back_populates="candidate", viewonly=True)
+    
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"
@@ -297,7 +301,11 @@ class Placement(Base):
     vendorid = Column(Integer, ForeignKey("vendor.id"))
     # clientid = Column(Integer, ForeignKey("client.id"s))
     clientid = Column(Integer, ForeignKey("client.id"))
-    candidate = relationship("Candidate", back_populates="placements")
+    # candidate = relationship("Candidate", back_populates="placements")
+    # candidate = relationship("Candidate", 
+    #                     back_populates="placements",
+    #                     foreign_keys=[candidateid])
+    candidate = relationship("Candidate", back_populates="placements", viewonly=True)
     vendor = relationship("Vendor", back_populates="placements")
     client = relationship("Client", back_populates="placements")
     po_entries = relationship("PO", back_populates="placement")
@@ -325,21 +333,21 @@ class Client(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     companyname = Column(String(250), unique=True, nullable=False)
-    tier = Column(Integer, nullable=False, default=2)
-    status = Column(String(45), nullable=False, default="Current")
-    email = Column(String(150), unique=True, nullable=False)
+    tier = Column(String(45), nullable=False, default="STANDARD")
+    status = Column(String(45), nullable=False, default="ACTIVE")
+    email = Column(String(150), nullable=False)
     phone = Column(String(150), nullable=False, default="000-000-0000")
-    fax = Column(String(150), nullable=False, default="000-000-0000")
+    fax = Column(String(150), nullable=True)
     address = Column(String(250), nullable=True)
     city = Column(String(150), nullable=True)
     state = Column(String(150), nullable=True)
     country = Column(String(150), nullable=True)
     zip = Column(String(150), nullable=True)
-    url = Column(String(150), nullable=True, default="http://nothing.com")
-    manager1name = Column(String(150), nullable=True)
+    url = Column(String(150), nullable=True)
     twitter = Column(String(100), nullable=True)
     facebook = Column(String(100), nullable=True)
     linkedin = Column(String(100), nullable=True)
+    manager1name = Column(String(150), nullable=True)
     manager1email = Column(String(150), nullable=True)
     manager1phone = Column(String(150), nullable=True)
     hmname = Column(String(150), nullable=True)
@@ -365,8 +373,12 @@ class ClientSearch(Base):
     city = Column(String(150), nullable=True)
     state = Column(String(150), nullable=True)
     country = Column(String(150), nullable=True)
+    zip = Column(String(150), nullable=True)
     status = Column(String(45), nullable=True)
-    tier = Column(Integer, nullable=True)
+    tier = Column(String(45), nullable=True)
+    manager1name = Column(String(150), nullable=True)
+    hmname = Column(String(150), nullable=True)
+    hrname = Column(String(150), nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
 class PO(Base):
@@ -564,7 +576,7 @@ class MktSubmission(Base):
     employeeid = Column(Integer, ForeignKey("employee.id"), nullable=False)
     submitter = Column(Integer, ForeignKey("employee.id"), nullable=True)
     submissiondate = Column(Date, nullable=False)
-    type = Column(String(45), nullable=False)
+    # type = Column(String(45), nullable=False)
     name = Column(String(150), nullable=True)
     email = Column(String(150), nullable=True)
     phone = Column(String(150), nullable=True)
@@ -574,9 +586,14 @@ class MktSubmission(Base):
     feedback = Column(Text, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True, server_default=func.now())
     
-    candidate = relationship("Candidate", back_populates="mkt_submissions")
+    # candidate = relationship("Candidate", back_populates="mkt_submissions")
     employee = relationship("Employee", foreign_keys=[employeeid], primaryjoin="MktSubmission.employeeid == Employee.id")
     submitter_rel = relationship("Employee", foreign_keys=[submitter], primaryjoin="MktSubmission.submitter == Employee.id")
+    # candidate = relationship("Candidate", 
+    #                     back_populates="mkt_submissions",
+    #                     foreign_keys=[candidateid])
+    candidate = relationship("Candidate", back_populates="mkt_submissions", viewonly=True)
+
 
     
     @validator('submissiondate', pre=True, always=True)

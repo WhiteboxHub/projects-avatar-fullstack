@@ -6,7 +6,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -22,7 +22,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import { Po, ErrorResponse } from "@/types/index";
+import { Po, } from "@/types/index";
 import { debounce } from "lodash";
 
 jsPDF.prototype.autoTable = autoTable;

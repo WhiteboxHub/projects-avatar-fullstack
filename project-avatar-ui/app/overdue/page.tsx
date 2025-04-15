@@ -1255,7 +1255,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -1270,7 +1270,7 @@ import {
   AiOutlineSearch,
   AiOutlineReload,
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
+// import { MdAdd } from "react-icons/md";
 import { debounce } from "lodash";
 
 interface Overdue {
@@ -1319,7 +1319,7 @@ const OverdueComponent = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = useCallback(async (searchQuery = "", page = 1) => {
+  const fetchData = useCallback(async (_, page = 1) => {
     setLoading(true);
     try {
       const response = await axios.get<ApiOverdueResponse>(`${API_URL}/overdue/get`, {
@@ -1387,7 +1387,7 @@ const OverdueComponent = () => {
       console.log("API Response:", response);
   
       // Check if the response data is an array
-      let data = response.data;
+      const data = response.data;
       if (!Array.isArray(data)) {
         console.error("Expected an array but received:", data);
         setRowData([]);

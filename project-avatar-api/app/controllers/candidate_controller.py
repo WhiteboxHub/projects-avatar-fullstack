@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import get_db
@@ -50,5 +49,4 @@ def delete_candidate(id: int, db: Session = Depends(get_db)):
     
     db.query(CandidateMarketing).filter(CandidateMarketing.candidateid == id).delete()
     db.delete(candidate)
-    db.commit()
-    
+    db.commit()    

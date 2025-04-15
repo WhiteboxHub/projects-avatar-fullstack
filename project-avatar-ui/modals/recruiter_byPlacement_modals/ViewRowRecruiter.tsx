@@ -1,14 +1,18 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { Recruiter } from '@/types/byClient';
-import { AiOutlineClose } from 'react-icons/ai';
+import Modal from "react-modal";
+import React from "react";
+import { AiOutlineClose } from "react-icons/ai";
+import { Recruiter } from "@/types/byClient";
 
+// interface ViewRowRecruiterProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   recruiter: Recruiter | null;
+// }
 interface ViewRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
   recruiter: Recruiter | null;
 }
-
 const ViewRowRecruiter: React.FC<ViewRowRecruiterProps> = ({ isOpen, onClose, recruiter }) => {
   return (
     <Modal

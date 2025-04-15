@@ -206,6 +206,48 @@ class CandidateBase(BaseModel):
     originalresume: Optional[str] = None
     notes: Optional[str] = None
 
+    @validator('dob', 'wpexpirationdate', pre=True)
+    def validate_dates(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('ssnvalidated', 'agreement', 'driverslicense', 'workpermit', 'diceflag', pre=True)
+    def validate_booleans(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('referralid', pre=True)
+    def validate_integers(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('salary0', 'salary6', 'salary12', pre=True)
+    def validate_floats(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+        
+    @validator('emergcontactemail', pre=True)
+    def validate_email(cls, value):
+        if value == "" or value is None:
+            return None
+        return value
+    
+    @validator('portalid', pre=True)
+    def validate_portalid(cls, value):
+        if value is None:
+            return None
+        return str(value)  # Convert integer to string
+    
+    # @validator('portalid', pre=True)
+    # def validate_portalid(cls, value):
+    #     if value is None:
+    #       return None
+    #   return str(value)  # Convert to string if it's an integer
+
 class CandidateCreate(CandidateBase):
     pass
 
@@ -511,7 +553,7 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    tier: Optional[int] = None
+    tier: Optional[str] = None
     status: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -521,18 +563,18 @@ class ClientBase(BaseModel):
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    url: Optional[HttpUrl] = None
+    url: Optional[str] = None
     manager1name: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
     linkedin: Optional[str] = None
-    manager1email: Optional[str] = None
+    manager1email: Optional[EmailStr] = None
     manager1phone: Optional[str] = None
     hmname: Optional[str] = None
-    hmemail: Optional[str] = None  
+    hmemail: Optional[EmailStr] = None  
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
-    hremail: Optional[str] = None
+    hremail: Optional[EmailStr] = None
     hrphone: Optional[str] = None
     notes: Optional[str] = None
 
@@ -549,7 +591,7 @@ class ClientBase(BaseModel):
         except Exception:
             return None
 
-    @field_validator("email", "hmemail", "hremail", mode="before")
+    @field_validator("email", "manager1email", "hmemail", "hremail", mode="before")
     @classmethod
     def validate_email(cls, v):
         if v is None or v.strip() == "":
@@ -595,7 +637,20 @@ class ClientCreate(ClientBase):
 class ClientUpdate(ClientBase):
     class Config:
         from_attributes = True    
-    
+
+class ClientResponseFetch(BaseModel):
+        id: int
+        name: str
+        class Config:
+            orm_mode = True
+            
+class ClientOption(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 class RecruiterBase(BaseModel):
      name:  Optional[str] = None
      email: str
@@ -662,7 +717,7 @@ class Mkt_submissionBase(BaseModel):
     employeeid: int
     submitter: Optional[int]=None
     submissiondate:str
-    type: str
+    type: Optional[str]=None  # Made type optional with a default of None
     name: Optional[str]=None
     email: Optional[str]=None
     phone: Optional[str]=None
@@ -739,8 +794,8 @@ class Mkt_submissionBase(BaseModel):
     candidateid: int
     employeeid: int
     submitter: Optional[int]=None
-    submissiondate:str
-    type: str
+    submissiondate: Optional[str]=None
+    # type: str
     name: Optional[str]=None
     email: Optional[str]=None
     phone: Optional[str]=None
@@ -748,6 +803,14 @@ class Mkt_submissionBase(BaseModel):
     location: Optional[str]=None
     notes: Optional[str]= None
     feedback: Optional[str]=None
+    
+    @validator('submissiondate', pre=True)
+    def validate_submission_date(cls, v):
+        if isinstance(v, date):
+            return v.isoformat()
+        if v in ('0000-00-00', None, ''):
+            return None
+        return v
     
 class Mkt_SubmissionCreate(Mkt_submissionBase):
     pass
@@ -763,7 +826,6 @@ class MktSubmissionInDB(Mkt_submissionBase):
     
     class Config:
         orm_mode = True
-        
         
 # new schemas
 
@@ -895,21 +957,21 @@ class VendorInDB(VendorBase):
     id: int
 
 # Client Schemas
-class ClientBase(BaseModel):
-    companyname: str
+# class ClientBase(BaseModel):
+#     companyname: str
 
-class ClientCreate(ClientBase):
-    pass
+# class ClientCreate(ClientBase):
+#     pass
 
-class ClientUpdate(ClientBase):
-    pass
+# class ClientUpdate(ClientBase):
+#     pass
 
-class ClientInDB(ClientBase):
-    id: int
+# class ClientInDB(ClientBase):
+#     id: int
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+#     class Config:
+#         orm_mode = True
+#         from_attributes = True
 
 # Recruiter Schemas
 class RecruiterBase(BaseModel):
