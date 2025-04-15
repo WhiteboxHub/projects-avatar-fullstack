@@ -1,3 +1,4 @@
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
@@ -24,8 +25,9 @@ import {
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
   FaDownload,
+  FaSync,
 } from "react-icons/fa";
-jsPDF.prototype.autoTable = autoTable;
+
 
 interface Company {
   clientid: number;
@@ -43,7 +45,7 @@ interface RecruiterData {
   phone: string;
   designation: string;
   status: string;
-  dob: string | null;
+  dob?: string;
   personalemail: string;
   skypeid: string;
   linkedin: string;
@@ -53,8 +55,9 @@ interface RecruiterData {
   notes: string;
   clientid: number;
   companyname: string;
-  employeeid?: string;
+  employeeid?: number;
   lastmoddatetime?: string;
+  vendorid: string;
 }
 
 interface RowData extends RecruiterData {
@@ -76,7 +79,7 @@ interface ModalState {
 }
 
 const RecruiterByClient = () => {
-  const gridRef = useRef<any>();
+  const gridRef = useRef<AgGridReact>(null);
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
     view: false,
@@ -173,10 +176,11 @@ const RecruiterByClient = () => {
         phone: "",
         designation: "",
         status: "",
-        dob: null,
+        dob: undefined,
         personalemail: "",
         skypeid: "",
         linkedin: "",
+        vendorid: "",
         twitter: "",
         facebook: "",
         review: "",
@@ -204,7 +208,7 @@ const RecruiterByClient = () => {
           phone: "",
           designation: "",
           status: "",
-          dob: null,
+          dob: undefined,
           personalemail: "",
           skypeid: "",
           linkedin: "",
@@ -214,6 +218,7 @@ const RecruiterByClient = () => {
           notes: "",
           clientid: -1,
           companyname: "",
+          vendorid: "",
           isGroupRow: false,
           level: 1,
         });
@@ -226,8 +231,8 @@ const RecruiterByClient = () => {
     () => [
       {
         headerName: "Name",
-        field: "name",
-        cellRenderer: (params: any) => {
+        field: "name" as keyof RowData,
+        cellRenderer: (params: { data: RowData; value: string }) => {
           if (params.data.isGroupRow) {
             const expanded = expandedCompanies[params.data.clientid];
             return (
@@ -279,28 +284,28 @@ const RecruiterByClient = () => {
       },
       {
         headerName: "Email",
-        field: "email",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "email" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Phone",
-        field: "phone",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "phone" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Designation",
-        field: "designation",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "designation" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Status",
-        field: "status",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "status" as keyof RowData,
+        hide: false,
         minWidth: 100,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: { value: string }) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",
@@ -314,62 +319,62 @@ const RecruiterByClient = () => {
       },
       {
         headerName: "DOB",
-        field: "dob",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "dob" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Personal Email",
-        field: "personalemail",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "personalemail" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
       {
         headerName: "Skype ID",
-        field: "skypeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "skypeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "LinkedIn",
-        field: "linkedin",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "linkedin" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Twitter",
-        field: "twitter",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "twitter" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Facebook",
-        field: "facebook",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "facebook" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Review",
-        field: "review",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "review" as keyof RowData,
+        hide: false,
         minWidth: 100,
       },
       {
         headerName: "Notes",
-        field: "notes",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "notes" as keyof RowData,
+        hide: false,
         minWidth: 200,
       },
       {
         headerName: "Employee ID",
-        field: "employeeid",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "employeeid" as keyof RowData,
+        hide: false,
         minWidth: 120,
       },
       {
         headerName: "Last Modified",
-        field: "lastmoddatetime",
-        hide: (params: any) => params.data.isGroupRow,
+        field: "lastmoddatetime" as keyof RowData,
+        hide: false,
         minWidth: 150,
       },
     ],
@@ -392,7 +397,8 @@ const RecruiterByClient = () => {
       setModalState({ ...modalState, add: false });
       fetchData();
     } catch (error) {
-      showAlert("Error adding recruiter", "error");
+      console.error("Error adding recruiter:", error);
+      // showAlert("Error adding recruiter", "error");
     }
   };
 
@@ -406,6 +412,7 @@ const RecruiterByClient = () => {
       setModalState({ ...modalState, edit: false });
       fetchData();
     } catch (error) {
+      console.error("Error updating recruiter:", error);
       showAlert("Error updating recruiter", "error");
     }
   };
@@ -419,6 +426,7 @@ const RecruiterByClient = () => {
         showAlert("Recruiter deleted successfully", "success");
         fetchData();
       } catch (error) {
+        console.error("Error deleting recruiter:", error);
         showAlert("Error deleting recruiter", "error");
       }
     }
@@ -430,11 +438,16 @@ const RecruiterByClient = () => {
       .filter((row) => !row.isGroupRow && row.id !== -1)
       .map((row) => [
         row.companyname,
-        row.name,
+        row.name.split(' - ')[0], // Extract just the name part without company
         row.email,
         row.phone,
         row.designation,
-        row.status,
+        row.status === 'A' ? 'Active' : 
+          row.status === 'I' ? 'Inactive' : 
+          row.status === 'D' ? 'Delete' : 
+          row.status === 'R' ? 'Rejected' : 
+          row.status === 'N' ? 'Not Interested' : 
+          row.status === 'E' ? 'Excellent' : row.status,
         row.dob || "",
         row.personalemail || "",
         row.skypeid || "",
@@ -445,7 +458,7 @@ const RecruiterByClient = () => {
         row.notes || "",
       ]);
 
-    autoTable(doc, {
+    const options = {
       head: [
         [
           "Company",
@@ -467,8 +480,10 @@ const RecruiterByClient = () => {
       body: tableData,
       styles: { fontSize: 8 },
       margin: { top: 20 },
-    });
+    };
 
+    // Apply autoTable to the document
+    autoTable(doc, options);
     doc.save("recruiters-by-client.pdf");
   };
 
@@ -520,7 +535,7 @@ const RecruiterByClient = () => {
           <button
             onClick={() => {
               const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
+              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,
                   edit: true,
@@ -537,7 +552,7 @@ const RecruiterByClient = () => {
           <button
             onClick={() => {
               const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
+              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
                 handleDelete(selectedRows[0].id);
               } else {
                 showAlert("Please select a recruiter to delete", "error");
@@ -548,9 +563,15 @@ const RecruiterByClient = () => {
             <MdDelete className="mr-2" />
           </button>
           <button
+            onClick={fetchData}
+            className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-md transition duration-300 hover:bg-gray-300"
+          >
+            <FaSync className="mr-2" />
+          </button>
+          <button
             onClick={() => {
               const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
+              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,
                   view: true,
@@ -594,8 +615,7 @@ const RecruiterByClient = () => {
         className="ag-theme-alpine relative"
         style={{ height: "400px", width: "100%", overflowY: "auto" }}
       >
-
-{isLoading && (
+        {isLoading && (
           <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
             <span className="ml-3 text-gray-700 font-medium">Loading...</span>
           </div>
@@ -616,12 +636,6 @@ const RecruiterByClient = () => {
           rowSelection="single"
           rowHeight={30}
           headerHeight={35}
-          overlayLoadingTemplate={
-            '<span class="ag-overlay-loading-center">Loading...</span>'
-          }
-          overlayNoRowsTemplate={
-            '<span class="ag-overlay-no-rows-center">No rows to show</span>'
-          }
           onGridReady={(params) => {
             params.api.sizeColumnsToFit();
           }}
@@ -645,19 +659,7 @@ const RecruiterByClient = () => {
             <FaChevronLeft />
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded ${
-                currentPage === page
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          {renderPageNumbers()}
 
           <button
             onClick={() => handlePageChange(currentPage + 1)}
@@ -694,7 +696,7 @@ const RecruiterByClient = () => {
       <EditRowModal
         isOpen={modalState.edit}
         onClose={() => setModalState({ ...modalState, edit: false })}
-        initialData={modalState.selectedRow}
+        initialData={modalState.selectedRow as RecruiterData | null}
         onSubmit={handleEdit}
         clients={clients}
         defaultClientId={

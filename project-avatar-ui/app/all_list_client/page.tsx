@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byAllList_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
@@ -23,6 +23,7 @@ import {
   FaChevronRight,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
+  FaSync
 } from "react-icons/fa";
 
 // Define types
@@ -47,6 +48,12 @@ interface Recruiter {
   lastmoddatetime?: string;
 }
 
+interface SearchParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
 const RecruiterByAllList = () => {
   const [rowData, setRowData] = useState<Recruiter[]>([]);
   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
@@ -55,7 +62,7 @@ const RecruiterByAllList = () => {
     edit: false,
     view: false,
   });
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: "", type: "" });
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -66,40 +73,10 @@ const RecruiterByAllList = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  useEffect(() => {
-    fetchRecruiters(currentPage);
-  }, [currentPage]);
-
-  // Debounced search function
-  const debouncedSearch = useCallback((value: string) => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    searchTimeoutRef.current = setTimeout(() => {
-      if (value === '') {
-        fetchRecruiters(1);
-      } else {
-        fetchRecruiters(1, value);
-      }
-    }, 500); // 500ms debounce delay
-  }, []);
-
-  // Handle search input changes with debounce
-  useEffect(() => {
-    debouncedSearch(searchValue);
-    
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchValue, debouncedSearch]);
-
-  const fetchRecruiters = async (page: number, search?: string) => {
+  const fetchRecruiters = useCallback(async (page: number, search?: string) => {
     setLoading(true);
     try {
-      const params: any = { 
+      const params: SearchParams = { 
         page, 
         pageSize,
       };
@@ -121,7 +98,37 @@ const RecruiterByAllList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, pageSize]);
+
+  useEffect(() => {
+    fetchRecruiters(currentPage);
+  }, [currentPage, fetchRecruiters]);
+
+  // Debounced search function
+  const debouncedSearch = useCallback((value: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (value === '') {
+        fetchRecruiters(1);
+      } else {
+        fetchRecruiters(1, value);
+      }
+    }, 500); // 500ms debounce delay
+  }, [fetchRecruiters]);
+
+  // Handle search input changes with debounce
+  useEffect(() => {
+    debouncedSearch(searchValue);
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchValue, debouncedSearch]);
 
   const showAlert = (message: string, type: string) => {
     setAlert({ show: true, message, type });
@@ -297,6 +304,12 @@ const RecruiterByAllList = () => {
             <MdDelete className="mr-2" />
           </button>
           <button
+            onClick={() => fetchRecruiters(currentPage)}
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          >
+            <FaSync className="mr-2" />
+          </button>
+          <button
             onClick={handleView}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-700"
           >
@@ -343,6 +356,9 @@ const RecruiterByAllList = () => {
             minWidth: 60,
             maxWidth: 200,
           }}
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center" style="border: 1px solid #ccc; padding: 8px; border-radius: 4px;">Loading...</span>'
+          }
           rowHeight={30}
           headerHeight={35}
         />

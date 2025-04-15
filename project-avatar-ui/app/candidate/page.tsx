@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
 import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ViewRowModal from "@/modals/candidate_modals/ViewRowCandidate";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
@@ -15,7 +15,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
-import { Candidate, TransformedCandidate } from "@/types/index";
+import { Candidate } from "@/types/index";
 
 import {
   AiOutlineEdit,
@@ -24,9 +24,6 @@ import {
   AiOutlineEye,
 } from "react-icons/ai";
 
-interface GroupedData {
-  [batch: string]: Candidate[];
-}
 
 interface DropdownOptions {
   courses: string[];
@@ -43,10 +40,10 @@ interface DropdownOptions {
 
 const Candidates = () => {
   const [rowData, setRowData] = useState<Candidate[]>([]);
-  const [, setGroupedData] = useState<GroupedData>({});
-  const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions | null>(null);
+  // const [, setGroupedData] = useState<GroupedData>({});
+  const [, setDropdownOptions] = useState<DropdownOptions | null>(null);
   const [columnDefs] = useState<{ headerName: string; field: string ; width?: number;
-    cellStyle?: any;}[]>([
+    cellStyle?: { [key: string]: string | number };}[]>([
     { headerName: "Batchname", field: "batchname", width: 120, cellStyle: { fontWeight: 'bold' } },
     { headerName: "Candidateid", field: "candidateid", width: 120 },
     { headerName: "Name", field: "name", width: 120 },
@@ -109,8 +106,8 @@ const Candidates = () => {
   }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<Candidate | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const gridRef = useRef<AgGridReact>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -125,7 +122,7 @@ const Candidates = () => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       if (gridRef.current?.api) {
@@ -152,28 +149,33 @@ const Candidates = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize, searchValue]);
 
   interface ErrorResponse {
     message: string;
   }
 
+  // Debounced search function
+  const debouncedSearch = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setCurrentPage(1);
+      fetchData();
+    }, 500); // 500ms debounce delay
+  }, [fetchData]);
+
   const handleSearch = () => {
     setCurrentPage(1);
-    setIsSearchActive(true);
     fetchData();
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
-    
-    // If search field is cleared, reset to original data
-    if (value === "" && isSearchActive) {
-      setIsSearchActive(false);
-      setCurrentPage(1);
-      fetchData();
-    }
+    debouncedSearch();
   };
 
   const handleDownloadPDF = () => {
@@ -194,7 +196,6 @@ const Candidates = () => {
 
   const handleRefresh = () => {
     setSearchValue("");
-    setIsSearchActive(false);
     setCurrentPage(1);
     fetchData();
   };
@@ -212,7 +213,16 @@ const Candidates = () => {
   useEffect(() => {
     fetchData();
     fetchDropdownOptions();
-  }, [currentPage]);
+  }, [currentPage, fetchData]);
+
+  // Clean up debounce timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.api) {
@@ -458,16 +468,14 @@ const Candidates = () => {
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           refreshData={fetchData}
-          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
-          onClose={() => setModalState({ ...modalState, edit: false })}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           refreshData={fetchData}
           candidateData={selectedRow}
-          dropdownOptions={dropdownOptions}
         />
       )}
       {modalState.view && selectedRow && (

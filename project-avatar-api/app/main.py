@@ -30,23 +30,34 @@ from app.routes.byvendorRoute import router as byvendor_route
 from app.routes.employeeRoute import router as employee
 from app.routes.vendorSearchRoute import router as vendorSearch_router
 from app.routes.mkl_placementsRoute import router as mkl_placements_router
+import os
+from jose import JWTError, jwt
+import secrets
 
 app = FastAPI()
 
-# Add CORS middleware configuration
+# Use a strong secret key from environment variables
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
+ALGORITHM = "HS256"
+
+# Define allowed origins
+ALLOWED_ORIGINS = [
+    "https://www.whitebox-learning.com",
+    "https://whitebox-learning.com",
+    "https://www.whitebox-learning.com/admin",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://www.whitebox-learning.com",
-        "https://whitebox-learning.com",
-        "https://www.whitebox-learning.com/admin",
-        "http://localhost:3000/admin",
-        "http://localhost:8000",
-        "http://localhost:3000"
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
     max_age=600
 )
 
@@ -71,7 +82,6 @@ app.include_router(by_client_router, prefix="/api/admin", tags=["recruiters"])
 app.include_router(by_placement_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
-
 app.include_router(placement_router, prefix="/api/admin/placements", tags=["placements"])
 app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
 # app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
@@ -81,7 +91,6 @@ app.include_router(vendorByPlacement_router, prefix="/api/admin",tags=["vendorBy
 app.include_router(byvendor_route, prefix="/api/admin", tags=["byvendor"])
 app.include_router(employee, prefix="/api/admin", tags=["employees"])
 app.include_router(vendorSearch_router, prefix="/api/admin", tags=["vendorSearch"])
-
 app.include_router(mkl_placements_router, prefix="/api/admin", tags=["placements"])
 
 @app.get("/")
