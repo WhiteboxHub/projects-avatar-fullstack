@@ -111,6 +111,7 @@ const Candidates = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const gridRef = useRef<AgGridReact>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -167,13 +168,23 @@ const Candidates = () => {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
-    
-    // If search field is cleared, reset to original data
-    if (value === "" && isSearchActive) {
-      setIsSearchActive(false);
-      setCurrentPage(1);
-      fetchData();
+
+    // Clear previous timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
     }
+
+    // Set a new timeout for debouncing
+    debounceTimeoutRef.current = setTimeout(() => {
+      if (value === "" && isSearchActive) {
+        setIsSearchActive(false);
+        setCurrentPage(1);
+        fetchData();
+      } else {
+        setIsSearchActive(true);
+        fetchData();
+      }
+    }, 300); // Adjust the debounce delay as needed
   };
 
   const handleDownloadPDF = () => {

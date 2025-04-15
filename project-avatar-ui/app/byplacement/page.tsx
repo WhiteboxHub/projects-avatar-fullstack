@@ -1,6 +1,6 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+"use client";
 import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
 import EditRowRecruiter from "@/modals/recruiter_byPlacement_modals/EditRowRecruiter";
 import ViewRowRecruiter from "@/modals/recruiter_byPlacement_modals/ViewRowRecruiter";
@@ -12,9 +12,6 @@ import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { Recruiter } from "@/types/byPlacement";
 import { Client } from "@/types/client";
-
-// import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-// import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 
 import React, {
   useCallback,
@@ -37,7 +34,6 @@ interface Company {
   recruiters: RecruiterData[];
   isGroup: boolean;
   isCollapsed: boolean;
-  // recruiter_count: number;
 }
 
 interface RecruiterData {
@@ -59,7 +55,7 @@ interface RecruiterData {
   companyname: string;
   employeeid?: number;
   lastmoddatetime?: string;
-  vendorid: string; // Ensure this is defined correctly
+  vendorid: string;
 }
 
 interface RowData extends RecruiterData {
@@ -395,7 +391,8 @@ const RecruiterByPlacement = () => {
       setModalState({...modalState, add: false});
       fetchData();
     } catch (error) {
-      showAlert("Error adding recruiter", "error");
+      // Do not show error tooltip
+      console.log("Error adding recruiter")
     }
   };
 
@@ -656,21 +653,6 @@ const RecruiterByPlacement = () => {
         onSubmit={handleAdd}
         clientOptions={clients.map(c => ({ id: c.id, name: c.name }))}
       />
-{/* 
-      <ViewRowModal
-        isOpen={modalState.view}
-        onClose={() => setModalState({...modalState, view: false})}
-        recruiter={modalState.selectedRow}
-      />
-
-<EditRowModal
-  isOpen={modalState.edit}
-  onClose={() => setModalState({...modalState, edit: false})}
-  initialData={modalState.selectedRow}
-  onSubmit={handleEdit}
-  clients={clients}
-  defaultClientId={selectedCompanyId || (modalState.selectedRow?.clientid || 0)}
-/> */}
 
 <EditRowRecruiter
   isOpen={modalState.edit}

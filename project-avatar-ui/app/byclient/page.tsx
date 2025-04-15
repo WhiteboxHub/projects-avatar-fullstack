@@ -395,7 +395,8 @@ const RecruiterByClient = () => {
       setModalState({ ...modalState, add: false });
       fetchData();
     } catch (error) {
-      showAlert("Error adding recruiter", "error");
+      // Suppress error tooltip
+      console.error("Error adding recruiter:", error);
     }
   };
 

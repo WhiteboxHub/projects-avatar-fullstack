@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/recruiter_byAllList_modals/AddRowRecruiter";
 import EditRowModal from "@/modals/recruiter_byAllList_modals/EditRowRecruiter";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/recruiter_byAllList_modals/ViewRowRecruiter";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
