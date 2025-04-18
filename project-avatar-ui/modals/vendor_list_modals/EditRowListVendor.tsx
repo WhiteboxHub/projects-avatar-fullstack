@@ -72,7 +72,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byVendorList/update/${formData.id}`, formData, {
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendorList/update/${formData.id}`, formData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       console.log(response.data.message); // Log success message

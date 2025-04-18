@@ -1,16 +1,17 @@
+
+
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/vendorbyplacement_modals/AddRowPlacementv";
-import EditRowRecruiter from "@/modals/vendorbyplacement_modals/EditRowPlacementv";
-import ViewRowRecruiter from "@/modals/vendorbyplacement_modals/ViewRowPlacementv";
+import AddRowModal from "@/modals/vendor_byVendor_modals/AddRowVendor";
+import EditRowModal from "@/modals/vendor_byVendor_modals/EditRowVendor";
+import ViewRowModal from "@/modals/vendor_byVendor_modals/ViewRowVendor";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byPlacement";
 import { Vendor } from "@/types/vendor";
 
 import React, {
@@ -27,13 +28,14 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
-
-interface Company {
+jsPDF.prototype.autoTable = autoTable;
+interface Vendor {
   vendorid: number;
   companyname: string;
   recruiters: RecruiterData[];
   isGroup: boolean;
   isCollapsed: boolean;
+  recruiter_count: number;
 }
 
 interface RecruiterData {
@@ -43,7 +45,7 @@ interface RecruiterData {
   phone: string;
   designation: string;
   status: string;
-  dob: string | null;
+  dob?: string;
   personalemail: string;
   skypeid: string;
   linkedin: string;
@@ -76,7 +78,7 @@ interface ModalState {
   selectedRow: RecruiterData | null;
 }
 
-const RecruiterByPlacement = () => {
+const RecruiterByVendor = () => {
   const gridRef = useRef<AgGridReact>();
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
@@ -87,16 +89,18 @@ const RecruiterByPlacement = () => {
   const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [expandedCompanies, setExpandedCompanies] = useState<{
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [expandedVendors, setExpandedVendors] = useState<{
     [key: number]: boolean;
   }>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
-  const pageSize = 100;
+  const [vendorsList, setVendorsList] = useState<Vendor[]>([]);
+  const [selectedVendorId, setSelectedVendorId] = useState<number | null>(
+    null
+  );
+  const pageSize = 10;
 
   const showAlert = (text: string, type: "success" | "error") => {
     setAlertMessage({ text, type });
@@ -116,16 +120,17 @@ const RecruiterByPlacement = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-vendor-placement`,
+        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-vendor`,
         {
           params: {
             page: currentPage,
             pageSize: pageSize,
+            type: "vendor",
             search: debouncedSearchValue || undefined,
           },
         }
       );
-      setCompanies(response.data.data);
+      setVendors(response.data.data);
       setTotalPages(response.data.pages);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -140,8 +145,8 @@ const RecruiterByPlacement = () => {
   }, [fetchData]);
 
   const toggleGroup = (vendorId: number) => {
-    setSelectedCompanyId(vendorId);
-    setExpandedCompanies((prev) => ({
+    setSelectedVendorId(vendorId); // Store the selected vendor ID
+    setExpandedVendors((prev) => ({
       ...prev,
       [vendorId]: !prev[vendorId],
     }));
@@ -150,8 +155,10 @@ const RecruiterByPlacement = () => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/vendors`);
-        setVendors(response.data || []);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/vendors`
+        );
+        setVendorsList(response.data || []);
       } catch (error) {
         console.error("Error fetching vendors:", error);
       }
@@ -161,35 +168,35 @@ const RecruiterByPlacement = () => {
 
   const rowData = useMemo(() => {
     const rows: RowData[] = [];
-    companies.forEach((company) => {
+    vendors.forEach((vendor) => {
       rows.push({
-        id: company.vendorid,
-        name: company.companyname,
+        id: vendor.vendorid,
+        name: vendor.companyname,
         email: "",
-        clientid: "",
         phone: "",
         designation: "",
         status: "",
-        dob: null,
+        dob: undefined,
         personalemail: "",
         skypeid: "",
         linkedin: "",
+        vendorid: "",
         twitter: "",
         facebook: "",
         review: "",
         notes: "",
-        vendorid: company.vendorid,
-        companyname: company.companyname,
+        vendorid: vendor.vendorid,
+        companyname: vendor.companyname,
         isGroupRow: true,
         level: 0,
-        expanded: expandedCompanies[company.vendorid],
+        expanded: expandedVendors[vendor.vendorid],
       });
 
-      if (expandedCompanies[company.vendorid]) {
-        company.recruiters.forEach((recruiter) => {
+      if (expandedVendors[vendor.vendorid]) {
+        vendor.recruiters.forEach((recruiter) => {
           rows.push({
             ...recruiter,
-            name: `${recruiter.id} ${recruiter.name} - ${company.companyname}`,
+            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname}`,
             isGroupRow: false,
             level: 1,
           });
@@ -201,7 +208,7 @@ const RecruiterByPlacement = () => {
           phone: "",
           designation: "",
           status: "",
-          dob: null,
+          dob: undefined,
           personalemail: "",
           skypeid: "",
           linkedin: "",
@@ -218,7 +225,7 @@ const RecruiterByPlacement = () => {
       }
     });
     return rows;
-  }, [companies, expandedCompanies]);
+  }, [vendors, expandedVendors]);
 
   const columnDefs = useMemo(
     () => [
@@ -227,8 +234,7 @@ const RecruiterByPlacement = () => {
         field: "name" as keyof RowData,
         cellRenderer: (params: { data: RowData; value: string }) => {
           if (params.data.isGroupRow) {
-            const expanded = expandedCompanies[params.data.vendorid];
-            //const company = companies.find(c => c.vendorid === params.data.vendorid);
+            const expanded = expandedVendors[params.data.vendorid];
             return (
               <div className="flex items-center">
                 <span
@@ -299,7 +305,7 @@ const RecruiterByPlacement = () => {
         field: "status" as keyof RowData,
         hide: false,
         minWidth: 100,
-        cellRenderer: (params:  { value: string }) => {
+        cellRenderer: (params: { value: string }) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",
@@ -372,7 +378,7 @@ const RecruiterByPlacement = () => {
         minWidth: 150,
       },
     ],
-    [expandedCompanies]
+    [expandedVendors]
   );
 
   const handlePageChange = (newPage: number) => {
@@ -384,13 +390,14 @@ const RecruiterByPlacement = () => {
   const handleAdd = async (formData: RecruiterData) => {
     try {
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-vendor-placement/add`,
+        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/add`,
         formData
       );
       showAlert("Recruiter added successfully", "success");
       setModalState({ ...modalState, add: false });
       fetchData();
     } catch (error) {
+      // Suppress error tooltip
       console.error("Error adding recruiter:", error);
     }
   };
@@ -398,15 +405,15 @@ const RecruiterByPlacement = () => {
   const handleEdit = async (formData: RecruiterData) => {
     try {
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-vendor-placement/update/${formData.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/update/${formData.id}`,
         formData
       );
       showAlert("Recruiter updated successfully", "success");
       setModalState({ ...modalState, edit: false });
       fetchData();
     } catch (error) {
-      showAlert("Error updating recruiter", "error");
       console.error("Error updating recruiter:", error);
+      showAlert("Error updating recruiter", "error");
     }
   };
 
@@ -414,13 +421,13 @@ const RecruiterByPlacement = () => {
     if (window.confirm("Are you sure you want to delete this recruiter?")) {
       try {
         await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-vendor-placement/remove/${id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/remove/${id}`
         );
         showAlert("Recruiter deleted successfully", "success");
         fetchData();
       } catch (error) {
-        showAlert("Error updating recruiter", "error");
-      console.error("Error updating recruiter:", error);
+        console.error("Error deleting recruiter:", error);
+        showAlert("Error deleting recruiter", "error");
       }
     }
   };
@@ -470,13 +477,13 @@ const RecruiterByPlacement = () => {
       margin: { top: 20 },
     });
 
-    doc.save("recruiters-by-placement.pdf");
+    doc.save("recruiters-by-vendor.pdf");
   };
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1) || i === totalPages) {
         pageNumbers.push(
           <button
             key={i}
@@ -489,6 +496,12 @@ const RecruiterByPlacement = () => {
           >
             {i}
           </button>
+        );
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pageNumbers.push(
+          <span key={i} className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hidden sm:block">
+            ...
+          </span>
         );
       }
     }
@@ -509,7 +522,7 @@ const RecruiterByPlacement = () => {
 
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold text-gray-800">
-          Placement Recruiters
+          Recruiter Management
         </h1>
         <div className="flex space-x-2">
           <button
@@ -591,91 +604,104 @@ const RecruiterByPlacement = () => {
       </div>
 
       <div
-        className="ag-theme-alpine"
+        className="ag-theme-alpine relative"
         style={{ height: "400px", width: "100%", overflowY: "auto" }}
       >
-      <AgGridReact
-      ref={gridRef}
-      rowData={rowData}
-      columnDefs={columnDefs}
-      defaultColDef={{
-        sortable: true,
-        filter: true,
-        cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-        minWidth: 60,
-      }}
-      suppressRowClickSelection={false}
-      rowSelection="single"
-      rowHeight={30}
-      headerHeight={35}
-      overlayNoRowsTemplate={
-        isLoading 
-          ? '<span class="ag-overlay-loading-center">Loading...</span>'
-          : '<span class="ag-overlay-loading-center">No data found</span>'
-      }
-      onGridReady={(params) => {
-        params.api.sizeColumnsToFit();
-      }}
-    />
+        {isLoading && (
+          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
+            <span className="ml-3 text-gray-700 font-medium">Loading...</span>
+          </div>
+        )}
+
+        <AgGridReact
+          ref={gridRef}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+            minWidth: 60,
+          }}
+          suppressRowClickSelection={false}
+          rowSelection="single"
+          rowHeight={30}
+          headerHeight={35}
+          overlayLoadingTemplate={
+            '<span class="ag-overlay-loading-center">Loading...</span>'
+          }
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+          }
+          onGridReady={(params) => {
+            params.api.sizeColumnsToFit();
+          }}
+        />
       </div>
 
       <div className="flex justify-between mt-4">
-        <div className="flex items-center flex-wrap gap-2 overflow-auto">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaChevronLeft />
           </button>
+
           {renderPageNumbers()}
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaChevronRight />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="text-sm px-2 py-1 rounded-md"
+            className="p-2 disabled:opacity-50 bg-gray-200 rounded hover:bg-gray-300"
           >
             <FaAngleDoubleRight />
           </button>
         </div>
+        <span className="ml-4 text-sm text-gray-600">
+          Total Records: {vendors.reduce((acc, vendor) => acc + vendor.recruiter_count, 0)}
+        </span>
       </div>
 
       <AddRowModal
         isOpen={modalState.add}
         onClose={() => setModalState({ ...modalState, add: false })}
         onSubmit={handleAdd}
-        vendorOptions={vendors.map(c => ({ id: c.id, name: c.name }))}
       />
 
-      <EditRowRecruiter
-        isOpen={modalState.edit}
-        onClose={() => setModalState({ ...modalState, edit: false })}
-        initialData={modalState.selectedRow as Recruiter | null}
-        onSubmit={handleEdit}
-        vendors={vendors}
-        defaultVendorId={selectedCompanyId || modalState.selectedRow?.vendorid || 0}
-      />
-
-      <ViewRowRecruiter
+      <ViewRowModal
         isOpen={modalState.view}
         onClose={() => setModalState({ ...modalState, view: false })}
-        recruiter={modalState.selectedRow as Recruiter | null}
+        recruiter={modalState.selectedRow}
+      />
+
+      <EditRowModal
+        isOpen={modalState.edit}
+        onClose={() => setModalState({ ...modalState, edit: false })}
+        initialData={modalState.selectedRow as RecruiterData | null}
+        onSubmit={handleEdit}
+        vendors={vendorsList}
+        defaultVendorId={
+          selectedVendorId || modalState.selectedRow?.vendorid || 0
+        }
       />
     </div>
   );
 };
 
-export default RecruiterByPlacement;
+export default RecruiterByVendor;

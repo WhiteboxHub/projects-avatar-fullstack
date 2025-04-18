@@ -136,9 +136,15 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onRequestCl
       // Transform the form data to match API expectations
       const payload = {
         ...formData,
-        mgrid: formData.manager ? dropdownOptions.managers.find(m => m.name === formData.manager)?.id : undefined,
-        designationid: formData.designation ? dropdownOptions.designations.find(d => d.name === formData.designation)?.id : undefined,
-        loginid: formData.loginid ? dropdownOptions.loginids.find(l => l.name === formData.loginid)?.id : undefined
+        mgrid: formData.manager ? parseInt(dropdownOptions.managers.find(m => m.name === formData.manager)?.id || '0') : undefined,
+        designationid: formData.designation ? parseInt(dropdownOptions.designations.find(d => d.name === formData.designation)?.id || '0') : undefined,
+        loginid: formData.loginid ? parseInt(dropdownOptions.loginids.find(l => l.name === formData.loginid)?.id || '0') : undefined,
+        commission: formData.commission === 'Y', // Convert commission to boolean
+        startdate: formData.startdate || null, // Ensure date fields are in the correct format
+        dob: formData.dob || null,
+        enddate: formData.enddate || null,
+        salary: formData.salary ? parseFloat(formData.salary) : undefined,
+        commissionrate: formData.commissionrate ? parseFloat(formData.commissionrate) : undefined,
       };
 
       // Remove undefined values
@@ -417,6 +423,198 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onRequestCl
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Commission</label>
+              <select
+                name="commission"
+                value={formData.commission}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              >
+                {commissionOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Commission Rate</label>
+              <input
+                type="text"
+                name="commissionrate"
+                value={formData.commissionrate}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Salary</label>
+              <input
+                type="text"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">State</label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Country</label>
+              <input
+                type="text"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Zip</label>
+              <input
+                type="text"
+                name="zip"
+                value={formData.zip}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
+              <input
+                type="text"
+                name="skypeid"
+                value={formData.skypeid}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Employment Agreement URL</label>
+              <input
+                type="text"
+                name="empagreementurl"
+                value={formData.empagreementurl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Offer Letter URL</label>
+              <input
+                type="text"
+                name="offerletterurl"
+                value={formData.offerletterurl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">DL URL</label>
+              <input
+                type="text"
+                name="dlurl"
+                value={formData.dlurl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Work Permit URL</label>
+              <input
+                type="text"
+                name="workpermiturl"
+                value={formData.workpermiturl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Contract URL</label>
+              <input
+                type="text"
+                name="contracturl"
+                value={formData.contracturl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
+              <input
+                type="date"
+                name="enddate"
+                value={formData.enddate}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Responsibilities</label>
+              <input
+                type="text"
+                name="responsibilities"
+                value={formData.responsibilities}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
+              <input
+                type="text"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
             </div>
           </div>
 

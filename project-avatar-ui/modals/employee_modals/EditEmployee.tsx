@@ -86,10 +86,20 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
       // Transform the form data back to API expected format
       const payload = {
         ...formData,
-        mgrid: dropdownOptions.managers.find(m => m.name === formData.manager)?.id || '',
-        designationid: dropdownOptions.designations.find(d => d.name === formData.designation)?.id || '',
-        loginid: dropdownOptions.loginids.find(l => l.name === formData.loginid)?.id || ''
+        mgrid: dropdownOptions.managers.find(m => m.name === formData.manager)?.id || null,
+        designationid: dropdownOptions.designations.find(d => d.name === formData.designation)?.id || null,
+        loginid: dropdownOptions.loginids.find(l => l.name === formData.loginid)?.id || null,
+        commission: formData.commission === 'Y', // Convert commission to boolean
+        startdate: formData.startdate || null, // Ensure date fields are in the correct format
+        dob: formData.dob || null,
+        enddate: formData.enddate || null,
       };
+
+      // Remove any undefined or null values to avoid validation errors
+      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+      // Log the payload to verify its structure
+      console.log('Payload:', payload);
 
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/employee/update/${formData.id}`, payload, {
         headers: { AuthToken: localStorage.getItem('token') },
@@ -97,7 +107,7 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
       onSave();
       onRequestClose();
     } catch (error) {
-      console.error('Error updating employee:', error);
+      console.error('Error updating employee:', error.response ? error.response.data : error.message);
     } finally {
       setIsLoading(false);
     }

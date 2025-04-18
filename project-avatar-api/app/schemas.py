@@ -852,13 +852,13 @@ class UrlInDB(UrlBase):
 # Employee Schemas
 class EmployeeBase(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     phone: Optional[str] = None
     status: Optional[str] = None
     startdate: Optional[date] = None
     mgrid: Optional[int] = None
     designationid: Optional[int] = None
-    personalemail: Optional[EmailStr] = None
+    personalemail: Optional[str] = None
     personalphone: Optional[str] = None
     dob: Optional[date] = None
     address: Optional[str] = None
@@ -871,11 +871,11 @@ class EmployeeBase(BaseModel):
     commission: Optional[bool] = None
     commissionrate: Optional[float] = None
     type: Optional[str] = None
-    empagreementurl: Optional[HttpUrl] = None
-    offerletterurl: Optional[HttpUrl] = None
-    dlurl: Optional[HttpUrl] = None
-    workpermiturl: Optional[HttpUrl] = None
-    contracturl: Optional[HttpUrl] = None
+    empagreementurl: Optional[str] = None
+    offerletterurl: Optional[str] = None
+    dlurl: Optional[str] = None
+    workpermiturl: Optional[str] = None
+    contracturl: Optional[str] = None
     enddate: Optional[date] = None
     loginid: Optional[int] = None
     responsibilities: Optional[str] = None
@@ -956,7 +956,7 @@ class VendorUpdate(VendorBase):
 class VendorBase(BaseModel):
     companyname: str
     status: str
-    tier: Optional[str] = None
+    tier: Optional[int] = None
     culture: Optional[str] = None
     solicited: Optional[str] = None
     minrate: Optional[float] = None
