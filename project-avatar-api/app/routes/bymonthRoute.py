@@ -20,7 +20,7 @@ def read_invoice_months(db: Session = Depends(get_db)):
 def read_invoices_by_month(
     month: Optional[str] = Query(None),
     page: int = Query(1),
-    page_size: int = Query(100),
+    page_size: int = Query(5000),
     db: Session = Depends(get_db)
 ):
     return get_invoices_grouped_by_month(db, month=month, page=page, page_size=page_size)
@@ -29,14 +29,14 @@ def read_invoices_by_month(
 def read_pname_list(db: Session = Depends(get_db)):
     return get_pname_list(db)
 
-@router.post("/api/admin/invoices")
+@router.post("/api/admin/bymonth/post/")
 def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depends(get_db)):
     try:
         return create_invoice(db, invoice_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.put("/api/admin/invoices/{invoice_id}")
+@router.put("/api/admin/bymonth/put/{invoice_id}")
 def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
     result = update_invoice(db, invoice_id, invoice_data)
     
@@ -45,7 +45,7 @@ def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db:
 
     return result
 
-@router.delete("/api/admin/invoices/{invoice_id}")
+@router.delete("/api/admin/bymonth/delete/{invoice_id}")
 def delete_invoice_entry(invoice_id: int, db: Session = Depends(get_db)):
     result = delete_invoice(db, invoice_id)
     if "error" in result:
