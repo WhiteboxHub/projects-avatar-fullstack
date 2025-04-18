@@ -1205,7 +1205,7 @@ const ByPo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<any[]>([]); // Adjust the type as per your client data structure
+  const [clients, setClients] = useState<any[]>([]); 
   const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
   const pageSize = 10;
 
@@ -1214,7 +1214,7 @@ const ByPo = () => {
     setTimeout(() => setAlertMessage(null), 3000);
   };
 
-  // Debounce search value
+ 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchValue(searchValue);
@@ -1249,7 +1249,7 @@ const ByPo = () => {
   const fetchClients = useCallback(async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/invoices` // Adjust the endpoint as per your API
+        `${process.env.NEXT_PUBLIC_API_URL}/invoices` 
       );
       setClients(response.data || []);
     } catch (error) {
