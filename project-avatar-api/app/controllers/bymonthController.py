@@ -1,3 +1,5 @@
+# new-projects-avatar-fullstack/project-avatar-api/app/controllers/bymonthController.py
+
 from sqlalchemy.orm import Session
 from app.models import Invoice
 from app.schemas import InvoiceCreateSchema, InvoiceUpdateSchema
@@ -13,7 +15,75 @@ def get_invoice_months(db: Session):
     result = db.execute(query)
     return [dict(row._mapping) for row in result]
 
-def get_invoices_by_month(db: Session, month: str, search: str = None, skip: int = 0, limit: int = 100):
+# def get_invoices_by_month(db: Session, month: str, search: str = None, skip: int = 0, limit: int = 100):
+#     query = text("""
+#         SELECT
+#             i.id,
+#             i.poid,
+#             i.invoicenumber,
+#             i.startdate,
+#             i.enddate,
+#             i.invoicedate,
+#             DATE_FORMAT(i.invoicedate, "%Y-%c-%M") AS invmonth,
+#             i.quantity,
+#             i.otquantity,
+#             p.rate,
+#             p.overtimerate,
+#             i.status,
+#             i.emppaiddate,
+#             i.candpaymentstatus,
+#             i.reminders,
+#             ((i.quantity * p.rate) + (i.otquantity * p.overtimerate)) AS amountexpected,
+#             DATE_ADD(i.invoicedate, INTERVAL p.invoicenet DAY) AS expecteddate,
+#             i.amountreceived,
+#             i.receiveddate,
+#             i.releaseddate,
+#             i.checknumber,
+#             i.invoiceurl,
+#             i.checkurl,
+#             p.freqtype,
+#             p.invoicenet,
+#             v.companyname,
+#             v.fax AS vendorfax,
+#             v.phone AS vendorphone,
+#             v.email AS vendoremail,
+#             v.timsheetemail,
+#             v.hrname,
+#             v.hremail,
+#             v.hrphone,
+#             v.managername,
+#             v.manageremail,
+#             v.managerphone,
+#             v.secondaryname,
+#             v.secondaryemail,
+#             v.secondaryphone,
+#             c.name AS candidatename,
+#             c.phone AS candidatephone,
+#             c.email AS candidateemail,
+#             pl.wrkemail,
+#             pl.wrkphone,
+#             r.name AS recruitername,
+#             r.phone AS recruiterphone,
+#             r.email AS recruiteremail,
+#             i.notes
+#         FROM invoice i
+#         JOIN po p ON i.poid = p.id
+#         JOIN placement pl ON p.placementid = pl.id
+#         JOIN candidate c ON pl.candidateid = c.candidateid
+#         JOIN vendor v ON pl.vendorid = v.id
+#         JOIN recruiter r ON pl.recruiterid = r.id
+#         WHERE i.status <> 'Delete'
+#         AND (:month IS NULL OR DATE_FORMAT(i.invoicedate, "%Y-%c-%M") = :month)
+#         AND (:search IS NULL OR i.invoicenumber LIKE :search OR c.name LIKE :search)
+#         LIMIT :limit OFFSET :skip;
+#     """)
+#     search_param = f"%{search}%" if search else None
+#     result = db.execute(query, {'month': month, 'search': search_param, 'skip': skip, 'limit': limit})
+#     return [dict(row._mapping) for row in result]
+
+
+
+def get_invoices_by_month(db: Session, month: str = None, search: str = None, skip: int = 0, limit: int = 100):
     query = text("""
         SELECT
             i.id,
@@ -75,9 +145,16 @@ def get_invoices_by_month(db: Session, month: str, search: str = None, skip: int
         AND (:search IS NULL OR i.invoicenumber LIKE :search OR c.name LIKE :search)
         LIMIT :limit OFFSET :skip;
     """)
+    
     search_param = f"%{search}%" if search else None
-    result = db.execute(query, {'month': month, 'search': search_param, 'skip': skip, 'limit': limit})
+    result = db.execute(query, {
+        'month': month,
+        'search': search_param,
+        'skip': skip,
+        'limit': limit
+    })
     return [dict(row._mapping) for row in result]
+
 
 def create_invoice(db: Session, invoice_data: InvoiceCreateSchema):
     new_invoice = Invoice(**invoice_data.dict())
@@ -137,3 +214,13 @@ def get_pname_list(db: Session):
     """)
     result = db.execute(query)
     return [dict(row._mapping) for row in result]
+
+def delete_invoice(db: Session, invoice_id: int):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        return {"error": "Invoice not found"}
+    
+    # Soft delete by updating status to "Delete"
+    invoice.status = "Delete"
+    db.commit()
+    return {"message": "Invoice deleted successfully"}

@@ -478,9 +478,6 @@
 // export default ByMonth;
 
 
-
-
-
 // "use client";
 
 // import React, { useState, useEffect, useRef } from "react";
@@ -523,9 +520,10 @@
 //   }>({ add: false, edit: false, view: false });
 //   const [selectedRow, setSelectedRow] = useState<ByMonth | null>(null);
 //   const [searchValue, setSearchValue] = useState<string>("");
-//   const [monthData, setMonthData] = useState<ByMonth[]>([]);
-//   const [, setSelectedMonth] = useState<string | null>(null);
+//   const [monthData, setMonthData] = useState<{ [key: string]: ByMonth[] }>({});
+//   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 //   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+//   const [selectedSubRow, setSelectedSubRow] = useState<ByMonth | null>(null);
 //   const gridRef = useRef<AgGridReact>(null);
 
 //   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -547,7 +545,7 @@
 //       setTotalRows(data.length);
 //       setupColumns(data);
 //     } catch (error) {
-//       console.error("Error loading data:", error);
+//       // console.error("Error loading data:", error);
 //     } finally {
 //       setLoading(false);
 //     }
@@ -594,23 +592,23 @@
 
 //   const handleRefresh = () => {
 //     setSearchValue("");
-//     fetchData();
-//     window.location.reload();
+//     setCurrentPage(1); // Reset to the first page
+//     setSelectedMonth(null); // Reset selected month
+//     setExpandedMonths(new Set()); // Reset expanded months
+//     setSelectedSubRow(null); // Reset selected subrow
+//     fetchData(); // Refetch the data
 //   };
 
 //   const handleAddRow = () =>
 //     setModalState((prevState) => ({ ...prevState, add: true }));
 
 //   const handleEditRow = () => {
-//     if (gridRef.current) {
-//       const selectedRows = gridRef.current.api.getSelectedRows();
-//       if (selectedRows.length > 0) {
-//         setSelectedRow(selectedRows[0]);
-//         setModalState((prevState) => ({ ...prevState, edit: true }));
-//       } else {
-//         setAlertMessage("Please select a row to edit.");
-//         setTimeout(() => setAlertMessage(null), 3000);
-//       }
+//     if (selectedSubRow) {
+//       setSelectedRow(selectedSubRow);
+//       setModalState((prevState) => ({ ...prevState, edit: true }));
+//     } else {
+//       setAlertMessage("Please select a row to edit.");
+//       setTimeout(() => setAlertMessage(null), 3000);
 //     }
 //   };
 
@@ -619,86 +617,106 @@
 //   }
 
 //   const handleDeleteRow = async () => {
-//     if (gridRef.current) {
-//       const selectedRows = gridRef.current.api.getSelectedRows();
-//       if (selectedRows.length > 0) {
-//         const byMonthId = selectedRows[0].byMonthid || selectedRows[0].id;
-//         if (byMonthId) {
-//           const confirmation = window.confirm(
-//             `Are you sure you want to delete By Month ID ${byMonthId}?`
-//           );
-//           if (!confirmation) return;
-
-//           try {
-//             await axios.delete(`${API_URL}/bymonth/delete/${byMonthId}`, {
+//     if (selectedSubRow) {
+//       const invoiceId = selectedSubRow.id;
+//       if (invoiceId) {
+//         const confirmation = window.confirm(
+//           `Are you sure you want to delete invoice ID ${invoiceId}?`
+//         );
+//         if (!confirmation) return;
+  
+//         try {
+//           setLoading(true);
+//           const response = await axios.delete(
+//             `${API_URL}/invoices/${invoiceId}`,
+//             {
 //               headers: { AuthToken: localStorage.getItem("token") },
-//             });
-//             alert("By Month deleted successfully.");
-//             fetchData();
-//           } catch (error) {
-//             const axiosError = error as AxiosError;
-//             alert(
-//                 `Failed to delete By Month: ${
-//                     (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-//                 }`
-//             );
+//             }
+//           );
+  
+//           // Show success message
+//           setAlertMessage("Invoice deleted successfully.");
+//           setTimeout(() => setAlertMessage(null), 3000);
+  
+//           // Refresh the appropriate data based on current view
+//           if (selectedMonth) {
+//             // If we're viewing a specific month, refresh that month's data
+//             await fetchMonthData(selectedMonth);
+//           } else {
+//             // Otherwise refresh the main data
+//             await fetchData();
 //           }
-//         } else {
-//           alert("No valid By Month ID found for the selected row.");
+  
+//           // Clear the selected row
+//           setSelectedSubRow(null);
+//         } catch (error) {
+//           const axiosError = error as AxiosError<{ error?: string }>;
+//           setAlertMessage(
+//             `Failed to delete invoice: ${
+//               axiosError.response?.data?.error || axiosError.message
+//             }`
+//           );
+//           setTimeout(() => setAlertMessage(null), 3000);
+//         } finally {
+//           setLoading(false);
 //         }
 //       } else {
-//         setAlertMessage("Please select a row to delete.");
+//         setAlertMessage("No valid invoice ID found for the selected row.");
 //         setTimeout(() => setAlertMessage(null), 3000);
 //       }
+//     } else {
+//       setAlertMessage("Please select a row to delete.");
+//       setTimeout(() => setAlertMessage(null), 3000);
 //     }
 //   };
-
 //   const handlePageChange = (newPage: number) => setCurrentPage(newPage);
 
 //   const handleViewRow = () => {
-//     if (gridRef.current) {
-//       const selectedRows = gridRef.current.api.getSelectedRows();
-//       if (selectedRows.length > 0) {
-//         setSelectedRow(selectedRows[0]);
-//         setModalState((prevState) => ({ ...prevState, view: true }));
-//       } else {
-//         setAlertMessage("Please select a row to view.");
-//         setTimeout(() => setAlertMessage(null), 3000);
-//       }
+//     if (selectedSubRow) {
+//       setSelectedRow(selectedSubRow);
+//       setModalState((prevState) => ({ ...prevState, view: true }));
+//     } else {
+//       setAlertMessage("Please select a row to view.");
+//       setTimeout(() => setAlertMessage(null), 3000);
 //     }
 //   };
 
-//   interface RowClickParams {
-//     data: {
-//       invmonth?: string;
-//       [key: string]: string | number | boolean | null | undefined;
-//     };
-//   }
-
-//   const handleRowClick = async (params: RowClickParams) => {
-//     const month = params.data.invmonth;
-//     console.log("Row clicked with data:", params.data);
-//     console.log("Selected Month:", month);
-
-//     if (month) {
-//       setSelectedMonth(month);
-//       try {
-//         const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
-//           headers: { AuthToken: localStorage.getItem("token") },
-//         });
-//         const data = response.data;
-//         console.log("Fetched Month Data:", data);
-//         setMonthData(data);
-//         // Toggle the expanded state
-//         setExpandedMonths((prev) =>
-//           new Set(prev).has(month) ? new Set([...prev].filter(m => m !== month)) : new Set([...prev, month])
-//         );
-//       } catch (error) {
-//         console.error("Error loading month data:", error);
-//       }
-//     } else {
-//       console.error("Month is undefined. Please check the data structure.");
+//   const fetchMonthData = async (month: string) => {
+//     try {
+//       const response = await axios.get(`${API_URL}/invoices/month/${month}`, {
+//         headers: { AuthToken: localStorage.getItem("token") },
+//       });
+//       const data = response.data;
+//       console.log("Fetched Month Data:", data);
+//       setMonthData(prev => ({ ...prev, [month]: data }));
+//     } catch (error) {
+//       console.error("Error loading month data:", error);
 //     }
+//   };
+
+//   const handleRowClick = async (month: string) => {
+//     setSelectedMonth(month);
+//     setSelectedSubRow(null); // Reset selected subrow when changing months
+    
+//     // Toggle the expanded state
+//     setExpandedMonths((prev) => {
+//       const newSet = new Set(prev);
+//       if (newSet.has(month)) {
+//         newSet.delete(month);
+//       } else {
+//         newSet.add(month);
+//         // Only fetch data if we don't already have it
+//         if (!monthData[month]) {
+//           fetchMonthData(month);
+//         }
+//       }
+//       return newSet;
+//     });
+//   };
+
+//   const handleSubRowClick = (row: ByMonth) => {
+//     setSelectedSubRow(row);
+//     console.log("Selected SubRow:", row);
 //   };
 
 //   const handleDownloadPDF = () => {
@@ -719,9 +737,7 @@
 //   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
 //   return (
-//     // <div className="p-4 mt-20 mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
-//       <div className="p-4 mt-4 mb-4 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl h-[600px] overflow-y-auto">
-
+//     <div className="p-4 mt-4 mb-4 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl h-[600px] overflow-y-auto">
 //       {alertMessage && (
 //         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
 //           {alertMessage}
@@ -796,19 +812,17 @@
 //       ) : (
 //         <div className="space-y-4">
 //           {rowData.map((row) => (
-//             <div key={row.id}>
+//             <div key={row.invmonth}>
 //               <div
 //                 className="flex justify-between items-center p-2 bg-gray-200 cursor-pointer"
-//                 onClick={() => handleRowClick({ data: row })}
+//                 onClick={() => handleRowClick(row.invmonth)}
 //               >
 //                 <span>{row.invmonth}</span>
 //                 <span
 //                   className="text-blue-600 cursor-pointer"
 //                   onClick={(e) => {
 //                     e.stopPropagation();
-//                     setExpandedMonths((prev) =>
-//                       new Set(prev).has(row.invmonth) ? new Set([...prev].filter(m => m !== row.invmonth)) : new Set([...prev, row.invmonth])
-//                     );
+//                     handleRowClick(row.invmonth);
 //                   }}
 //                 >
 //                   {expandedMonths.has(row.invmonth) ? "-" : "+"}
@@ -870,8 +884,12 @@
 //                       </tr>
 //                     </thead>
 //                     <tbody>
-//                       {monthData.map((data) => (
-//                         <tr key={data.id} className="hover:bg-gray-50 even:bg-gray-50">
+//                       {monthData[row.invmonth]?.map((data) => (
+//                         <tr
+//                           key={data.id}
+//                           className={`hover:bg-gray-50 even:bg-gray-50 cursor-pointer ${selectedSubRow?.id === data.id ? 'bg-blue-200' : ''}`}
+//                           onClick={() => handleSubRowClick(data)}
+//                         >
 //                           <td className="px-4 py-1 border-b border-r border-gray-300 whitespace-nowrap">{data.id}</td>
 //                           <td className="px-4 py-2 border-b border-gray-300">{data.poid}</td>
 //                           <td className="px-4 py-2 border-b border-gray-300">{data.invoicenumber}</td>
@@ -973,7 +991,7 @@
 //         </div>
 //       </div>
 
-//       {modalState.add && (
+//       {/* {modalState.add && (
 //         <AddRowModal
 //           isOpen={modalState.add}
 //           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
@@ -985,22 +1003,54 @@
 //           isOpen={modalState.edit}
 //           onRequestClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
 //           rowData={selectedRow}
-//           onSave={fetchData}
+//           onSave={() => {
+//             if (selectedMonth) {
+//               fetchMonthData(selectedMonth);
+//             }
+//           }}
 //         />
 //       )}
 //       {modalState.view && selectedRow && (
 //         <ViewRowModal
 //           isOpen={modalState.view}
-//           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+//           onRequestClose={() => setModalState((prev) => ({ ...prev, view: false }))}
 //           rowData={selectedRow}
 //         />
-//       )}
+//       )} */}
+
+
+
+//         {modalState.add && (
+//           <AddRowModal
+//             isOpen={modalState.add}
+//             onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
+//             refreshData={fetchData}
+//           />
+//         )}
+//         {modalState.edit && selectedRow && (
+//           <EditRowModal
+//             isOpen={modalState.edit}
+//             onRequestClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+//             rowData={selectedRow}
+//             onSave={() => {
+//               if (selectedMonth) {
+//                 fetchMonthData(selectedMonth);
+//               }
+//             }}
+//           />
+//         )}
+//         {modalState.view && selectedRow && (
+//           <ViewRowModal
+//             isOpen={modalState.view}
+//             onRequestClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+//             rowData={selectedRow}
+//           />
+//         )}
 //     </div>
 //   );
 // };
 
 // export default ByMonth;
-
 
 
 "use client";
@@ -1033,7 +1083,6 @@ jsPDF.prototype.autoTable = autoTable;
 const ByMonth = () => {
   const [rowData, setRowData] = useState<ByMonth[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string }[]>([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -1068,7 +1117,6 @@ const ByMonth = () => {
       console.log("Fetched Data:", data);
       setRowData(data);
       setTotalRows(data.length);
-      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -1090,7 +1138,6 @@ const ByMonth = () => {
       const { data, totalRows } = response.data;
       setRowData(data);
       setTotalRows(totalRows);
-      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
     }
@@ -1100,24 +1147,17 @@ const ByMonth = () => {
     fetchByMonths(null, searchValue);
   };
 
-  const setupColumns = (data: Record<string, unknown>[]) => {
-    if (data.length > 0) {
-      const columns = Object.keys(data[0]).map((key) => ({
-        headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        field: key,
-      }));
-      console.log("Column Definitions:", columns);
-      setColumnDefs(columns);
-    }
-  };
-
   useEffect(() => {
     fetchData();
   }, [currentPage]);
 
   const handleRefresh = () => {
     setSearchValue("");
-    fetchData();
+    setCurrentPage(1); // Reset to the first page
+    setSelectedMonth(null); // Reset selected month
+    setExpandedMonths(new Set()); // Reset expanded months
+    setSelectedSubRow(null); // Reset selected subrow
+    fetchData(); // Refetch the data
   };
 
   const handleAddRow = () =>
@@ -1133,38 +1173,48 @@ const ByMonth = () => {
     }
   };
 
-  interface ErrorResponse {
-    message: string;
-  }
-
   const handleDeleteRow = async () => {
     if (selectedSubRow) {
-      const byMonthId = selectedSubRow.id;
-      if (byMonthId) {
+      const invoiceId = selectedSubRow.id;
+      if (invoiceId) {
         const confirmation = window.confirm(
-          `Are you sure you want to delete invoice ID ${byMonthId}?`
+          `Are you sure you want to delete invoice ID ${invoiceId}?`
         );
         if (!confirmation) return;
 
         try {
-          await axios.delete(`${API_URL}/invoices/delete/${byMonthId}`, {
-            headers: { AuthToken: localStorage.getItem("token") },
-          });
-          alert("Invoice deleted successfully.");
-          // Refresh the month data after deletion
+          setLoading(true);
+          const response = await axios.delete(
+            `${API_URL}/invoices/${invoiceId}`,
+            {
+              headers: { AuthToken: localStorage.getItem("token") },
+            }
+          );
+
+          setAlertMessage("Invoice deleted successfully.");
+          setTimeout(() => setAlertMessage(null), 3000);
+
           if (selectedMonth) {
             await fetchMonthData(selectedMonth);
+          } else {
+            await fetchData();
           }
+
+          setSelectedSubRow(null);
         } catch (error) {
-          const axiosError = error as AxiosError;
-          alert(
-              `Failed to delete invoice: ${
-                  (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-              }`
+          const axiosError = error as AxiosError<{ error?: string }>;
+          setAlertMessage(
+            `Failed to delete invoice: ${
+              axiosError.response?.data?.error || axiosError.message
+            }`
           );
+          setTimeout(() => setAlertMessage(null), 3000);
+        } finally {
+          setLoading(false);
         }
       } else {
-        alert("No valid invoice ID found for the selected row.");
+        setAlertMessage("No valid invoice ID found for the selected row.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     } else {
       setAlertMessage("Please select a row to delete.");
@@ -1200,15 +1250,13 @@ const ByMonth = () => {
   const handleRowClick = async (month: string) => {
     setSelectedMonth(month);
     setSelectedSubRow(null); // Reset selected subrow when changing months
-    
-    // Toggle the expanded state
+
     setExpandedMonths((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(month)) {
         newSet.delete(month);
       } else {
         newSet.add(month);
-        // Only fetch data if we don't already have it
         if (!monthData[month]) {
           fetchMonthData(month);
         }
@@ -1226,7 +1274,7 @@ const ByMonth = () => {
     const doc = new jsPDF();
     doc.text("By Month Data", 20, 10);
     const pdfData = rowData.map((row) => Object.values(row));
-    const headers = columnDefs.map((col) => col.headerName);
+    const headers = Object.keys(rowData[0]).map((key) => key.charAt(0).toUpperCase() + key.slice(1));
     autoTable(doc, {
       head: [headers],
       body: pdfData,
@@ -1516,7 +1564,7 @@ const ByMonth = () => {
       {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
-          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          onRequestClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           rowData={selectedRow}
         />
       )}
