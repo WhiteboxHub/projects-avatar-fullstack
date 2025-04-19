@@ -1,130 +1,22 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { ByMonth } from '@/types'; // Adjust the import path accordingly
+import { AiOutlineClose } from 'react-icons/ai';
+import { InvoiceData } from '@/types/invoice';
 
 interface ViewRowModalProps {
   isOpen: boolean;
-  onRequestClose: () => void;
-  rowData: ByMonth; // Use the actual type for your row data
+  onClose: () => void;
+  invoice: InvoiceData | null;
 }
 
-const ByMonthViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onRequestClose, rowData }) => {
-  // Format date fields
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  // Format currency fields
-  const formatCurrency = (amount: number | string | null) => {
-    if (amount === null || amount === undefined) return 'N/A';
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(num);
-  };
-
-  // Group fields into logical sections
-  const fieldGroups = [
-    {
-      title: 'Basic Information',
-      fields: [
-        { key: 'id', label: 'ID', format: (value: any) => value },
-        { key: 'poid', label: 'PO ID', format: (value: any) => value },
-        { key: 'invoicenumber', label: 'Invoice Number', format: (value: any) => value },
-        { key: 'invmonth', label: 'Invoice Month', format: (value: any) => value },
-        { key: 'status', label: 'Status', format: (value: any) => value },
-      ]
-    },
-    {
-      title: 'Date Information',
-      fields: [
-        { key: 'startdate', label: 'Start Date', format: formatDate },
-        { key: 'enddate', label: 'End Date', format: formatDate },
-        { key: 'invoicedate', label: 'Invoice Date', format: formatDate },
-        { key: 'emppaiddate', label: 'Employee Paid Date', format: formatDate },
-        { key: 'expecteddate', label: 'Expected Date', format: formatDate },
-        { key: 'receiveddate', label: 'Received Date', format: formatDate },
-        { key: 'releaseddate', label: 'Released Date', format: formatDate },
-      ]
-    },
-    {
-      title: 'Financial Information',
-      fields: [
-        { key: 'quantity', label: 'Quantity', format: (value: any) => value },
-        { key: 'otquantity', label: 'OT Quantity', format: (value: any) => value },
-        { key: 'rate', label: 'Rate', format: formatCurrency },
-        { key: 'overtimerate', label: 'OT Rate', format: formatCurrency },
-        { key: 'amountexpected', label: 'Amount Expected', format: formatCurrency },
-        { key: 'amountreceived', label: 'Amount Received', format: formatCurrency },
-        { key: 'invoicenet', label: 'Invoice Net', format: formatCurrency },
-        { key: 'checknumber', label: 'Check Number', format: (value: any) => value },
-      ]
-    },
-    {
-      title: 'Contact Information',
-      fields: [
-        { key: 'companyname', label: 'Company Name', format: (value: any) => value },
-        { key: 'vendorphone', label: 'Vendor Phone', format: (value: any) => value },
-        { key: 'vendoremail', label: 'Vendor Email', format: (value: any) => value },
-        { key: 'timsheetemail', label: 'Timesheet Email', format: (value: any) => value },
-        { key: 'hrname', label: 'HR Name', format: (value: any) => value },
-        { key: 'hremail', label: 'HR Email', format: (value: any) => value },
-        { key: 'hrphone', label: 'HR Phone', format: (value: any) => value },
-        { key: 'managername', label: 'Manager Name', format: (value: any) => value },
-        { key: 'manageremail', label: 'Manager Email', format: (value: any) => value },
-        { key: 'managerphone', label: 'Manager Phone', format: (value: any) => value },
-        { key: 'recruitername', label: 'Recruiter Name', format: (value: any) => value },
-        { key: 'recruiteremail', label: 'Recruiter Email', format: (value: any) => value },
-        { key: 'recruiterphone', label: 'Recruiter Phone', format: (value: any) => value },
-        { key: 'candidatename', label: 'Candidate Name', format: (value: any) => value },
-        { key: 'candidateemail', label: 'Candidate Email', format: (value: any) => value },
-        { key: 'candidatephone', label: 'Candidate Phone', format: (value: any) => value },
-      ]
-    },
-    {
-      title: 'Additional Information',
-      fields: [
-        { key: 'freqtype', label: 'Frequency Type', format: (value: any) => value },
-        { key: 'candpaymentstatus', label: 'Candidate Payment Status', format: (value: any) => value },
-        { key: 'reminders', label: 'Reminders', format: (value: any) => value },
-        {
-          key: 'invoiceurl',
-          label: 'Invoice URL',
-          format: (value: any) => value ? (
-            <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-              View Invoice
-            </a>
-          ) : 'N/A'
-        },
-        {
-          key: 'checkurl',
-          label: 'Check URL',
-          format: (value: any) => value ? (
-            <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-              View Check
-            </a>
-          ) : 'N/A'
-        },
-        { key: 'notes', label: 'Notes', format: (value: any) => value || 'N/A' },
-      ]
-    }
-  ];
-
+const ViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onClose, invoice }) => {
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={onRequestClose}
-      ariaHideApp={false} // Ensure the modal does not hide the app content
+      onRequestClose={onClose}
       style={{
         content: {
-          top: '50%',
+          top: '55%',
           left: '50%',
           right: 'auto',
           bottom: 'auto',
@@ -142,57 +34,276 @@ const ByMonthViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onRequestClo
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       }}
-      contentLabel="View Invoice Details"
+      contentLabel="View Invoice Modal"
+      ariaHideApp={false}
     >
-      <div className="modal-header flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Invoice Details {rowData?.invoicenumber && `- ${rowData.invoicenumber}`}
-        </h1>
+      <div className="relative">
         <button
-          className="text-2xl font-semibold text-gray-500 hover:text-gray-700 transition"
-          onClick={onRequestClose}
+          onClick={onClose}
+          className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
         >
-          ×
+          <AiOutlineClose />
         </button>
       </div>
+
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Invoice Details</h2>
 
       <div className="modal-body">
-        {rowData ? (
-          <div className="space-y-6">
-            {fieldGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="border border-gray-200 rounded-lg p-4">
-                <h2 className="text-lg font-semibold mb-3 text-blue-700">{group.title}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {group.fields.map((field, fieldIndex) => (
-                    <div key={fieldIndex} className="modal-field">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">
-                        {field.label}
-                      </label>
-                      <div className="text-gray-800 bg-gray-50 p-2 rounded-md break-words">
-                        {field.format(rowData[field.key as keyof ByMonth])}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {invoice ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Basic Information */}
+            <div className="modal-field">
+              <label htmlFor="Company Name">Company Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.companyname || 'N/A'}
               </div>
-            ))}
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Invoice Number">Invoice Number</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.invoicenumber || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Status">Status</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.status || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Invoice Net">Invoice Net</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.invoicenet ? `$${invoice.invoicenet.toFixed(2)}` : 'N/A'}
+              </div>
+            </div>
+
+            {/* Month Information */}
+            <div className="modal-field">
+              <label htmlFor="Month">Month</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.invmonth || 'N/A'}
+              </div>
+            </div>
+
+            {/* Dates */}
+            <div className="modal-field">
+              <label htmlFor="Start Date">Start Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.startdate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="End Date">End Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.enddate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Invoice Date">Invoice Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.invoicedate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="EMP Paid Date">EMP Paid Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.emppaiddate || 'N/A'}
+              </div>
+            </div>
+
+            {/* Financial Information */}
+            <div className="modal-field">
+              <label htmlFor="Quantity">Quantity</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.quantity || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Rate">Rate</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.rate ? `$${invoice.rate.toFixed(2)}` : 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="OT Quantity">OT Quantity</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.otquantity || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Overtime Rate">Overtime Rate</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.overtimerate ? `$${invoice.overtimerate.toFixed(2)}` : 'N/A'}
+              </div>
+            </div>
+
+            {/* Payment Information */}
+            <div className="modal-field">
+              <label htmlFor="Amount Expected">Amount Expected</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.amountexpected ? `$${invoice.amountexpected.toFixed(2)}` : 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Expected Date">Expected Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.expecteddate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Amount Received">Amount Received</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.amountreceived ? `$${invoice.amountreceived.toFixed(2)}` : 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Received Date">Received Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.receiveddate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Released Date">Released Date</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.releaseddate || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Candidate Payment Status">Candidate Payment Status</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.candpaymentstatus || 'N/A'}
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="modal-field">
+              <label htmlFor="HR Name">HR Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.hrname || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HR Email">HR Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.hremail || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="HR Phone">HR Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.hrphone || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Manager Name">Manager Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.managername || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Manager Email">Manager Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.manageremail || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Manager Phone">Manager Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.managerphone || 'N/A'}
+              </div>
+            </div>
+
+            {/* Candidate Information */}
+            <div className="modal-field">
+              <label htmlFor="Candidate Name">Candidate Name</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.candidatename || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Candidate Email">Candidate Email</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.candidateemail || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Candidate Phone">Candidate Phone</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.candidatephone || 'N/A'}
+              </div>
+            </div>
+
+            {/* Additional Information */}
+            <div className="modal-field">
+              <label htmlFor="Check Number">Check Number</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.checknumber || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Reminders">Reminders</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.reminders || 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Invoice URL">Invoice URL</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.invoiceurl ? (
+                  <a href={invoice.invoiceurl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    View Invoice
+                  </a>
+                ) : 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label htmlFor="Check URL">Check URL</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
+                {invoice.checkurl ? (
+                  <a href={invoice.checkurl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    View Check
+                  </a>
+                ) : 'N/A'}
+              </div>
+            </div>
+
+            <div className="modal-field col-span-1 md:col-span-2">
+              <label htmlFor="Notes">Notes</label>
+              <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline min-h-[100px]">
+                {invoice.notes || 'N/A'}
+              </div>
+            </div>
           </div>
         ) : (
-          <p className="text-gray-600">No data available</p>
+          <p className="text-gray-600">No invoice data available</p>
         )}
-      </div>
-
-      <div className="modal-actions flex justify-end mt-6">
-        <button
-          type="button"
-          className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
-          onClick={onRequestClose}
-        >
-          Close
-        </button>
       </div>
     </Modal>
   );
 };
 
-export default ByMonthViewRowModal;
+export default ViewRowModal;
