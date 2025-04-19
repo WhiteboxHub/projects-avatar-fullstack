@@ -1,43 +1,45 @@
-
 "use client";
+import React, { useState, useRef, useEffect } from "react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
+import { FaDownload } from "react-icons/fa";
+// import AddRowModal from "@/modals/recruiter_byPlacement_modals/AddRowRecruiter";
 // import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-import React, { useEffect, useRef, useState } from "react";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
-import autoTable from "jspdf-autotable";
-import axios from "axios";
-import { AgGridReact } from "ag-grid-react";
-import { jsPDF } from "jspdf";
-import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byClient";
-
 import {
-  FaDownload,
   FaChevronLeft,
   FaChevronRight,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
 } from "react-icons/fa";
+import {
+  AiOutlineEdit,
+  AiOutlineEye,
+  AiOutlineSearch,
+} from "react-icons/ai";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { Recruiter } from "@/types/byPlacement";
+import axios from "axios";
+// import ViewRowModal from "@/modals/bymonth_modals/ViewRowByMonth";
 
 jsPDF.prototype.autoTable = autoTable;
 
-const RecruiterByClient = () => {
-  const [modalState, setModalState] = useState<{
-    add: boolean;
-    edit: boolean;
-    view: boolean;
-  }>({ add: false, edit: false, view: false });
+const RecruiterByPlacement = () => {
+//   const [, setModalState] = useState<{
+//     add: boolean;
+//     edit: boolean;
+//     view: boolean;
+//   }>({ add: false, edit: false, view: false });
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<Recruiter[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+//   const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [pageSize] = useState<number>(200);
+  const [pageSize] = useState<number>(100);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -48,47 +50,48 @@ const RecruiterByClient = () => {
 
   const fetchRecruiters = async (page: number) => {
     try {
-      const response = await axios.get(`${API_URL}/recruiters/by-client`, {
+      const response = await axios.get(`${API_URL}/by/recruiters/by-placement`, {
         params: { page, pageSize },
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setRowData(response.data.data);
-      setTotalPages(Math.min(response.data.pages, 307));
+      setTotalPages(response.data.pages);
+      console.log(response.data.pages);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     }
   };
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+//   const handleAddRow = () =>
+//     setModalState((prevState) => ({ ...prevState, add: true }));
 
-  const handleEditRow = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, edit: true }));
-      } else {
-        setAlertMessage("Please select a row to edit.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+//   const handleEditRow = () => {
+//     if (gridRef.current) {
+//       const selectedRows = gridRef.current.api.getSelectedRows();
+//       if (selectedRows.length > 0) {
+//         // setSelectedRow(selectedRows[0]);
+//         setModalState((prevState) => ({ ...prevState, edit: true }));
+//       } else {
+//         setAlertMessage("Please select a row to edit.");
+//         setTimeout(() => setAlertMessage(null), 3000);
+//       }
+//     }
+//   };
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const recruiterId = selectedRows[0].id; // Assuming the recruiter object has an 'id' property
+        const recruiterId = selectedRows[0].id; // Assuming 'id' is the identifier
         try {
-          await axios.delete(`${API_URL}/recruiters/byClient/remove/${recruiterId}`, {
+          await axios.delete(`${API_URL}/by/recruiters/byPlacement/remove/${recruiterId}`, {
             headers: { AuthToken: localStorage.getItem("token") },
           });
           setAlertMessage("Recruiter deleted successfully.");
           fetchRecruiters(currentPage); // Refresh the list after deletion
         } catch (error) {
+          setAlertMessage("Error deleting recruiter.");
           console.error("Error deleting recruiter:", error);
-          setAlertMessage("Failed to delete recruiter.");
         }
       } else {
         setAlertMessage("Please select a row to delete.");
@@ -97,50 +100,30 @@ const RecruiterByClient = () => {
     }
   };
 
-  const handleViewRow = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, view: true }));
-      } else {
-        setAlertMessage("Please select a row to view.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+//   const handleViewRow = () => {
+//     if (gridRef.current) {
+//       const selectedRows = gridRef.current.api.getSelectedRows();
+//       if (selectedRows.length > 0) {
+//         // setSelectedRow(selectedRows[0]);
+//         setModalState((prevState) => ({ ...prevState, view: true }));
+//       } else {
+//         setAlertMessage("Please select a row to view.");
+//         setTimeout(() => setAlertMessage(null), 3000);
+//       }
+//     }
+//   };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Recruiter Data", 20, 10);
     autoTable(doc, {
-      head: [
-        [
-          "ID",
-          "Name",
-          "Email",
-          "Phone",
-          "Status",
-          "Designation",
-          "DOB",
-          "Personal Email",
-          "Employee ID",
-          "Skype ID",
-          "LinkedIn",
-          "Twitter",
-          "Facebook",
-          "Review",
-          "Vendor ID",
-          "Client ID",
-          "Notes",
-          "Last Modified DateTime",
-        ],
-      ],
+      head: [["ID", "Name", "Email", "Phone", "Company", "Status", "Designation", "DOB", "Personal Email", "Employee ID", "Skype ID", "LinkedIn", "Twitter", "Facebook", "Review", "Client ID", "Notes", "Last Modified DateTime"]],
       body: rowData.map((row) => [
         row.id,
-        row.name,
-        row.email,
+        row.name || "",
+        row.email || "",
         row.phone || "",
+        // row.comp || "",
         row.status || "",
         row.designation || "",
         row.dob || "",
@@ -151,7 +134,6 @@ const RecruiterByClient = () => {
         row.twitter || "",
         row.facebook || "",
         row.review || "",
-        row.vendorid || "",
         row.clientid || "",
         row.notes || "",
         row.lastmoddatetime || "",
@@ -162,7 +144,6 @@ const RecruiterByClient = () => {
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
-      // Allow going to the last page
       setCurrentPage(newPage);
     }
   };
@@ -170,7 +151,6 @@ const RecruiterByClient = () => {
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
-      // Include the last page
       if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pageNumbers.push(
           <button
@@ -198,18 +178,16 @@ const RecruiterByClient = () => {
         </div>
       )}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Recruiter Management
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-800">Recruiter Management</h1>
         <div className="flex space-x-2">
           <button
-            onClick={handleAddRow}
+            // onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
           >
             <MdAdd className="mr-2" />
           </button>
           <button
-            onClick={handleEditRow}
+            // onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
           >
             <AiOutlineEdit className="mr-2" />
@@ -221,7 +199,7 @@ const RecruiterByClient = () => {
             <MdDelete className="mr-2" />
           </button>
           <button
-            onClick={handleViewRow}
+            // onClick={handleViewRow}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
           >
             <AiOutlineEye className="mr-2" />
@@ -261,6 +239,7 @@ const RecruiterByClient = () => {
             { headerName: "Name", field: "name" },
             { headerName: "Email", field: "email" },
             { headerName: "Phone", field: "phone" },
+            { headerName: "Company", field: "comp" },
             { headerName: "Status", field: "status" },
             { headerName: "Designation", field: "designation" },
             { headerName: "DOB", field: "dob" },
@@ -271,7 +250,6 @@ const RecruiterByClient = () => {
             { headerName: "Twitter", field: "twitter" },
             { headerName: "Facebook", field: "facebook" },
             { headerName: "Review", field: "review" },
-            { headerName: "Vendor ID", field: "vendorid" },
             { headerName: "Client ID", field: "clientid" },
             { headerName: "Notes", field: "notes" },
             { headerName: "Last Modified DateTime", field: "lastmoddatetime" },
@@ -323,14 +301,15 @@ const RecruiterByClient = () => {
           </button>
         </div>
       </div>
-      {modalState.add && (
+      {/* {modalState.add && (
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onSubmit={() => {
+            // Handle add logic
           }}
         />
-      )}
+      )} */}
       {/* {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
@@ -340,16 +319,15 @@ const RecruiterByClient = () => {
           }}
         />
       )} */}
-      {modalState.view && selectedRow && (
+      {/* {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
           recruiter={selectedRow}
         />
-      )}
+      )} */}
     </div>
   );
 };
 
-export default RecruiterByClient;
-
+export default RecruiterByPlacement;

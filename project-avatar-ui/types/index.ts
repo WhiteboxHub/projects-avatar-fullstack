@@ -469,6 +469,7 @@ export interface Vendor {
       locationpreference: string;
       skypeid: string;
       ipemailid: number;
+      ipemail: string;
       resumeid: number;
       coverletter: string;
       intro: string;
@@ -477,9 +478,10 @@ export interface Vendor {
       notes: string;
       suspensionreason: string;
       yearsofexperience: string;
+      manager_name: string;
+      instructor_name: string;
+      submitter_name: string;
     }
-
-
 
 
 

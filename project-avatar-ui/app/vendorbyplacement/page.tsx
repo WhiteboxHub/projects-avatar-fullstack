@@ -283,7 +283,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/vendor_byPlacement_modals/AddRowVendor";
-import EditRowModal from "@/modals/vendor_byPlacement_modals/EditRowVendor";
+// import EditRowModal from "@/modals/vendor_byPlacement_modals/EditRowVendor";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -296,12 +296,12 @@ import {
   AiOutlineSearch,
 } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Recruiter } from "@/types/byVendorPlacement";
+import type { RecruiterByVendorPlacement } from "@/types/byVendorPlacement";
 import axios from "axios";
 
 jsPDF.prototype.autoTable = autoTable;
 
-const RecruiterByVendorPlacement = () => {
+const VendorByPlacementPage = () => {
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
@@ -310,8 +310,8 @@ const RecruiterByVendorPlacement = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [rowData, setRowData] = useState<Recruiter[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  const [rowData, setRowData] = useState<RecruiterByVendorPlacement[]>([]);
+  const [, setSelectedRow] = useState<RecruiterByVendorPlacement | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [pageSize] = useState<number>(100);
@@ -598,7 +598,7 @@ const RecruiterByVendorPlacement = () => {
           }}
         />
       )}
-      {modalState.edit && selectedRow && (
+      {/* {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
@@ -608,7 +608,7 @@ const RecruiterByVendorPlacement = () => {
             setModalState((prev) => ({ ...prev, edit: false }));
           }}
         />
-      )}
+      )} */}
       {/* {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}
@@ -620,4 +620,4 @@ const RecruiterByVendorPlacement = () => {
   );
 };
 
-export default RecruiterByVendorPlacement;
+export default VendorByPlacementPage;

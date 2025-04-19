@@ -7,7 +7,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
+// import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
 import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
 import {
   FaChevronLeft,
@@ -251,16 +251,16 @@ const VendorByClient = () => {
           }}
         />
       )}
-      {modalState.edit && selectedRow && (
+      {/* {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRow}
-          onSubmit={() => {
-            // Handle edit logic
-          }}
+          // onSubmit={() => {
+          //   // Handle edit logic
+          // }}
         />
-      )}
+      )} */}
       {modalState.view && selectedRow && (
         <ViewRowModal
           isOpen={modalState.view}

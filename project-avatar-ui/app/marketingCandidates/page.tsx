@@ -1,5 +1,3 @@
-// // // new-projects-avatar-fullstack/project-avatar-ui/app/marketingCandidates/page.tsx
-
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
@@ -18,6 +16,7 @@ import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
 import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
 import { UserOptions } from 'jspdf-autotable';
+import { CandidateMarketing } from '@/types/index';
 
 interface RowData {
   id: number;
@@ -75,7 +74,7 @@ const MarketingCandidates = () => {
     }
   }, [API_URL]);
 
-  const fetchData = useCallback(async (searchQuery = "", page = 1) => {
+  const fetchData = useCallback(async (searchQuery: string = "", page: number = 1) => {
     try {
       const response = await axios.get(`${API_URL}/candidatemarketing`, {
         params: {
@@ -433,14 +432,26 @@ const MarketingCandidates = () => {
         <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            manager_name: '',
+            instructor_name: '',
+            submitter_name: '',
+            ipemailid: 0
+          } as CandidateMarketing : null}
           onSave={fetchData}
           employees={employees}
         />
        <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
-          rowData={selectedRow as RowData}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            manager_name: '',
+            instructor_name: '',
+            submitter_name: '',
+            ipemailid: 0
+          } as CandidateMarketing : null}
         />
       </div>
     </div>

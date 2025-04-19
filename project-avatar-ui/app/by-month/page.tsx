@@ -1005,12 +1005,12 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AxiosError } from 'axios';
-import { AgGridReact } from "ag-grid-react";
+// import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
@@ -1049,7 +1049,7 @@ const ByMonth = () => {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [selectedSubRow, setSelectedSubRow] = useState<ByMonth | null>(null);
-  const gridRef = useRef<AgGridReact>(null);
+  // const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -1506,9 +1506,9 @@ const ByMonth = () => {
           isOpen={modalState.edit}
           onRequestClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           rowData={selectedRow}
-          onSave={() => {
+          onSave={async () => {
             if (selectedMonth) {
-              fetchMonthData(selectedMonth);
+              await fetchMonthData(selectedMonth);
             }
           }}
         />

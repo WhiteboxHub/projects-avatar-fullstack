@@ -34,7 +34,7 @@ const Clients = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string; editable?: boolean; width?: number; editoptions?: any; formatter?: string; label?: string; }[]
+    { headerName: string; field: string; editable?: boolean; width?: number; editoptions?: Record<string, unknown>; formatter?: string; label?: string; }[]
   >([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);

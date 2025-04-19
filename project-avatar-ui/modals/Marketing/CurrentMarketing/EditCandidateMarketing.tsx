@@ -919,36 +919,16 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-
-interface CandidateMarketing {
-  id: number;
-  manager_name: string;
-  instructor_name: string;
-  submitter_name: string;
-  status: string;
-  locationpreference: string;
-  priority: string;
-  technology: string;
-  resumeid: number;
-  minrate: number;
-  ipemail: string;
-  relocation: string;
-  closedate: string;
-  suspensionreason: string;
-  intro: string;
-  notes: string;
-  skypeid: string;
-  currentlocation: string;
-}
+import { CandidateMarketing } from '@/types/index';
+// import { ErrorResponse } from '@/types/index';
 
 interface Employee {
+  id: number;
   name: string;
-
 }
 
 interface IpEmail {
   email: string;
-  
 }
 
 interface EditCandidateMarketingModalProps {
@@ -968,11 +948,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 }) => {
   const [formData, setFormData] = useState<CandidateMarketing>({
     id: 0,
-    manager_name: '',
-    instructor_name: '',
-    submitter_name: '',
+    candidateid: 0,
+    startdate: '',
+    mmid: 0,
+    instructorid: 0,
     status: '',
-    locationpreference: '',
+    submitterid: 0,
     priority: '',
     technology: '',
     resumeid: 0,
@@ -985,6 +966,14 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     notes: '',
     skypeid: '',
     currentlocation: '',
+    locationpreference: '',
+    yearsofexperience: '',
+    coverletter: '',
+    closedemail: '',
+    ipemailid: 0,
+    manager_name: '',
+    instructor_name: '',
+    submitter_name: '',
   });
   const [ipEmails, setIpEmails] = useState<IpEmail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -1010,6 +999,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     if (rowData) {
       setFormData({
         ...rowData,
+        startdate: typeof rowData.startdate === 'number' ? String(rowData.startdate) : rowData.startdate || '',
         manager_name: rowData.manager_name || '',
         instructor_name: rowData.instructor_name || '',
         submitter_name: rowData.submitter_name || '',

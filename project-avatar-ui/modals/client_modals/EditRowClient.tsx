@@ -13,7 +13,7 @@ interface EditRowModalProps {
 
 const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData, onSave }) => {
   const [formData, setFormData] = useState<ClientUpdate>({
-    id: clientData.id,
+    id: String(clientData.id),
     companyname: clientData.companyname,
     tier: clientData.tier,
     status: clientData.status,
@@ -42,7 +42,10 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
   });
 
   useEffect(() => {
-    setFormData(clientData);
+    setFormData({
+      ...clientData,
+      id: String(clientData.id)
+    });
   }, [clientData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -56,7 +59,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const updatedData: ClientUpdate = { ...formData, id: clientData.id };
+      const updatedData: ClientUpdate = { ...formData, id: String(clientData.id) };
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${clientData.id}`, updatedData);
       await onSave();
       onClose();

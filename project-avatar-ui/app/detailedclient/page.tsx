@@ -26,6 +26,8 @@ import {
   AiOutlineEye,
   AiOutlineSearch
 } from "react-icons/ai";
+import { SortChangedEvent } from "ag-grid-community";
+
 interface ViewRowRecruiterComponentProps {
   isOpen: boolean;
   onClose: () => void;
@@ -104,7 +106,7 @@ const RecruiterByClient = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [rowData, setRowData] = useState<RecruiterDetails[]>([]);
   const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null);
-  const gridRef = useRef<AgGridReact>(null);
+  const gridRef = useRef<AgGridReact<RecruiterDetails>>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(1000);
@@ -133,7 +135,7 @@ const RecruiterByClient = () => {
 
   useEffect(() => {
     fetchRecruiters(currentPage);
-  }, [currentPage, sortField, sortOrder]);
+  }, [currentPage, sortField, sortOrder, fetchRecruiters]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -261,12 +263,13 @@ const RecruiterByClient = () => {
     return pageNumbers;
   };
 
-  const handleSortChanged = (params: any) => {
-    if (params.columnApi.getColumnState().length > 0) {
-      const sortModel = params.columnApi.getColumnState().find((column: any) => column.sort);
+  const handleSortChanged = (event: SortChangedEvent<RecruiterDetails>) => {
+    const columnState = event.api.getColumnState();
+    if (columnState.length > 0) {
+      const sortModel = columnState.find((column) => column.sort);
       if (sortModel) {
         setSortField(sortModel.colId);
-        setSortOrder(sortModel.sort);
+        setSortOrder(sortModel.sort || "asc");
       }
     }
   };
@@ -304,7 +307,7 @@ const RecruiterByClient = () => {
           </button>
           <button
             onClick={handleViewRow}
-            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md transition duration-300 hover:bg-gray-700"
+            className="flex items-center px-4 py-2 bg-gray-600 text-white arounded-md transition duration-300 hover:bg-gray-700"
             title="View Recruiter Details"
           >
             <AiOutlineEye className="mr-2" />
@@ -366,7 +369,7 @@ const RecruiterByClient = () => {
               headerName: "Status", 
               field: "status", 
               width: 100,
-              cellRenderer: (params: any) => {
+              cellRenderer: (params: { value: string }) => {
                 const statusMap: {[key: string]: string} = {
                   'A': 'Active',
                   'I': 'Inactive',
@@ -388,7 +391,7 @@ const RecruiterByClient = () => {
               headerName: "Review", 
               field: "review", 
               width: 100,
-              cellRenderer: (params: any) => {
+              cellRenderer: (params: { value: string }) => {
                 return params.value === 'Y' ? 'Yes' : params.value === 'N' ? 'No' : params.value;
               }
             },
@@ -403,6 +406,9 @@ const RecruiterByClient = () => {
             resizable: true,
             cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
           }}
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center" style="border: 1px solid #ccc; padding: 8px; border-radius: 4px;">Loading...</span>'
+          }
           onSortChanged={handleSortChanged}
           rowHeight={30}
           headerHeight={35}

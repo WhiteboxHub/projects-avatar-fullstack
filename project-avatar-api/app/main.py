@@ -62,6 +62,7 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=600
 )
+
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router, prefix="/api/admin/auth", tags=["auth"])

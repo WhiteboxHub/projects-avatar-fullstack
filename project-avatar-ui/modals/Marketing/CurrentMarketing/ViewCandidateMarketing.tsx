@@ -1,12 +1,12 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { CandidateMarketing, Employee } from '@/types'; // Adjust the import path accordingly
-import { AiOutlineClose } from 'react-icons/ai'; // Import any icons if needed
+import { CandidateMarketing } from '@/types/index'; // Adjust the import path accordingly
+// import { AiOutlineClose } from 'react-icons/ai'; // Import any icons if needed
 
 interface ViewEmployeeProps {
   isOpen: boolean;
   onRequestClose: () => void;
-  rowData:  CandidateMarketing ;
+  rowData: CandidateMarketing | null;
 }
 
 const ViewEmployee: React.FC<ViewEmployeeProps> = ({ isOpen, onRequestClose, rowData }) => {

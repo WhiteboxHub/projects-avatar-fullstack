@@ -100,12 +100,12 @@ const ViewRowRecruiter: React.FC<ViewRowRecruiterProps> = ({ isOpen, onClose, re
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Employee ID</label>
               <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
                 {recruiter.employeeid || 'N/A'}
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
@@ -142,12 +142,12 @@ const ViewRowRecruiter: React.FC<ViewRowRecruiterProps> = ({ isOpen, onClose, re
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
               <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
                 {recruiter.vendorid || 'N/A'}
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
@@ -163,12 +163,12 @@ const ViewRowRecruiter: React.FC<ViewRowRecruiterProps> = ({ isOpen, onClose, re
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Last Modified Date</label>
               <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
                 {recruiter.lastmoddatetime || 'N/A'}
               </div>
-            </div>
+            </div> */}
           </>
         ) : (
           <p>No data available</p>

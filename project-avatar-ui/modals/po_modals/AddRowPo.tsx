@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
+// import { AiOutlineClose } from 'react-icons/ai';
 import { Po } from '../../types/index';
 
 interface AddRowPOProps {
@@ -30,11 +30,11 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     InvoiceNet: '',
     POUrl: '',
     Notes: '',
-    placementid: '', // Add placementid to formData
   });
 
+  const [selectedPlacementId, setSelectedPlacementId] = useState<string>('');
   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
-  const [loadingPlacements, setLoadingPlacements] = useState(false);
+  const [, setLoadingPlacements] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -60,11 +60,11 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // If PlacementDetails is changed, update placementid
+    // If PlacementDetails is changed, update selectedPlacementId
     if (name === 'PlacementDetails') {
       const selectedPlacement = placementOptions.find(option => option.name === value);
       if (selectedPlacement) {
-        setFormData(prevData => ({ ...prevData, placementid: selectedPlacement.id }));
+        setSelectedPlacementId(selectedPlacement.id);
       }
     }
   };
@@ -73,11 +73,11 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     e.preventDefault();
     try {
       const payload = {
-        placementid: parseInt(formData.placementid), // Use placementid from state
+        placementid: parseInt(selectedPlacementId),
         begindate: formData.StartDate,
         enddate: formData.EndDate,
-        rate: parseFloat(formData.Rate),
-        overtimerate: parseFloat(formData.OvertimeRate),
+        rate: formData.Rate ? parseFloat(formData.Rate) : 0,
+        overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
         freqtype: formData.FreqType,
         frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
         invoicestartdate: formData.InvoiceStartDate,
@@ -86,7 +86,7 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
         notes: formData.Notes,
       };
 
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/po`, payload, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/po`, payload, {
         headers: { AuthToken: localStorage.getItem('token') },
       });
       refreshData();
