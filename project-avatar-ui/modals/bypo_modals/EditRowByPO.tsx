@@ -470,13 +470,13 @@ interface EditRowModalProps {
   defaultClientId: number;
 }
 
-const EditRowModal: React.FC<EditRowModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  rowData, 
-  onSave, 
+const EditRowModal: React.FC<EditRowModalProps> = ({
+  isOpen,
+  onClose,
+  rowData,
+  onSave,
   clients,
-  defaultClientId 
+  defaultClientId
 }) => {
   const [formData, setFormData] = useState({
     invoicenumber: '',
@@ -583,31 +583,12 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
     }
   }, [rowData, defaultClientId]);
 
-
-  const fetchInvoiceOptions = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/invoices`, {
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-      
-      // Just use the raw data
-      setInvoiceOptions(response.data);
-      console.log("Raw data being set:", response.data);
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'quantity' || name === 'otquantity' || name === 'rate' || 
-              name === 'overtimerate' || name === 'amountexpected' || 
+      [name]: name === 'quantity' || name === 'otquantity' || name === 'rate' ||
+              name === 'overtimerate' || name === 'amountexpected' ||
               name === 'amountreceived' || name === 'invoicenet' || name === 'poid'
         ? Number(value)
         : value
@@ -663,7 +644,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
             &times;
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Basic Information */}
@@ -690,7 +671,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
               >
                 {clients.map(client => (
                   <option key={client.id} value={client.id}>
-                    {client.name}
+                    {client.pname}
                   </option>
                 ))}
               </select>

@@ -485,7 +485,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/invoices`, formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/invoices/post`, formData, {
         headers: { AuthToken: localStorage.getItem('token') },
       });
       await refreshData();

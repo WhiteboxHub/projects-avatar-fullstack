@@ -3059,6 +3059,217 @@ const ByMonth = () => {
           return statusMap[params.value] || params.value;
         },
       },
+      {
+                headerName: "Amount Expected",
+                field: "amountexpected" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Expected Date",
+                field: "expecteddate" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Amount Received",
+                field: "amountreceived" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Received Date",
+                field: "receiveddate" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Released Date",
+                field: "releaseddate" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Check Number",
+                field: "checknumber" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Invoice URL",
+                field: "invoiceurl" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Check URL",
+                field: "checkurl" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Freq Type",
+                field: "freqtype" as keyof RowData,
+                hide: false,
+                minWidth: 100,
+              },
+              {
+                headerName: "Invoice Net",
+                field: "invoicenet" as keyof RowData,
+                hide: false,
+                minWidth: 100,
+              },
+              {
+                headerName: "Company Name",
+                field: "companyname" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Vendor Fax",
+                field: "vendorfax" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Vendor Phone",
+                field: "vendorphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Vendor Email",
+                field: "vendoremail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Timesheet Email",
+                field: "timsheetemail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "HR Name",
+                field: "hrname" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "HR Email",
+                field: "hremail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "HR Phone",
+                field: "hrphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Manager Name",
+                field: "managername" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Manager Email",
+                field: "manageremail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Manager Phone",
+                field: "managerphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Secondary Name",
+                field: "secondaryname" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Secondary Email",
+                field: "secondaryemail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Secondary Phone",
+                field: "secondaryphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Candidate Name",
+                field: "candidatename" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Candidate Phone",
+                field: "candidatephone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Candidate Email",
+                field: "candidateemail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Work Email",
+                field: "wrkemail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Work Phone",
+                field: "wrkphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Recruiter Name",
+                field: "recruitername" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Recruiter Phone",
+                field: "recruiterphone" as keyof RowData,
+                hide: false,
+                minWidth: 120,
+              },
+              {
+                headerName: "Recruiter Email",
+                field: "recruiteremail" as keyof RowData,
+                hide: false,
+                minWidth: 150,
+              },
+              {
+                headerName: "Notes",
+                field: "notes" as keyof RowData,
+                hide: false,
+                minWidth: 200,
+              },
+
+
+
+
+
+
+
+
+
+
+
+
+
     ],
     [expandedMonthGroups]
   );
@@ -3101,7 +3312,7 @@ const ByMonth = () => {
     if (window.confirm("Are you sure you want to delete this invoice?")) {
       try {
         await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/invoices/bypo/delete/${id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/invoices/delete/${id}`
         );
         showAlert("Invoice deleted successfully", "success");
         fetchData();
@@ -3372,6 +3583,7 @@ const ByMonth = () => {
         clients={clients}
         defaultClientId={selectedMonth || modalState.selectedRow?.poid || 0}
       />
+      
     </div>
   );
 };
