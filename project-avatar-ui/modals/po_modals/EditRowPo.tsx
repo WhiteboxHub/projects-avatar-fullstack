@@ -1,3 +1,5 @@
+// // new-projects-avatar-fullstack/project-avatar-ui/modals/po_modals/EditRowPo.tsx
+
 // import React, { useState, useEffect } from 'react';
 // import Modal from 'react-modal';
 // import axios from 'axios';
@@ -11,10 +13,15 @@
 //   onSave: () => void;
 // }
 
+// interface PlacementOption {
+//   id: string;
+//   name: string;
+// }
+
 // const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
 //   const [formData, setFormData] = useState<Po>({
-//     id: '',
-//     PlacementID: '',
+//     POID: '', 
+//     PlacementDetails: '',
 //     StartDate: '',
 //     EndDate: '',
 //     Rate: '',
@@ -25,41 +32,101 @@
 //     InvoiceNet: '',
 //     POUrl: '',
 //     Notes: '',
-//     PlacementDetails: '',
 //   });
 
+//   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
+//   const [loadingPlacements, setLoadingPlacements] = useState(false);
+
 //   useEffect(() => {
-//     if (rowData) {
-//       setFormData(rowData);
+//     const fetchData = async () => {
+//       if (rowData) {
+//         // console.log("Row Data:", rowData); 
+//         setFormData((prevData) => ({
+//           ...prevData,
+//           POID: rowData.POID || rowData.POID, 
+//           PlacementDetails: placementOptions.find(option => option.id === rowData.PlacementDetails)?.name || '',
+//           StartDate: rowData.StartDate || rowData.StartDate,
+//           EndDate: rowData.EndDate || rowData.EndDate,
+//           Rate: rowData.Rate || rowData.Rate,
+//           OvertimeRate: rowData.OvertimeRate || rowData.OvertimeRate,
+//           FreqType: rowData.FreqType || rowData.FreqType,
+//           InvoiceFrequency: rowData.InvoiceFrequency || rowData.InvoiceStartDate,
+//           InvoiceStartDate: rowData.InvoiceStartDate || rowData.InvoiceStartDate,
+//           InvoiceNet: rowData.InvoiceNet || rowData.InvoiceNet,
+//           POUrl: rowData.POUrl || rowData.POUrl,
+//           Notes: rowData.Notes || rowData.Notes,
+//         }));
+//       }
+//     };
+  
+//     if (isOpen) {
+//       fetchData();
+//       fetchPlacementOptions();
 //     }
-//   }, [rowData]);
+//   }, [rowData, isOpen]);
+  
+
+//   const fetchPlacementOptions = async () => {
+//     if (placementOptions.length === 0) {
+//       setLoadingPlacements(true);
+//       try {
+//         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/po/data`, {
+//           headers: { AuthToken: localStorage.getItem('token') },
+//         });
+//         setPlacementOptions(response.data);
+//       } catch (error) {
+//         console.error('Error fetching placement options:', error);
+//       } finally {
+//         setLoadingPlacements(false);
+//       }
+//     }
+//   };
 
 //   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 //     const { name, value } = e.target;
-//     if (name !== 'POID' && name !== 'PlacementID') {
-//       setFormData({ ...formData, [name]: value });
+//     setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+//     // If PlacementDetails is changed, update placementid
+//     if (name === 'PlacementDetails') {
+//       const selectedPlacement = placementOptions.find(option => option.name === value);
+//       if (selectedPlacement) {
+//         setFormData(prevData => ({ ...prevData, placementid: selectedPlacement.id }));
+//       }
 //     }
 //   };
 
 //   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 //     e.preventDefault();
-//     if (formData) {
+//     if (formData.POID) {
 //       try {
-//         const API_URL = process.env.NEXT_PUBLIC_API_URL; // Ensure the API URL is set correctly
-//         const updatedData = { ...formData };
-//         delete updatedData.id;
-//         delete updatedData.PlacementID;
-
-//         await axios.put(`${API_URL}/po/update/${formData.id}`, updatedData, {
+//         const payload = {
+//           POID: formData.POID,
+//           begindate: formData.StartDate,
+//           enddate: formData.EndDate,
+//           rate: formData.Rate, // Change 'Rate' to 'rate'
+//           overtimerate: formData.OvertimeRate, // Change 'OvertimeRate' to 'overtimerate'
+//           freqtype: formData.FreqType,
+//           frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
+//           invoicestartdate: formData.InvoiceStartDate,
+//           invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
+//           polink: formData.POUrl,
+//           notes: formData.Notes,
+//         };
+  
+//         await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/${formData.POID}`, payload, {
 //           headers: { AuthToken: localStorage.getItem('token') },
 //         });
-//         onSave(); // Call the onSave callback to refresh data or handle post-update actions
-//         onRequestClose(); // Close the modal after saving
+//         onSave();
+//         onRequestClose();
 //       } catch (error) {
 //         console.error('Error updating PO:', error);
 //       }
+//     } else {
+//       console.error('Error: formData.POID is undefined');
 //     }
 //   };
+
+
 
 //   return (
 //     <Modal
@@ -97,33 +164,23 @@
 //         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit PO Details</h2>
 
 //         <form onSubmit={handleSubmit} className="space-y-4">
-//           {/* PO ID */}
 //           <div>
-//             <label className="block text-gray-700">PO ID</label>
-//             <input
-//               type="text"
-//               name="POID"
-//               value={formData.id}
-//               readOnly
+//             <label className="block text-gray-700">Placement</label>
+//             <select
+//               name="PlacementDetails"
+//               value={formData.PlacementDetails}
+//               onChange={handleChange}
 //               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-//               placeholder="Enter PO ID"
-//             />
+//             >
+//               <option value="">Select Placement</option>
+//               {placementOptions.map((option) => (
+//                 <option key={option.id} value={option.name}>
+//                   {option.name}
+//                 </option>
+//               ))}
+//             </select>
 //           </div>
 
-//           {/* Placement ID */}
-//           <div>
-//             <label className="block text-gray-700">Placement ID</label>
-//             <input
-//               type="text"
-//               name="PlacementID"
-//               value={formData.PlacementID}
-//               readOnly
-//               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-//               placeholder="Enter Placement ID"
-//             />
-//           </div>
-
-//           {/* Start Date */}
 //           <div>
 //             <label className="block text-gray-700">Start Date</label>
 //             <input
@@ -135,7 +192,6 @@
 //             />
 //           </div>
 
-//           {/* End Date */}
 //           <div>
 //             <label className="block text-gray-700">End Date</label>
 //             <input
@@ -147,19 +203,6 @@
 //             />
 //           </div>
 
-//           {/* Invoice Start Date */}
-//           <div>
-//             <label className="block text-gray-700">Invoice Start Date</label>
-//             <input
-//               type="date"
-//               name="InvoiceStartDate"
-//               value={formData.InvoiceStartDate ? new Date(formData.InvoiceStartDate).toISOString().split('T')[0] : ''}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-//             />
-//           </div>
-
-//           {/* Rate */}
 //           <div>
 //             <label className="block text-gray-700">Rate</label>
 //             <input
@@ -172,7 +215,6 @@
 //             />
 //           </div>
 
-//           {/* Overtime Rate */}
 //           <div>
 //             <label className="block text-gray-700">Overtime Rate</label>
 //             <input
@@ -185,20 +227,20 @@
 //             />
 //           </div>
 
-//           {/* Freq. Type */}
 //           <div>
-//             <label className="block text-gray-700">Freq. Type</label>
-//             <input
-//               type="text"
+//             <label className="block text-gray-700">Frequency Type</label>
+//             <select
 //               name="FreqType"
 //               value={formData.FreqType}
 //               onChange={handleChange}
 //               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-//               placeholder="Enter frequency type"
-//             />
+//             >
+//               <option value="Monthly">Monthly</option>
+//               <option value="Weekly">Weekly</option>
+//               <option value="Daily">Daily</option>
+//             </select>
 //           </div>
 
-//           {/* Invoice Frequency */}
 //           <div>
 //             <label className="block text-gray-700">Invoice Frequency</label>
 //             <input
@@ -211,7 +253,17 @@
 //             />
 //           </div>
 
-//           {/* Invoice Net */}
+//           <div>
+//             <label className="block text-gray-700">Invoice Start Date</label>
+//             <input
+//               type="date"
+//               name="InvoiceStartDate"
+//               value={formData.InvoiceStartDate ? new Date(formData.InvoiceStartDate).toISOString().split('T')[0] : ''}
+//               onChange={handleChange}
+//               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+//             />
+//           </div>
+
 //           <div>
 //             <label className="block text-gray-700">Invoice Net</label>
 //             <input
@@ -224,7 +276,6 @@
 //             />
 //           </div>
 
-//           {/* PO Url */}
 //           <div>
 //             <label className="block text-gray-700">PO URL</label>
 //             <input
@@ -237,7 +288,6 @@
 //             />
 //           </div>
 
-//           {/* Notes */}
 //           <div>
 //             <label className="block text-gray-700">Notes</label>
 //             <input
@@ -250,33 +300,22 @@
 //             />
 //           </div>
 
-//           {/* Placement Details */}
-//           <div>
-//             <label className="block text-gray-700">Placement Details</label>
-//             <input
-//               type="text"
-//               name="PlacementDetails"
-//               value={formData.PlacementDetails}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-//               placeholder="Enter placement details"
-//             />
+//           <div className="flex space-x-4">
+//             <button
+//               type="submit"
+//               className="mt-4 flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+//             >
+//               Save PO
+//             </button>
+
+//             <button
+//               type="button"
+//               onClick={onRequestClose}
+//               className="mt-4 flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200"
+//             >
+//               Cancel
+//             </button>
 //           </div>
-
-//           <button
-//             type="submit"
-//             className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-//           >
-//             Save PO
-//           </button>
-
-//           <button
-//             type="button"
-//             onClick={onRequestClose}
-//             className="mt-2 w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200"
-//           >
-//             Cancel
-//           </button>
 //         </form>
 //       </div>
 //     </Modal>
@@ -284,6 +323,7 @@
 // };
 
 // export default EditRowPo;
+
 
 
 
@@ -300,10 +340,15 @@ interface EditRowModalProps {
   onSave: () => void;
 }
 
+interface PlacementOption {
+  id: string;
+  name: string;
+}
+
 const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
   const [formData, setFormData] = useState<Po>({
-    id: '',
-    PlacementID: '',
+    POID: '',
+    PlacementDetails: '',
     StartDate: '',
     EndDate: '',
     Rate: '',
@@ -314,40 +359,77 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
     InvoiceNet: '',
     POUrl: '',
     Notes: '',
-    PlacementDetails: '',
   });
 
+  const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
+  const [loadingPlacements, setLoadingPlacements] = useState(false);
+
   useEffect(() => {
-    if (rowData) {
-      setFormData(rowData);
+    const fetchData = async () => {
+      if (rowData) {
+        setFormData({
+          POID: rowData.POID || '',
+          PlacementDetails: rowData.PlacementDetails || '',
+          StartDate: rowData.StartDate || '',
+          EndDate: rowData.EndDate || '',
+          Rate: rowData.Rate || '',
+          OvertimeRate: rowData.OvertimeRate || '',
+          FreqType: rowData.FreqType || '',
+          InvoiceFrequency: rowData.InvoiceFrequency || '',
+          InvoiceStartDate: rowData.InvoiceStartDate || '',
+          InvoiceNet: rowData.InvoiceNet || '',
+          POUrl: rowData.POUrl || '',
+          Notes: rowData.Notes || '',
+        });
+      }
+    };
+
+    if (isOpen) {
+      fetchData();
+      fetchPlacementOptions();
     }
-  }, [rowData]);
+  }, [rowData, isOpen]);
+
+  const fetchPlacementOptions = async () => {
+    if (placementOptions.length === 0) {
+      setLoadingPlacements(true);
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/po/data`, {
+          headers: { AuthToken: localStorage.getItem('token') },
+        });
+        setPlacementOptions(response.data);
+      } catch (error) {
+        console.error('Error fetching placement options:', error);
+      } finally {
+        setLoadingPlacements(false);
+      }
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (formData) {
+    if (formData.POID) {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL;
-        const updatedData = { 
-          StartDate: formData.StartDate,
-          EndDate: formData.EndDate,
-          Rate: formData.Rate,
-          OvertimeRate: formData.OvertimeRate,
-          FreqType: formData.FreqType,
-          InvoiceFrequency: formData.InvoiceFrequency,
-          InvoiceStartDate: formData.InvoiceStartDate,
-          InvoiceNet: formData.InvoiceNet,
-          POUrl: formData.POUrl,
-          Notes: formData.Notes,
-          PlacementDetails: formData.PlacementDetails
+        const payload = {
+          POID: formData.POID,
+          begindate: formData.StartDate,
+          enddate: formData.EndDate,
+          rate: formData.Rate,
+          overtimerate: formData.OvertimeRate,
+          freqtype: formData.FreqType,
+          frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
+          invoicestartdate: formData.InvoiceStartDate,
+          invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
+          polink: formData.POUrl,
+          notes: formData.Notes,
         };
 
-        await axios.put(`${API_URL}/po/update/${formData.id}`, updatedData, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/${formData.POID}`, payload, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();
@@ -355,6 +437,8 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
       } catch (error) {
         console.error('Error updating PO:', error);
       }
+    } else {
+      console.error('Error: formData.POID is undefined');
     }
   };
 
@@ -394,20 +478,23 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit PO Details</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Placement Details */}
           <div>
             <label className="block text-gray-700">Placement</label>
-            <input
-              type="text"
+            <select
               name="PlacementDetails"
               value={formData.PlacementDetails}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              placeholder="Enter placement details"
-            />
+            >
+              <option value="">Select Placement</option>
+              {placementOptions.map((option) => (
+                <option key={option.id} value={option.name}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Start Date */}
           <div>
             <label className="block text-gray-700">Start Date</label>
             <input
@@ -419,7 +506,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* End Date */}
           <div>
             <label className="block text-gray-700">End Date</label>
             <input
@@ -431,7 +517,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Rate */}
           <div>
             <label className="block text-gray-700">Rate</label>
             <input
@@ -444,7 +529,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Overtime Rate */}
           <div>
             <label className="block text-gray-700">Overtime Rate</label>
             <input
@@ -457,7 +541,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Freq. Type */}
           <div>
             <label className="block text-gray-700">Frequency Type</label>
             <select
@@ -473,7 +556,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             </select>
           </div>
 
-          {/* Invoice Frequency */}
           <div>
             <label className="block text-gray-700">Invoice Frequency</label>
             <input
@@ -486,7 +568,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Invoice Start Date */}
           <div>
             <label className="block text-gray-700">Invoice Start Date</label>
             <input
@@ -498,7 +579,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Invoice Net */}
           <div>
             <label className="block text-gray-700">Invoice Net</label>
             <input
@@ -511,7 +591,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* PO Url */}
           <div>
             <label className="block text-gray-700">PO URL</label>
             <input
@@ -524,7 +603,6 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             />
           </div>
 
-          {/* Notes */}
           <div>
             <label className="block text-gray-700">Notes</label>
             <input

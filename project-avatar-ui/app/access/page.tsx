@@ -326,7 +326,7 @@ const Users = () => {
     try {
       let url = `${API_URL}/access/authuser?page=${page}&pageSize=${paginationPageSize}`;
       if (searchQuery) {
-        url = `${API_URL}/access/authuser-fname/${searchQuery}`;
+        url = `${API_URL}/access/authuser-uname/${searchQuery}`;
       }
       const response = await axios.get(url, {
         headers: { AuthToken: localStorage.getItem("token") },
@@ -343,7 +343,7 @@ const Users = () => {
       const dataWithSerials = data.map((item: User) => ({
         ...item,
       }));
-      console.log("Fetched Row Data:", dataWithSerials);  // Debugging log
+
       setRowData(dataWithSerials);
       setTotalRows(totalRows);
       setupColumns(dataWithSerials);
@@ -369,7 +369,7 @@ const Users = () => {
           field: key,
         })),
       ];
-      console.log("Column Definitions:", columns);  // Debugging log
+
       setColumnDefs(columns);
     } else {
       console.error("Data is not an array or is empty:", data);
@@ -377,11 +377,11 @@ const Users = () => {
   };
 
   useEffect(() => {
-    console.log("Row Data Updated:", rowData);  // Debugging log
+
   }, [rowData]);
 
   useEffect(() => {
-    console.log("Column Definitions Updated:", columnDefs);  // Debugging log
+
   }, [columnDefs]);
 
   const handleEditRow = () => {

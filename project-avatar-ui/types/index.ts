@@ -250,20 +250,19 @@ export interface ErrorResponse {
     POUrl?: string;
     Notes?: string;
 
-    // Additional properties with alternative names
-    id?: string;
-    PlacementID?: string;
-    placementDetails?: string; // Including both PlacementDetails variants if needed
-    startDate?: string;
-    endDate?: string;
-    rate?: string;
-    overtimeRate?: string;
-    freqType?: string;
-    invoiceFrequency?: string;
-    invoiceStartDate?: string;
-    invoiceNet?: string;
-    poUrl?: string;
-    notes?: string;
+    // // Additional properties with alternative names
+    // PlacementID?: string;
+    // placementDetails?: string; // Including both PlacementDetails variants if needed
+    // startDate?: string;
+    // endDate?: string;
+    // rate?: string;
+    // overtimeRate?: string;
+    // freqType?: string;
+    // invoiceFrequency?: string;
+    // invoiceStartDate?: string;
+    // invoiceNet?: string;
+    // poUrl?: string;
+    // notes?: string;
 }
 
 
@@ -470,6 +469,7 @@ export interface Vendor {
       locationpreference: string;
       skypeid: string;
       ipemailid: number;
+      ipemail: string;
       resumeid: number;
       coverletter: string;
       intro: string;
@@ -478,9 +478,10 @@ export interface Vendor {
       notes: string;
       suspensionreason: string;
       yearsofexperience: string;
+      manager_name: string;
+      instructor_name: string;
+      submitter_name: string;
     }
-
-
 
 
 

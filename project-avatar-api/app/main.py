@@ -1,3 +1,5 @@
+# new-projects-avatar-fullstack/project-avatar-api/app/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import engine, Base
@@ -22,7 +24,7 @@ from app.routes.byAllListRoute import router as by_allList_router
 from app.routes.byDetailedRoute import router as by_detailed_router
 from app.routes.placementsRoute import router as placement_router
 from app.routes.urlsRoute import router as urls_router
-# from app.routes.vendordetailsRoute import router as all_vendor_details_router
+from app.routes.vendordetailsRoute import router as all_vendor_details_router
 from app.routes.allVendorRoute import router as all_vendor_list_router
 from app.routes.vendorListRoute import router as vendorList_router
 from app.routes.vendorByPlacement import router as vendorByPlacement_router
@@ -44,11 +46,11 @@ ALGORITHM = "HS256"
 ALLOWED_ORIGINS = [
     "https://www.whitebox-learning.com",
     "https://whitebox-learning.com",
-    "https://www.whitebox-learning.com/admin"
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
-    # "http://localhost:8000",
-    # "http://127.0.0.1:8000"
+    "https://www.whitebox-learning.com/admin",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
 ]
 
 app.add_middleware(
@@ -84,7 +86,7 @@ app.include_router(by_allList_router, prefix="/api/admin/by", tags=["recruiters"
 app.include_router(by_detailed_router, prefix="/api/admin/by", tags=["recruiters"])
 app.include_router(placement_router, prefix="/api/admin/placements", tags=["placements"])
 app.include_router(urls_router, prefix="/api/admin", tags=["urls"])
-# app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
+app.include_router(all_vendor_details_router, prefix="/api/admin",tags=["allvendordetails"])
 app.include_router(all_vendor_list_router, prefix="/api/admin",tags=["alllistvendordetails"])
 app.include_router(vendorList_router,prefix="/api/admin",tags=["vendorList"])
 app.include_router(vendorByPlacement_router, prefix="/api/admin",tags=["vendorByPlacement"])

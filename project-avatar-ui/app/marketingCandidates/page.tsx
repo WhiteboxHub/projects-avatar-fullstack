@@ -9,15 +9,14 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import EditRowModal from "../../modals/Marketing/MarketingCandidate/EditCandidateMarketing";
-// import ViewRowModal from "../../modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
+import ViewRowModal from "../../modals/Marketing/MarketingCandidate/ViewCandidateMarketing";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-import { MdDelete } from "react-icons/md";
 import { debounce } from "lodash";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
 import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
 import { UserOptions } from 'jspdf-autotable';
-// import { CandidateMarketing } from "@/types";
+import { CandidateMarketing } from '@/types/index';
 
 interface RowData {
   id: number;
@@ -64,79 +63,88 @@ const MarketingCandidates = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = useCallback((searchQuery = "", page = 1) => {
-    const fetchDataAsync = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/candidatemarketing`, {
-          params: {
-            page: page,
-            page_size: paginationPageSize,
-            search: searchQuery,
-          },
-          headers: { AuthToken: localStorage.getItem("token") },
-        });
+  const fetchEmployees = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/employees`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      setEmployees(response.data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  }, [API_URL]);
 
-        console.log("Full API Response:", response); // Log the full response
+  const fetchData = useCallback(async (searchQuery: string = "", page: number = 1) => {
+    try {
+      const response = await axios.get(`${API_URL}/candidatemarketing`, {
+        params: {
+          page: page,
+          page_size: paginationPageSize,
+          search: searchQuery,
+        },
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
 
-        // Check if the response data is an array
-        const apiData = response.data;
-        if (Array.isArray(apiData)) {
-          console.log("Fetched Data:", apiData);
-          setRowData(apiData);
-          setTotalRows(apiData.length); // Assuming totalRows is the length of the array
-          setupColumns(apiData);
-        } else {
-          console.error("Data is not an array:", apiData);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
+      if (Array.isArray(response.data)) {
+        setRowData(response.data);
+        setTotalRows(response.data.length);
+        setupColumns(response.data);
+      } else {
+        console.error("Data is not an array:", response.data);
       }
-    };
-
-    fetchDataAsync();
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
   }, [API_URL, paginationPageSize]);
 
-  const debouncedFetchData = useCallback(
+  const searchCandidatesByName = useCallback(async (searchQuery: string) => {
+    try {
+      const response = await axios.get(`${API_URL}/candidatemarketing/by-name/${searchQuery}`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+
+      let data = response.data;
+      if (!Array.isArray(data)) {
+        data = [data]; // Convert single object to an array with one element
+      }
+
+      if (Array.isArray(data)) {
+        setRowData(data);
+        setTotalRows(data.length);
+        setupColumns(data);
+      } else {
+        console.error("Data is not an array:", data);
+        setRowData([]);
+        setTotalRows(0);
+        setColumnDefs([]);
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+      alert("No candidate with that name.");
+    }
+  }, [API_URL]);
+
+  const debouncedSearch = useCallback(
     debounce((query: string) => {
-      fetchData(query, currentPage);
+      searchCandidatesByName(query);
     }, 300),
-    [fetchData, currentPage]
+    [searchCandidatesByName]
   );
 
   useEffect(() => {
-    console.log("Fetching data with search value:", searchValue);
-    if (searchValue) {
-      debouncedFetchData(searchValue);
-    }
-    return () => {
-      debouncedFetchData.cancel();
-    };
-  }, [searchValue, debouncedFetchData]);
+    fetchData();
+    fetchEmployees();
+  }, [fetchData, fetchEmployees]);
 
   useEffect(() => {
-    console.log("Fetching data for page:", currentPage);
-    if (!searchValue) {
+    if (searchValue) {
+      debouncedSearch(searchValue);
+    } else {
       fetchData("", currentPage);
     }
-  }, [currentPage, fetchData, searchValue]);
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/employees`, {
-          headers: { AuthToken: localStorage.getItem("token") },
-        });
-        setEmployees(response.data);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-      }
-    };
-
-    fetchEmployees();
-  }, [API_URL]);
+  }, [searchValue, currentPage, fetchData, debouncedSearch]);
 
   const setupColumns = (data: RowData[]) => {
-    console.log("Setting up columns with data:", data);
     if (Array.isArray(data) && data.length > 0) {
       const keys = Object.keys(data[0]);
       const columns = keys.map((key) => ({
@@ -144,8 +152,6 @@ const MarketingCandidates = () => {
         field: key,
       }));
       setColumnDefs(columns);
-    } else {
-      console.error("Data is not an array or is empty:", data);
     }
   };
 
@@ -153,8 +159,6 @@ const MarketingCandidates = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        console.log("Selected Row:", selectedRows[0]); // Add this line
-
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
@@ -177,35 +181,9 @@ const MarketingCandidates = () => {
     }
   };
 
-  const handleDeleteRow = async () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        const id = selectedRows[0].id;
-        const confirmation = window.confirm(`Are you sure you want to delete entry ID ${id}?`);
-        if (!confirmation) return;
-
-        try {
-          await axios.delete(`${API_URL}/candidatemarketing/${id}`, {
-            headers: { AuthToken: localStorage.getItem("token") },
-          });
-          alert("Entry deleted successfully.");
-          fetchData(searchValue);
-        } catch (error) {
-          console.error("Error deleting entry:", error);
-          alert(`Failed to delete entry: ${error || "Unknown error occurred"}`);
-        }
-      } else {
-        setAlertMessage("Please select a row to delete.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
-
   const handleRefresh = () => {
     setSearchValue("");
     fetchData();
-    window.location.reload();
   };
 
   const handlePageChange = (newPage: number) => {
@@ -243,6 +221,7 @@ const MarketingCandidates = () => {
           row.suspensionreason ?? "",
           row.yearsofexperience ?? 0,
         ]).map(row => row.filter(value => value !== undefined));
+
         doc.autoTable(doc, {
           head: [
             [
@@ -259,7 +238,7 @@ const MarketingCandidates = () => {
               "Relocation",
               "Location Preference",
               "Skype ID",
-              "IP Email ",
+              "IP Email",
               "Resume ID",
               "Cover Letter",
               "Intro",
@@ -283,7 +262,9 @@ const MarketingCandidates = () => {
   };
 
   const handleSearch = () => {
-    fetchData(searchValue);
+    if (searchValue) {
+      searchCandidatesByName(searchValue);
+    }
   };
 
   const handleExportToExcel = () => {
@@ -301,14 +282,8 @@ const MarketingCandidates = () => {
   };
 
   const options = [
-    {
-      value: "Export to PDF",
-      label: "Export to PDF",
-    },
-    {
-      value: "Export to Excel",
-      label: "Export to Excel",
-    },
+    { value: "Export to PDF", label: "Export to PDF" },
+    { value: "Export to Excel", label: "Export to Excel" },
   ];
 
   const defaultOption = "Download";
@@ -327,8 +302,9 @@ const MarketingCandidates = () => {
           </div>
         )}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800"> Marketing Candidates </h1>
+          <h1 className="text-3xl font-bold text-gray-800">Marketing Candidates</h1>
         </div>
+
         <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
           <div className="flex w-full md:w-auto mb-2 md:mb-0">
             <input
@@ -352,12 +328,6 @@ const MarketingCandidates = () => {
               className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
             >
               <AiOutlineEdit className="mr-2" />
-            </button>
-            <button
-              onClick={handleDeleteRow}
-              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700"
-            >
-              <MdDelete className="mr-2" />
             </button>
             <button
               onClick={handleViewRow}
@@ -414,6 +384,7 @@ const MarketingCandidates = () => {
             headerHeight={35}
           />
         </div>
+
         <div className="flex flex-col md:flex-row justify-between items-center mt-4">
           <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
             <div className="flex space-x-1 overflow-x-auto">
@@ -457,22 +428,34 @@ const MarketingCandidates = () => {
             </div>
           </div>
         </div>
+
         <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            manager_name: '',
+            instructor_name: '',
+            submitter_name: '',
+            ipemailid: 0
+          } as CandidateMarketing : null}
           onSave={fetchData}
           employees={employees}
         />
-        {/* <ViewRowModal
+       <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
-          rowData={selectedRow as RowData}
-        /> */}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            manager_name: '',
+            instructor_name: '',
+            submitter_name: '',
+            ipemailid: 0
+          } as CandidateMarketing : null}
+        />
       </div>
     </div>
   );
 };
 
 export default withAuth(MarketingCandidates);
-

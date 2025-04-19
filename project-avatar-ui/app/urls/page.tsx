@@ -35,7 +35,7 @@ const Urls = () => {
   const [columnDefs, setColumnDefs] = useState<
     { headerName: string; field: string }[]
   >([]);
-  const [paginationPageSize] = useState<number>(100);
+  const [paginationPageSize] = useState<number>(500);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -142,22 +142,22 @@ const Urls = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const urlId = selectedRows[0].urlid || selectedRows[0].id;
-        if (urlId) {
+        const reindexedId = selectedRows[0].reindexed_id; // Use the correct field for reindexed ID
+        if (reindexedId) {
           const confirmation = window.confirm(
-            `Are you sure you want to delete URL ID ${urlId}?`
+            `Are you sure you want to delete URL with reindexed ID ${reindexedId}?`
           );
           if (!confirmation) return;
-
+  
           try {
-            await axios.delete(`${API_URL}/urls/delete/${urlId}`, {
+            await axios.delete(`${API_URL}/urls/delete/${reindexedId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert("URL deleted successfully.");
             fetchData();
           } catch (error) {
             const axiosError = error as AxiosError;
-
+  
             alert(
               `Failed to delete URL: ${
                 (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
@@ -165,7 +165,7 @@ const Urls = () => {
             );
           }
         } else {
-          alert("No valid URL ID found for the selected row.");
+          alert("No valid reindexed ID found for the selected row.");
         }
       } else {
         setAlertMessage("Please select a row to delete."); // Set alert message
@@ -173,6 +173,7 @@ const Urls = () => {
       }
     }
   };
+  
 
   const handlePageChange = (newPage: number) => setCurrentPage(newPage);
 
@@ -203,7 +204,7 @@ const Urls = () => {
     doc.save("url_data.pdf");
   };
 
-  const totalPages = Math.ceil(totalRows / paginationPageSize);
+  const totalPages = Math.ceil((totalRows -1) / paginationPageSize);
   const startPage = Math.max(1, currentPage - 2);
   const endPage = Math.min(totalPages, currentPage + 2);
   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);

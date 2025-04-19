@@ -460,6 +460,9 @@ class AuthUser(Base):
     token_expiry = Column(DateTime, nullable=True)
     role = Column(String(100), nullable=True)    
 
+
+
+    
 class CurrentMarketing(Base):
     __tablename__ = "currentmarketing" 
     id = Column(Integer, primary_key=True, index=True)
@@ -662,3 +665,29 @@ class PlacementRecruiter(Base):
     # ... other fields (dob, skypeid, etc.) ...
 
     vendor = relationship("Vendor")
+
+
+
+
+
+class Designation(Base):
+    __tablename__ = 'designation'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+
+class UCUser(Base):
+    __tablename__ = 'uc_users'
+    
+    id = Column(Integer, primary_key=True)
+    display_name = Column(String(255))
+    email = Column(String(255))
+
+class UCUserPermissionMatch(Base):
+    __tablename__ = 'uc_user_permission_matches'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('uc_users.id'))
+    permission_id = Column(Integer)
+    
+    user = relationship("UCUser")

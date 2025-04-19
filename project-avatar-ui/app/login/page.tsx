@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import logo from "../../public/images/ip_logo1.jpg";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,12 @@ const Login = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   console.log(API_URL);
 
+  // Configure axios defaults for CORS
+  useEffect(() => {
+    axios.defaults.withCredentials = true;
+    axios.defaults.headers.common['Content-Type'] = 'application/json';
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true); 
@@ -27,6 +33,11 @@ const Login = () => {
       const response = await axios.post(`${API_URL}/auth/login`, {
         username,
         password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin,
+        }
       });
 
       console.log(response);
@@ -37,10 +48,15 @@ const Login = () => {
       login(); 
       setLoading(false); 
       router.push("/leads"); 
-    } catch {
-      setLoading(false); 
-      setError("Invalid username or password");
+    } catch (err) {
+      setLoading(false);
+      if (axios.isAxiosError(err) && err.message.includes('CORS')) {
+        setError("CORS error: Unable to connect to the server. Please check server configuration.");
+      } else {
+        setError("Invalid username or password");
+      }
       setMessage(null);
+      console.error("Login error:", err);
     }
   };
 

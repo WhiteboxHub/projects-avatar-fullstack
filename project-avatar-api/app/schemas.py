@@ -352,21 +352,7 @@ class POUpdateSchema(BaseModel):
     
     
 class CandidateMarketingBase(BaseModel):
-    
-#     status: Optional[str] = None
-#     priority: Optional[str] = None
-#     technology: Optional[str] = None
-#     minrate: Optional[int] = None
-#     currentlocation: Optional[str] = None
-#     relocation: Optional[str] = None
-#     locationpreference: Optional[str] = None
-#     ipemailid: Optional[int] = None
-#     resumeid: Optional[int] = None
-#     coverletter: Optional[str] = None
-#     intro: Optional[str] = None
-#     closedate: Optional[datetime] = None
-#     notes: Optional[str] = None
- pass
+    pass
 
 class CandidateMarketingCreateSchema(CandidateMarketingBase):
     pass
@@ -397,30 +383,35 @@ class Config:
         from_attributes = True     
               
 class AuthUserBase(BaseModel):
-    uname: str=''
-    team: Optional[str] = ''
     level: Optional[str] = ''
     instructor: Optional[str] = 'Y'
     override: Optional[str] = 'N'
     status: Optional[str] = 'inactive'
-    lastlogin: Optional[datetime] = None
-    logincount: Optional[int] = None
-    fullname: Optional[str] = ''
-    address: Optional[str] = ''
-    phone: Optional[str] = None
-    state: Optional[str] = ''
-    zip: Optional[str] = ''
-    city: Optional[str] = ''
-    country: Optional[str] = ''
-    message: Optional[str] = ''
-    registereddate: Optional[datetime] = None
     level3date: Optional[datetime] = None
-    demo: Optional[str] = 'N'
-    enddate: Optional[date] = None
-    googleId: Optional[str] = ''
-    reset_token: Optional[str] = None
-    token_expiry: Optional[datetime] = None
-    role: Optional[str] = ''
+    # uname: str=''
+    # team: Optional[str] = ''
+    # level: Optional[str] = ''
+    # instructor: Optional[str] = 'Y'
+    # override: Optional[str] = 'N'
+    # status: Optional[str] = 'inactive'
+    # lastlogin: Optional[datetime] = None
+    # logincount: Optional[int] = None
+    # fullname: Optional[str] = ''
+    # address: Optional[str] = ''
+    # phone: Optional[str] = None
+    # state: Optional[str] = ''
+    # zip: Optional[str] = ''
+    # city: Optional[str] = ''
+    # country: Optional[str] = ''
+    # message: Optional[str] = ''
+    # registereddate: Optional[datetime] = None
+    # level3date: Optional[datetime] = None
+    # demo: Optional[str] = 'N'
+    # enddate: Optional[date] = None
+    # googleId: Optional[str] = ''
+    # reset_token: Optional[str] = None
+    # token_expiry: Optional[datetime] = None
+    # role: Optional[str] = ''
 
 class AuthUserCreateSchema(AuthUserBase):
     passwd: str
@@ -429,6 +420,7 @@ class AuthUserUpdateSchema(AuthUserBase):
     instructor: Optional[str] = 'Y'
     override: Optional[str] = 'N'
     status: Optional[str] = 'inactive'
+    level3date: Optional[datetime] = None
 
 class AuthUserSchema(AuthUserBase):
     id: int
@@ -469,7 +461,7 @@ class CurrentMarketingCreateSchema(CurrentMarketingBase):
 
 class CurrentMarketingUpdateSchema(CurrentMarketingBase):
     
-    # candidateid: int
+    candidateid: int
     # startdate: int
     mmid: int
     instructorid: int
@@ -904,7 +896,7 @@ class EmployeeInDB(EmployeeBase):
 # Vendor Schemas
 class VendorBase(BaseModel):
     companyname: str
-    status: str
+    status: str = "inactive" 
     tier: Optional[str] = None
     culture: Optional[str] = None
     solicited: Optional[str] = None

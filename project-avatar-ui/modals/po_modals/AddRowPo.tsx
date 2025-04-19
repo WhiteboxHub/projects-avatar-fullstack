@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+// new-projects-avatar-fullstack/project-avatar-ui/modals/po_modals/AddRowPo.tsx
+
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
+// import { AiOutlineClose } from 'react-icons/ai';
 import { Po } from '../../types/index';
-
 
 interface AddRowPOProps {
   isOpen: boolean;
   onClose: () => void;
   refreshData: () => void;
+}
+
+interface PlacementOption {
+  id: string;
+  name: string;
 }
 
 const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => {
@@ -26,17 +32,63 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     Notes: '',
   });
 
+  const [selectedPlacementId, setSelectedPlacementId] = useState<string>('');
+  const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
+  const [, setLoadingPlacements] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPlacementOptions();
+    }
+  }, [isOpen]);
+
+  const fetchPlacementOptions = async () => {
+    setLoadingPlacements(true);
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/po/data`, {
+        headers: { AuthToken: localStorage.getItem('token') },
+      });
+      setPlacementOptions(response.data);
+    } catch (error) {
+      console.error('Error fetching placement options:', error);
+    } finally {
+      setLoadingPlacements(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // If PlacementDetails is changed, update selectedPlacementId
+    if (name === 'PlacementDetails') {
+      const selectedPlacement = placementOptions.find(option => option.name === value);
+      if (selectedPlacement) {
+        setSelectedPlacementId(selectedPlacement.id);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/po/add`, formData, {
+      const payload = {
+        placementid: parseInt(selectedPlacementId),
+        begindate: formData.StartDate,
+        enddate: formData.EndDate,
+        rate: formData.Rate ? parseFloat(formData.Rate) : 0,
+        overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
+        freqtype: formData.FreqType,
+        frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
+        invoicestartdate: formData.InvoiceStartDate,
+        invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
+        polink: formData.POUrl,
+        notes: formData.Notes,
+      };
+
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/po`, payload, {
         headers: { AuthToken: localStorage.getItem('token') },
       });
-
       refreshData();
       onClose();
     } catch (error) {
@@ -80,23 +132,25 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
       <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">Add New PO</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Placement Details */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Placement Details</label>
-          <input
-            type="text"
+          <select
             name="PlacementDetails"
             value={formData.PlacementDetails}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter placement details"
-          />
+          >
+            <option value="">Select Placement</option>
+            {placementOptions.map((option) => (
+              <option key={option.id} value={option.name}>
+                {option.name}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {/* Start Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
-          <input
+         <div>
+         <label className="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
+         <input
             type="date"
             name="StartDate"
             value={formData.StartDate}
@@ -105,7 +159,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* End Date */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
           <input
@@ -117,7 +170,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Rate */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Rate</label>
           <input
@@ -130,7 +182,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Overtime Rate */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Overtime Rate</label>
           <input
@@ -143,20 +194,20 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Frequency Type */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Frequency Type</label>
-          <input
-            type="text"
+          <label className="block text-gray-700">Frequency Type</label>
+          <select
             name="FreqType"
             value={formData.FreqType}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter frequency type"
-          />
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="Monthly">Monthly</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Daily">Daily</option>
+          </select>
         </div>
 
-        {/* Invoice Frequency */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Frequency</label>
           <input
@@ -169,7 +220,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Invoice Start Date */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Start Date</label>
           <input
@@ -181,7 +231,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Invoice Net */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Net</label>
           <input
@@ -194,7 +243,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* PO URL */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">PO URL</label>
           <input
@@ -207,7 +255,6 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           />
         </div>
 
-        {/* Notes */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
           <input
