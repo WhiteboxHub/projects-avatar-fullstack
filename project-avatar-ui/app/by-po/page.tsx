@@ -108,7 +108,7 @@ interface ModalState {
 }
 
 const ByPo = () => {
-  const gridRef = useRef<any>();
+  const gridRef = useRef<AgGridReact<RowData>>(null);
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
     view: false,
@@ -125,7 +125,7 @@ const ByPo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<any[]>([]); // Adjust the type as per your client data structure
+  const [clients, setClients] = useState<{ id: number; pname: string }[]>([]);
   const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
   const pageSize = 10;
 
@@ -345,7 +345,7 @@ const ByPo = () => {
       {
         headerName: "Name",
         field: "name" as keyof RowData,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: { data: RowData; value: string }) => {
           if (params.data.isGroupRow) {
             const expanded = expandedPoGroups[params.data.poid];
             return (
@@ -448,7 +448,7 @@ const ByPo = () => {
         field: "status" as keyof RowData,
         hide: false,
         minWidth: 100,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: { value: string }) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",

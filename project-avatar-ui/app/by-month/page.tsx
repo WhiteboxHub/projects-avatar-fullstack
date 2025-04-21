@@ -2760,7 +2760,7 @@ interface ModalState {
 }
 
 const ByMonth = () => {
-  const gridRef = useRef<any>();
+  const gridRef = useRef<AgGridReact<RowData>>(null);
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
     view: false,
@@ -2777,7 +2777,7 @@ const ByMonth = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<{ id: number; pname: string }[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const pageSize = 10;
 
@@ -2823,9 +2823,9 @@ const ByMonth = () => {
       );
       
       // Merge the data
-      const mergedData = monthResponse.data.map((monthItem: any) => {
+      const mergedData = monthResponse.data.map((monthItem: { invmonth: string }) => {
         const detailedMonth = detailedResponse.data.data.find(
-          (d: any) => d.invmonth === monthItem.invmonth
+          (d: { invmonth: string; invoices: InvoiceData[] }) => d.invmonth === monthItem.invmonth
         );
         
         return {
@@ -2941,7 +2941,7 @@ const ByMonth = () => {
       {
         headerName: "Month",
         field: "name",
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: { data: RowData; value: string }) => {
           if (params.data.isGroupRow) {
             const expanded = expandedMonthGroups[params.data.invmonth];
             return (
@@ -3029,7 +3029,7 @@ const ByMonth = () => {
         field: "amountexpected",
         hide: false,
         minWidth: 120,
-        valueFormatter: (params: any) => {
+        valueFormatter: (params: { value: number }) => {
           return params.value ? `$${params.value.toFixed(2)}` : '';
         }
       },
@@ -3038,7 +3038,7 @@ const ByMonth = () => {
         field: "amountreceived",
         hide: false,
         minWidth: 120,
-        valueFormatter: (params: any) => {
+        valueFormatter: (params: { value: number }) => {
           return params.value ? `$${params.value.toFixed(2)}` : '';
         }
       },
@@ -3047,7 +3047,7 @@ const ByMonth = () => {
         field: "status",
         hide: false,
         minWidth: 100,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: { value: string }) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",
