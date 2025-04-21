@@ -125,6 +125,7 @@ export interface ByPO {
 //   notes: string;
 // }
 export interface Candidate{
+  isGroupRow: any;
   id: number;
   name: string;
   assessment: string;
