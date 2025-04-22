@@ -40,6 +40,7 @@ interface Recruiter {
   skypeid: string;
   linkedin: string;
   twitter: string;
+  clientid:number;
   facebook: string;
   review: string;
   notes: string;
@@ -398,10 +399,11 @@ const RecruiterByAllListVendor = () => {
 
       {modalState.view && selectedRow && (
         <ViewRowModal
-          isOpen={modalState.view}
-          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
-          recruiter={selectedRow}
-        />
+        isOpen={modalState.view}
+        onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+        
+        rowData={selectedRow}  // Changed from recruiter to rowData
+      />
       )}
     </div>
   );
