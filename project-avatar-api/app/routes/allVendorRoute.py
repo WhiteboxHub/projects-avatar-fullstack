@@ -1,72 +1,30 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import Response
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
-from app.controllers.all_Vendor_Controller import (
-    get_all_recruiters,
-    add_recruiter,
-    update_recruiter,
-    view_recruiter_by_id,
-    delete_recruiter
-)
-from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterInDB,RecruiterBase
+from sqlalchemy import func, or_
+from app.models import Recruiter, Vendor
 from app.database.db import get_db
-from app.models import Recruiter
+from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterResponse
+from app.controllers.all_Vendor_Controller import get_recruiters_with_vendors, add_recruiter, update_recruiter, delete_recruiter
 
 router = APIRouter()
 
-@router.get("/allvendors", response_model=dict)
-async def get_all_recruiters_route(
-    page: int = Query(1, description="Page number"),
-    page_size: int = Query(200, description="Items per page"),
+@router.get("/recruiters/byAllListVendor", response_model=dict)
+def read_recruiters(
+    page: int = 1, 
+    page_size: int = 100, 
+    search: str = None, 
     db: Session = Depends(get_db)
 ):
-    offset = (page - 1) * page_size
-    recruiters = get_all_recruiters(db, offset=offset, limit=page_size)
-    total_rows = db.query(Recruiter).filter(Recruiter.clientid == 0).count()
+    return get_recruiters_with_vendors(db, page, page_size, search)
 
-    return {
-        "data": recruiters,
-        "totalRows": total_rows
-    }
-    
-    
-@router.post("/allvendors/add", response_model=RecruiterInDB)
-async def create_recruiter(recruiter: RecruiterCreate, db: Session = Depends(get_db)):
-    """
-    Create a new recruiter.
-    """
+@router.post("/recruiters/byAllListVendor/add", response_model=RecruiterResponse)
+def create_recruiter(recruiter: RecruiterCreate, db: Session = Depends(get_db)):
     return add_recruiter(db, recruiter)
 
-@router.put("/allvendors/update/{id}", response_model=RecruiterInDB)
-async def update_recruiter_route(
-    id: int,
-    recruiter: RecruiterUpdate,
-    db: Session = Depends(get_db)
-):
-    """
-    Update a recruiter by ID.
-    """
-    updated_recruiter = update_recruiter(db, id, recruiter)
-    if not updated_recruiter:
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    return updated_recruiter
+@router.put("/recruiters/byAllListVendor/update/{recruiter_id}", response_model=RecruiterResponse)
+def edit_recruiter(recruiter_id: int, recruiter: RecruiterUpdate, db: Session = Depends(get_db)):
+    return update_recruiter(db, recruiter_id, recruiter)
 
-@router.get("/allvendors/{id}", response_model=RecruiterInDB)
-async def get_recruiter_by_id_route(id: int, db: Session = Depends(get_db)):
-    """
-    Get a single recruiter by ID.
-    """
-    recruiter = view_recruiter_by_id(db, id)
-    if not recruiter:
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    return recruiter
-
-@router.delete("/allvendors/delete/{id}")
-async def delete_recruiter_route(id: int, db: Session = Depends(get_db)):
-    """
-    Delete a recruiter by ID.
-    """
-    if not delete_recruiter(db, id):
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/recruiters/byAllListVendor/remove/{recruiter_id}")
+def remove_recruiter(recruiter_id: int, db: Session = Depends(get_db)):
+    return delete_recruiter(db, recruiter_id)
