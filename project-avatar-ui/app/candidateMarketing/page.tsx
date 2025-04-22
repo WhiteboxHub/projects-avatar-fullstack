@@ -45,6 +45,9 @@ interface RowData {
   notes: string;
   suspensionreason: string;
   yearsofexperience: string;
+  manager_name?: string;
+  instructor_name?: string;
+  submitter_name?: string;
 }
 
 interface Employee {
@@ -485,14 +488,28 @@ const CurrentMarketing = () => {
         <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow as RowData}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            ipemail: selectedRow.ipemail || '',
+            manager_name: selectedRow.manager_name || '',
+            instructor_name: selectedRow.instructor_name || '',
+            submitter_name: selectedRow.submitter_name || '',
+            ipemailid: selectedRow.ipemail || '' // Adding the missing ipemailid property
+          } as unknown as CandidateMarketing : null}
           onSave={fetchAllCandidates}
           employees={employees} // Pass the fetched employees here
         />
         <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
-          rowData={selectedRow as unknown as CandidateMarketing}
+          rowData={selectedRow ? {
+            ...selectedRow,
+            ipemail: selectedRow.ipemail || '',
+            manager_name: selectedRow.manager_name || '',
+            instructor_name: selectedRow.instructor_name || '',
+            submitter_name: selectedRow.submitter_name || '',
+            ipemailid: selectedRow.ipemail || '' // Adding the missing ipemailid property
+          } as unknown as CandidateMarketing : null}
         />
       </div>
     </div>

@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
 import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ViewRowModal from "@/modals/candidate_modals/ViewRowCandidate";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
@@ -15,7 +15,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
-import { Candidate, TransformedCandidate } from "@/types/index";
+import { Candidate } from "@/types/index";
 
 import {
   AiOutlineEdit,
@@ -24,9 +24,6 @@ import {
   AiOutlineEye,
 } from "react-icons/ai";
 
-interface GroupedData {
-  [batch: string]: Candidate[];
-}
 
 interface DropdownOptions {
   courses: string[];
@@ -41,20 +38,71 @@ interface DropdownOptions {
   referralIds: { id: number; name: string }[];
 }
 
+interface GroupedData {
+  [key: string]: Candidate[];
+}
+
 const Candidates = () => {
   const [rowData, setRowData] = useState<Candidate[]>([]);
-  const [, setGroupedData] = useState<GroupedData>({});
+  const [groupedData, setGroupedData] = useState<GroupedData>({});
   const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions | null>(null);
-  const [columnDefs] = useState<{ headerName: string; field: string ; width?: number;
-    cellStyle?: any;}[]>([
-    { headerName: "Batchname", field: "batchname", width: 120, cellStyle: { fontWeight: 'bold' } },
+  const [expandedGroups, setExpandedGroups] = useState<{[key: string]: boolean}>({});
+  const [columnDefs] = useState<{ headerName: string; field: string; width?: number; cellStyle?: { [key: string]: string | number }; cellRenderer?: any;}[]>([
+    { 
+      headerName: "Batchname", 
+      field: "batchname", 
+      width: 120, 
+      cellStyle: { fontWeight: 'bold' },
+      cellRenderer: (params: any) => {
+        if (params.data && params.data.isGroupRow) {
+          const expanded = expandedGroups[params.value];
+          return (
+            <div className="flex items-center">
+              <span
+                className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleGroup(params.value);
+                }}
+              >
+                <span className="mr-2 text-gray-600 flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded-full">
+                  {expanded ? (
+                    <span className="text-blue-600 text-lg font-bold">−</span>
+                  ) : (
+                    <span className="text-green-600 text-lg font-bold">+</span>
+                  )}
+                </span>
+                <span className="font-medium">{params.value === 'No Batch' ? 'Unassigned' : params.value}</span>
+              </span>
+            </div>
+          );
+        }
+        return <span className="pl-8">{params.value}</span>;
+      }
+    },
     { headerName: "Candidateid", field: "candidateid", width: 120 },
     { headerName: "Name", field: "name", width: 120 },
     { headerName: "Email", field: "email", width: 120 },
     { headerName: "Phone", field: "phone", width: 120 },
     { headerName: "Course", field: "course", width: 120 },
     { headerName: "Enrolleddate", field: "enrolleddate", width: 120 },
-    { headerName: "Status", field: "status", width: 120 },
+    { 
+      headerName: "Status", 
+      field: "status", 
+      width: 120,
+      cellRenderer: (params: any) => {
+        const statusMap: { [key: string]: string } = {
+          A: "Active",
+          I: "Inactive",
+          D: "Delete",
+          R: "Rejected",
+          N: "Not Interested",
+          E: "Excellent",
+        };
+        return statusMap[params.value] || params.value;
+      }
+    },
     { headerName: "Statuschangedate", field: "statuschangedate", width: 120 },
     { headerName: "Processflag", field: "processflag", width: 120 },
     { headerName: "Diceflag", field: "diceflag", width: 120 },
@@ -109,11 +157,37 @@ const Candidates = () => {
   }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<Candidate | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const gridRef = useRef<AgGridReact>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [initialDataLoaded, setInitialDataLoaded] = useState<boolean>(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const toggleGroup = (batchName: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [batchName]: !prev[batchName]
+    }));
+    
+    // Update the row data to show/hide the group's children
+    const updatedRows = [...rowData];
+    const groupIndex = updatedRows.findIndex(row => row.isGroupRow && row.batchname === batchName);
+    
+    if (groupIndex !== -1) {
+      const isExpanded = !expandedGroups[batchName];
+      const batchData = groupedData[batchName] || [];
+      
+      if (isExpanded) {
+        // Insert the group's children after the group header
+        updatedRows.splice(groupIndex + 1, 0, ...batchData);
+      } else {
+        // Remove the group's children
+        updatedRows.splice(groupIndex + 1, batchData.length);
+      }
+      
+      setRowData(updatedRows);
+    }
+  };
 
   const fetchDropdownOptions = async () => {
     try {
@@ -126,7 +200,7 @@ const Candidates = () => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       if (gridRef.current?.api) {
@@ -141,7 +215,52 @@ const Candidates = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       const { data, totalRows } = response.data;
-      setRowData(data);
+      
+      // Group data by batchname
+      const grouped: GroupedData = {};
+      data.forEach((candidate: Candidate) => {
+        const batchName = candidate.batchname || 'No Batch';
+        if (!grouped[batchName]) {
+          grouped[batchName] = [];
+        }
+        grouped[batchName].push(candidate);
+      });
+      
+      // Sort batch names in descending order
+      const sortedBatchNames = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      
+      // Initialize all groups as expanded by default
+      const initialExpandedState: {[key: string]: boolean} = {};
+      sortedBatchNames.forEach(batchName => {
+        // Set all groups to expanded by default (showing minus sign)
+        initialExpandedState[batchName] = true;
+      });
+      
+      // Only set expanded groups on initial load or preserve user's choices
+      if (!initialDataLoaded) {
+        setExpandedGroups(initialExpandedState);
+        setInitialDataLoaded(true);
+      }
+      
+      setGroupedData(grouped);
+      
+      // Create row data with group headers and sorted by batch name in descending order
+      const rows: any[] = [];
+      sortedBatchNames.forEach(batchName => {
+        // Add group header row
+        rows.push({
+          batchname: batchName,
+          isGroupRow: true,
+          candidateid: batchName,
+        });
+        
+        // Add child rows if group is expanded
+        if (expandedGroups[batchName]) {
+          rows.push(...grouped[batchName]);
+        }
+      });
+      
+      setRowData(rows);
       setTotalRows(totalRows);
       setTotalPages(Math.ceil(totalRows / paginationPageSize));
     } catch (error) {
@@ -153,44 +272,42 @@ const Candidates = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize, searchValue, expandedGroups, initialDataLoaded]);
 
   interface ErrorResponse {
     message: string;
   }
 
+  // Debounced search function
+  const debouncedSearch = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setCurrentPage(1);
+      fetchData();
+    }, 500); // 500ms debounce delay
+  }, [fetchData]);
+
   const handleSearch = () => {
     setCurrentPage(1);
-    setIsSearchActive(true);
     fetchData();
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
-
-    // Clear previous timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Set a new timeout for debouncing
-    debounceTimeoutRef.current = setTimeout(() => {
-      if (value === "" && isSearchActive) {
-        setIsSearchActive(false);
-        setCurrentPage(1);
-        fetchData();
-      } else {
-        setIsSearchActive(true);
-        fetchData();
-      }
-    }, 300); // Adjust the debounce delay as needed
+    debouncedSearch();
   };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Candidate Data", 10, 10);
-    const pdfData = rowData.map((row) => Object.values(row));
+    
+    // Filter out group rows for PDF
+    const filteredData = rowData.filter(row => !row.isGroupRow);
+    const pdfData = filteredData.map((row) => Object.values(row));
     const headers = columnDefs.map((col) => col.headerName);
 
     autoTable(doc, {
@@ -205,7 +322,6 @@ const Candidates = () => {
 
   const handleRefresh = () => {
     setSearchValue("");
-    setIsSearchActive(false);
     setCurrentPage(1);
     fetchData();
   };
@@ -213,9 +329,11 @@ const Candidates = () => {
   const handleViewRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
+      if (selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
+      } else {
+        alert("Please select a candidate row to view");
       }
     }
   };
@@ -223,7 +341,16 @@ const Candidates = () => {
   useEffect(() => {
     fetchData();
     fetchDropdownOptions();
-  }, [currentPage]);
+  }, [currentPage, fetchData]);
+
+  // Clean up debounce timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (gridRef.current && gridRef.current.api) {
@@ -237,11 +364,11 @@ const Candidates = () => {
   const handleEditRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
+      if (selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        alert("Please select a row to edit");
+        alert("Please select a candidate row to edit");
       }
     }
   };
@@ -249,7 +376,7 @@ const Candidates = () => {
   const handleDeleteRow = async () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
+      if (selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
         const candidateid = selectedRows[0].candidateid;
 
         if (candidateid) {
@@ -269,6 +396,8 @@ const Candidates = () => {
         } else {
           alert("No valid candidate ID found for the selected row.");
         }
+      } else {
+        alert("Please select a candidate row to delete");
       }
     }
   };
@@ -302,6 +431,18 @@ const Candidates = () => {
     }
 
     return pageNumbers;
+  };
+
+  // Fixed the getRowStyle function to properly type the return value
+  const getRowStyle = (params: any) => {
+    if (params.data.isGroupRow) {
+      return { 
+        backgroundColor: '#f0f0f0',
+        fontWeight: 'bold' as 'bold',
+        borderBottom: '1px solid #ccc'
+      };
+    }
+    return { backgroundColor: '#ffffff' };
   };
 
   return (
@@ -391,11 +532,8 @@ const Candidates = () => {
           }}
           rowHeight={30}
           headerHeight={35}
-          getRowStyle={() => ({
-            paddingTop: "5px",
-            backgroundColor: '#ffffff',
-            fontWeight: 'normal',
-          })}
+          getRowStyle={getRowStyle}
+          isRowSelectable={(params) => !params.data.isGroupRow}
           onGridReady={(params) => {
             params.api.sizeColumnsToFit();
             if (loading) {
@@ -474,7 +612,7 @@ const Candidates = () => {
       {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
-          onClose={() => setModalState({ ...modalState, edit: false })}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           refreshData={fetchData}
           candidateData={selectedRow}
         />

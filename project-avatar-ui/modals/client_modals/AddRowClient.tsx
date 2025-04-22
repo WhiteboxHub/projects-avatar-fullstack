@@ -12,6 +12,7 @@ interface AddRowModalProps {
 
 const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<ClientCreate>({
+    name: '',
     companyname: '',
     tier: '',
     status: '',
@@ -94,6 +95,19 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
       <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">Add New Client</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Name */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter name"
+          />
+        </div>
+        
         {/* Company Name */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>

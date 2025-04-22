@@ -1338,6 +1338,7 @@ interface CandidateMarketing {
 
 interface Employee {
   name: string;
+  // Remove 'id' property since it doesn't exist on type 'Employee'
 }
 
 interface IpEmail {
@@ -1509,8 +1510,8 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               required
             >
               <option value="">Select Manager</option>
-              {employees.map(emp => (
-                <option key={`manager-${emp.id}`} value={emp.name}>
+              {employees.map((emp, index) => (
+                <option key={`manager-${index}`} value={emp.name}>
                   {emp.name}
                 </option>
               ))}
@@ -1528,8 +1529,8 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               required
             >
               <option value="">Select Instructor</option>
-              {employees.map(emp => (
-                <option key={`instructor-${emp.id}`} value={emp.name}>
+              {employees.map((emp, index) => (
+                <option key={`instructor-${index}`} value={emp.name}>
                   {emp.name}
                 </option>
               ))}
@@ -1547,8 +1548,8 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               required
             >
               <option value="">Select Submitter</option>
-              {employees.map(emp => (
-                <option key={`submitter-${emp.id}`} value={emp.name}>
+              {employees.map((emp, index) => (
+                <option key={`submitter-${index}`} value={emp.name}>
                   {emp.name}
                 </option>
               ))}

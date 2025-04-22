@@ -3,14 +3,14 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/mkl_submissions_models/AddRowModal";
 import EditRowModal from "@/modals/mkl_submissions_models/EditRowModal";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState} from "react";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { FaDownload } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import { MdAdd } from "react-icons/md";
+// import { MdDelete } from "react-icons/md";
+// import { MdAdd } from "react-icons/md";
 import { CandidateOption, EmployeeOption, MktSubmission } from "@/types/mkl_submissions";
 
 import {
@@ -31,6 +31,7 @@ import {
 const PlacementPage = () => {
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState<string>("");
+    const [searchInputValue, setSearchInputValue] = useState<string>("");
     const [rowData, setRowData] = useState<MktSubmission[]>([]);
     const [selectedRow, setSelectedRow] = useState<MktSubmission | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -47,6 +48,7 @@ const PlacementPage = () => {
     const [sortField, setSortField] = useState<string>("submissiondate");
     const [sortOrder, setSortOrder] = useState<string>("desc");
     const gridRef = useRef<AgGridReact>(null);
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -55,6 +57,24 @@ const PlacementPage = () => {
         fetchCandidateOptions();
         fetchEmployeeOptions();
     }, [currentPage, searchValue, sortField, sortOrder]);
+
+    // Debounce search input
+    useEffect(() => {
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            setSearchValue(searchInputValue);
+            setCurrentPage(1); // Reset to first page when search changes
+        }, 500); // 500ms debounce delay
+        
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [searchInputValue]);
 
     const fetchPlacements = async () => {
         try {
@@ -108,8 +128,8 @@ const PlacementPage = () => {
     };
 
     const handleSearch = () => {
+        setSearchValue(searchInputValue);
         setCurrentPage(1);
-        fetchPlacements();
     };
 
     const handleDownloadPDF = () => {
@@ -206,7 +226,7 @@ const PlacementPage = () => {
         const maxPagesToShow = 5;
         
         let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
         
         if (endPage - startPage + 1 < maxPagesToShow) {
             startPage = Math.max(1, endPage - maxPagesToShow + 1);
@@ -219,12 +239,17 @@ const PlacementPage = () => {
         return pageNumbers;
     };
 
-    const handleSortChanged = (event: any) => {
-        if (event.columnApi.getColumnState().length > 0) {
-            const sortModel = event.columnApi.getColumnState().find((column: any) => column.sort);
-            if (sortModel) {
-                setSortField(sortModel.colId);
-                setSortOrder(sortModel.sort);
+    const handleSortChanged = () => {
+        if (gridRef.current && gridRef.current.api) {
+            const columnState = gridRef.current.api.getColumnState();
+            const sortedColumn = columnState.find(column => column.sort);
+            
+            if (sortedColumn) {
+                setSortField(sortedColumn.colId);
+                setSortOrder(sortedColumn.sort || "asc");
+            } else {
+                setSortField("submissiondate");
+                setSortOrder("desc");
             }
         }
     };
@@ -258,12 +283,7 @@ const PlacementPage = () => {
                     </button>
                     <button
                         onClick={handleEditPlacement}
-                        className={`flex items-center px-4 py-2 ${
-                            selectedRow
-                                ? "bg-yellow-600 text-white hover:bg-yellow-700"
-                                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                        } rounded-md transition duration-300`}
-                        disabled={!selectedRow}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
                     >
                         <FaEdit className="mr-2" />
                     </button>
@@ -307,8 +327,8 @@ const PlacementPage = () => {
                 <input
                     type="text"
                     placeholder="Search..."
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                    value={searchInputValue}
+                    onChange={(e) => setSearchInputValue(e.target.value)}
                     className="border border-gray-300 rounded-md p-2 w-64"
                 />
                 <button
@@ -333,6 +353,7 @@ const PlacementPage = () => {
                             headerName: "Candidate Name",
                             field: "candidate_name",
                             width: 150,
+                            valueGetter: (params) => getCandidateName(params.data?.candidateid)
                         },
                         { headerName: "Course", field: "course", width: 100 },
                         { headerName: "Client Name", field: "name", width: 150 },
@@ -344,6 +365,7 @@ const PlacementPage = () => {
                             headerName: "Employee Name",
                             field: "employee_name",
                             width: 150,
+                            valueGetter: (params) => getEmployeeName(params.data?.employeeid)
                         },
                         { headerName: "Feedback", field: "feedback", width: 200 },
                         { headerName: "Notes", field: "notes", width: 200 }

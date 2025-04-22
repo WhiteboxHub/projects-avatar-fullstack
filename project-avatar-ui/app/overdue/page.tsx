@@ -1248,7 +1248,6 @@
 
 // export default OverdueComponent;
 
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -1319,7 +1318,7 @@ const OverdueComponent = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = useCallback(async (_, page = 1) => {
+  const fetchData = useCallback(async (_: unknown, page = 1) => {
     setLoading(true);
     try {
       const response = await axios.get<ApiOverdueResponse>(`${API_URL}/overdue/get`, {
@@ -1414,21 +1413,21 @@ const OverdueComponent = () => {
       if (query) {
         fetchOverdues(query);
       } else {
-        fetchData("", currentPage);
+        fetchData(null, currentPage);
       }
     }, 300),
     [fetchOverdues, fetchData, currentPage]
   );
 
   useEffect(() => {
-    fetchData("", currentPage);
+    fetchData(null, currentPage);
   }, [fetchData, currentPage]);
 
   useEffect(() => {
     if (searchValue) {
       debouncedSearch(searchValue);
     } else {
-      fetchData("", currentPage);
+      fetchData(null, currentPage);
     }
   }, [searchValue, currentPage, fetchData, debouncedSearch]);
 
@@ -1450,7 +1449,7 @@ const OverdueComponent = () => {
 
   const handleRefresh = () => {
     setSearchValue("");
-    fetchData("", currentPage);
+    fetchData(null, currentPage);
   };
 
   const handleEditRow = () => {
@@ -1673,7 +1672,7 @@ const OverdueComponent = () => {
           isOpen={modalState.edit}
           onRequestClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           rowData={selectedRow}
-          onSave={fetchData}
+          onSave={() => fetchData(null, currentPage)}
         />
       )}
       {modalState.view && selectedRow && (

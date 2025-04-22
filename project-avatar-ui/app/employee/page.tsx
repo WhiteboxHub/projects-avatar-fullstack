@@ -496,7 +496,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import jsPDF from "jspdf";
+// import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { AgGridReact } from "ag-grid-react";
@@ -565,7 +565,7 @@ const Employees = () => {
     [paginationPageSize, API_URL]
   );
 
-  const setupColumns = (sampleData: any) => {
+  const setupColumns = (sampleData: Record<string, unknown>) => {
     try {
       if (!sampleData) return;
       
@@ -691,44 +691,44 @@ const Employees = () => {
     fetchData(searchValue, 1); // Reset to page 1 when searching
   };
 
-  const handleDownloadPDF = () => {
-    if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-        doc.text("Selected Employee Data", 15, 10);
+  // const handleDownloadPDF = () => {
+  //   if (gridRef.current) {
+  //     const selectedRows = gridRef.current.api.getSelectedRows();
+  //     if (selectedRows.length > 0) {
+  //       const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  //       doc.text("Selected Employee Data", 15, 10);
 
-        const pdfData = selectedRows.map((row) => [
-          row.si_no,
-          row.id,
-          row.name,
-          row.email,
-          row.phone,
-          row.status,
-          row.type,
-        ]);
+  //       const pdfData = selectedRows.map((row) => [
+  //         row.si_no,
+  //         row.id,
+  //         row.name,
+  //         row.email,
+  //         row.phone,
+  //         row.status,
+  //         row.type,
+  //       ]);
 
-        (doc as any).autoTable({
-          head: [["SI No", "ID", "Name", "Email", "Phone", "Status", "Type"]],
-          body: pdfData,
-          styles: { fontSize: 8, cellPadding: 4 },
-          margin: { top: 15, left: 15, right: 15 },
-          didDrawPage: function (data: any) {
-            doc.text(
-              "Page " + doc.internal.pages.length,
-              data.settings.margin.left,
-              doc.internal.pageSize.height - 10
-            );
-          },
-        });
+  //       (doc as unknown).autoTable({
+  //         head: [["SI No", "ID", "Name", "Email", "Phone", "Status", "Type"]],
+  //         body: pdfData,
+  //         styles: { fontSize: 8, cellPadding: 4 },
+  //         margin: { top: 15, left: 15, right: 15 },
+  //         didDrawPage: function (data: Record<string, unknown>) {
+  //           doc.text(
+  //             "Page " + doc.internal.pages.length,
+  //             data.settings.margin.left as number,
+  //             doc.internal.pageSize.height - 10
+  //           );
+  //         },
+  //       });
 
-        doc.save("Selected_Employee_data.pdf");
-      } else {
-        setAlertMessage("Please select a row to download.");
-        setTimeout(() => setAlertMessage(null), 3000);
-      }
-    }
-  };
+  //       doc.save("Selected_Employee_data.pdf");
+  //     } else {
+  //       setAlertMessage("Please select a row to download.");
+  //       setTimeout(() => setAlertMessage(null), 3000);
+  //     }
+  //   }
+  // };
 
   const handleExportToExcel = () => {
     if (gridRef.current) {
@@ -833,7 +833,7 @@ const Employees = () => {
               value={defaultOption}
               onChange={(selectedOption) => {
                 if (selectedOption.value === "Export to PDF") {
-                  handleDownloadPDF();
+                  // handleDownloadPDF();
                 } else if (selectedOption.value === "Export to Excel") {
                   handleExportToExcel();
                 }
