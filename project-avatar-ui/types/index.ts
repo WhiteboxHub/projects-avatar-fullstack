@@ -175,6 +175,26 @@ export interface Candidate{
   avatarid: string;
   notes: string;
   batchname: string;
+  recruiterassesment:string;
+  instructorassesment:string;
+  originalresume:string;
+  lastmoddatetime:number;
+  statuschangedate:number;
+  diceflag:string;
+  batchid:number;
+  emaillist:string;
+
+}
+
+
+export interface Candidate {
+  id: number;
+  loginid: number;
+  ipaddress: number;
+  logoutdatetime: number;
+  useragent:string;
+  logindatetime:number;
+  lastmoddatetime:number; 
 }
 
   export  interface User  {

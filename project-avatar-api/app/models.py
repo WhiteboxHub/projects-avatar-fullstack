@@ -17,7 +17,16 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     uname = Column(String, unique=True, index=True)
     password = Column(String)
+class LoginHistory(Base):
+    __tablename__ = "loginhistory"
 
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    loginid = Column(Integer, index=True)
+    logindatetime = Column(DateTime)
+    ipaddress = Column(String(45))
+    useragent = Column(String(300))
+    logoutdatetime = Column(DateTime)
+    lastmoddatetime = Column(TIMESTAMP, server_default=func.current_timestamp())
 
 class Employee(Base):
     __tablename__ = 'employee'

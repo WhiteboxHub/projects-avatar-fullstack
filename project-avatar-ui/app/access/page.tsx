@@ -1,5 +1,4 @@
-// // // // avatar/wbl_admin/app/access/page.tsx
-
+// // // // // // avatar/wbl_admin/app/access/page.tsx
 // "use client"; // Add this directive at the top of the file
 
 // import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -11,7 +10,6 @@
 // import EditRowModal from "../../modals/access_modals/EditRowUser";
 // import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 // import ViewRowModal from "../../modals/access_modals/ViewRowUser";
-// import { debounce } from "lodash";
 // import withAuth from "@/modals/withAuth";
 // import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
 // import { User } from "../../types/index";
@@ -34,7 +32,7 @@
 //     try {
 //       let url = `${API_URL}/access/authuser?page=${page}&pageSize=${paginationPageSize}`;
 //       if (searchQuery) {
-//         url = `${API_URL}/access/authuser-fname/${searchQuery}`;
+//         url = `${API_URL}/access/authuser-uname/${searchQuery}`;
 //       }
 //       const response = await axios.get(url, {
 //         headers: { AuthToken: localStorage.getItem("token") },
@@ -51,7 +49,7 @@
 //       const dataWithSerials = data.map((item: User) => ({
 //         ...item,
 //       }));
-//       console.log("Fetched Row Data:", dataWithSerials);  // Debugging log
+
 //       setRowData(dataWithSerials);
 //       setTotalRows(totalRows);
 //       setupColumns(dataWithSerials);
@@ -65,26 +63,9 @@
 //     }
 //   }, [paginationPageSize, API_URL]);
 
-//   const debouncedFetchData = useRef(
-//     debounce((query: string) => {
-//       fetchData(query, currentPage);
-//     }, 300)
-//   ).current;
-
 //   useEffect(() => {
-//     if (searchValue) {
-//       debouncedFetchData(searchValue);
-//     }
-//     return () => {
-//       debouncedFetchData.cancel();
-//     };
-//   }, [searchValue, debouncedFetchData, currentPage]);
-
-//   useEffect(() => {
-//     if (!searchValue) {
-//       fetchData("", currentPage);
-//     }
-//   }, [currentPage, fetchData, searchValue]);
+//     fetchData("", currentPage);
+//   }, [currentPage, fetchData]);
 
 //   const setupColumns = (data: User[]) => {
 //     if (Array.isArray(data) && data.length > 0) {
@@ -94,20 +75,12 @@
 //           field: key,
 //         })),
 //       ];
-//       console.log("Column Definitions:", columns);  // Debugging log
+
 //       setColumnDefs(columns);
 //     } else {
 //       console.error("Data is not an array or is empty:", data);
 //     }
 //   };
-
-//   useEffect(() => {
-//     console.log("Row Data Updated:", rowData);  // Debugging log
-//   }, [rowData]);
-
-//   useEffect(() => {
-//     console.log("Column Definitions Updated:", columnDefs);  // Debugging log
-//   }, [columnDefs]);
 
 //   const handleEditRow = () => {
 //     if (gridRef.current) {
@@ -150,9 +123,28 @@
 //   };
 
 //   const totalPages = Math.ceil(totalRows / paginationPageSize);
-//   const startPage = Math.max(1, currentPage);
-//   const endPage = Math.min(totalPages, currentPage + 4);
-//   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
+
+//   const renderPageNumbers = () => {
+//     const pageNumbers = [];
+//     for (let i = 1; i <= totalPages; i++) {
+//       if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+//         pageNumbers.push(
+//           <button
+//             key={i}
+//             onClick={() => handlePageChange(i)}
+//             className={`text-sm px-2 py-1 rounded-md ${
+//               currentPage === i
+//                 ? "bg-blue-600 text-white"
+//                 : "bg-gray-200 text-gray-800"
+//             } hidden sm:block`}
+//           >
+//             {i}
+//           </button>
+//         );
+//       }
+//     }
+//     return pageNumbers;
+//   };
 
 //   return (
 //     <div className="relative">
@@ -240,15 +232,7 @@
 //               >
 //                 <FaChevronLeft />
 //               </button>
-//               {pageOptions.map((page) => (
-//                 <button
-//                   key={page}
-//                   onClick={() => handlePageChange(page)}
-//                   className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-//                 >
-//                   {page}
-//                 </button>
-//               ))}
+//               {renderPageNumbers()}
 //               <button
 //                 onClick={() => handlePageChange(currentPage + 1)}
 //                 disabled={currentPage === totalPages}
@@ -290,10 +274,8 @@
 
 
 
-
-
-
-"use client"; // Add this directive at the top of the file
+// // // // // avatar/wbl_admin/app/access/page.tsx
+"use client"; 
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
@@ -333,12 +315,7 @@ const Users = () => {
       });
 
       let data = response.data;
-
-      // Check if data is an array or a single object
-      if (!Array.isArray(data)) {
-        data = [data]; // Wrap the single object in an array
-      }
-
+      if (!Array.isArray(data)) { data = [data]; }
       const totalRows = data.length;
       const dataWithSerials = data.map((item: User) => ({
         ...item,
@@ -376,14 +353,6 @@ const Users = () => {
     }
   };
 
-  useEffect(() => {
-
-  }, [rowData]);
-
-  useEffect(() => {
-
-  }, [columnDefs]);
-
   const handleEditRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
@@ -418,16 +387,37 @@ const Users = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+    fetchData("", newPage); // Fetch data for the new page
   };
 
   const handleSearch = () => {
-    fetchData(searchValue, currentPage);
+    fetchData(searchValue, 1); // Reset to the first page when searching
   };
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const startPage = Math.max(1, currentPage);
-  const endPage = Math.min(totalPages, currentPage + 4);
-  const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      }
+    }
+    return pageNumbers;
+  };
+
 
   return (
     <div className="relative">
@@ -515,15 +505,7 @@ const Users = () => {
               >
                 <FaChevronLeft />
               </button>
-              {pageOptions.map((page) => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                >
-                  {page}
-                </button>
-              ))}
+              {renderPageNumbers()}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}

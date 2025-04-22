@@ -340,10 +340,9 @@
 // export default withAuth(CandidateSearch);
 
 
-// avatar/wbl_admin/app/candidateSearch/page.tsx
-
+// // avatar/wbl_admin/app/candidateSearch/page.tsx
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react"; // Import useEffect here
 import axios from "axios";
 import withAuth from "@/modals/withAuth";
 import { FaSpinner, FaChevronDown, FaChevronRight } from "react-icons/fa";
@@ -377,8 +376,26 @@ const CandidateSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-
+  const [loginHistory, setLoginHistory] = useState([]);
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const fetchLoginHistory = async (portalId: string) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${API_URL}/loginhistory/${portalId}`, {
+        headers: { AuthToken: token },
+      });
+      setLoginHistory(response.data);
+    } catch (error) {
+      console.error("Failed to fetch login history", error);
+    }
+  };
+
+  useEffect(() => {
+    if (openDropdown === "Login History" && selectedCandidate?.portalid) {
+      fetchLoginHistory(selectedCandidate.portalid);
+    }
+  }, [openDropdown, selectedCandidate]);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -612,15 +629,25 @@ const CandidateSearch: React.FC = () => {
               </p>
             </Dropdown>
 
-            <Dropdown title="Login History" isOpen={openDropdown === "Login History"} onClick={() => toggleDropdown("Login History")}>
-              <p>
-                {/* <strong>Login Count:</strong> {selectedCandidate.logincount} */}
-              </p>
+            <Dropdown
+              title="Login History"
+              isOpen={openDropdown === "Login History"}
+              onClick={() => toggleDropdown("Login History")}
+            >
+              {loginHistory.length > 0 ? (
+                loginHistory.map((entry, index) => (
+                  <div key={index} className="mb-1">
+                    <strong>{new Date(entry.logindatetime).toLocaleString()}</strong> - {entry.ipaddress}
+                  </div>
+                ))
+              ) : (
+                <p>No login history found</p>
+              )}
             </Dropdown>
 
             <Dropdown title="Original Resume" isOpen={openDropdown === "Original Resume"} onClick={() => toggleDropdown("Original Resume")}>
               <p>
-                {/* <strong>Resume:</strong> {selectedCandidate.resumeid} */}
+                <strong>Resume:</strong> {selectedCandidate.originalresume}
               </p>
             </Dropdown>
 
@@ -644,13 +671,13 @@ const CandidateSearch: React.FC = () => {
 
             <Dropdown title="Recruiter Assessment" isOpen={openDropdown === "Recruiter Assessment"} onClick={() => toggleDropdown("Recruiter Assessment")}>
               <p>
-                {/* <strong>Instructor:</strong> {selectedCandidate.instructor} */}
+                <strong>Instructor:</strong> {selectedCandidate.recruiterassesment}
               </p>
             </Dropdown>
 
             <Dropdown title="Instructor Assessment" isOpen={openDropdown === "Instructor Assessment"} onClick={() => toggleDropdown("Instructor Assessment")}>
               <p>
-                {/* <strong>Instructor:</strong> {selectedCandidate.instructor} */}
+                <strong>Instructor:</strong> {selectedCandidate.instructorassesment}
               </p>
             </Dropdown>
           </div>
