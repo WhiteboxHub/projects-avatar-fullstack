@@ -1,84 +1,95 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from app.models import Recruiter
-from typing import List
-from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterInDB
+from sqlalchemy import func, or_
+from app.models import Recruiter, Vendor
+from app.schemas import RecruiterResponse
+from fastapi import HTTPException
 
-def get_all_recruiters(db: Session, offset: int = 0, limit: int = 100) -> List[RecruiterInDB]:
-    """
-    Fetch all recruiters with clientid = 0 (type = "list"), sorted by email.
-    """
-    if offset < 0 or limit < 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Offset and limit must be non-negative."
+def get_recruiters_with_vendors(db: Session, page: int, page_size: int, search: str = None):
+    query = db.query(
+        Recruiter.id,
+        Recruiter.name,
+        Recruiter.email,
+        Recruiter.phone,
+        Recruiter.designation,
+        Recruiter.vendorid,
+        func.coalesce(Vendor.companyname, " ").label('comp'),
+        Recruiter.status,
+        Recruiter.dob,
+        Recruiter.personalemail,
+        Recruiter.skypeid,
+        Recruiter.linkedin,
+        Recruiter.twitter,
+        Recruiter.facebook,
+        Recruiter.review,
+        Recruiter.notes
+    ).outerjoin(Vendor, Recruiter.vendorid == Vendor.id).filter(
+        Recruiter.clientid == 0
+    )
+    
+    if search:
+        search = f"%{search}%"
+        query = query.filter(
+            or_(
+                Recruiter.name.ilike(search),
+                Recruiter.email.ilike(search),
+                Recruiter.phone.ilike(search),
+                Recruiter.designation.ilike(search),
+                Vendor.companyname.ilike(search),
+                Recruiter.status.ilike(search),
+                Recruiter.personalemail.ilike(search),
+                Recruiter.skypeid.ilike(search),
+                Recruiter.notes.ilike(search)
+            )
         )
 
-    # Fetch recruiters sorted by email
-    recruiters = db.query(Recruiter).filter(Recruiter.clientid == 0).order_by(Recruiter.email).offset(offset).limit(limit).all()
+    total = query.count()
+    recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
 
-    # Add SL No and convert to Pydantic model
-    result = []
-    for index, recruiter in enumerate(recruiters, start=1):
-        recruiter_data = {
-            "sl_no": index,  # Add SL No
-            "id": recruiter.id,  # Ensure id comes after sl_no
-            "name": recruiter.name,
-            "email": recruiter.email,
-            "phone": recruiter.phone,
-            "designation": recruiter.designation,
-            "vendorid": recruiter.vendorid,
-            "status": recruiter.status,
-            "dob": recruiter.dob,
-            "personalemail": recruiter.personalemail,
-            "skypeid": recruiter.skypeid,
-            "linkedin": recruiter.linkedin,
-            "twitter": recruiter.twitter,
-            "facebook": recruiter.facebook,
-            "review": recruiter.review,
-            "notes": recruiter.notes,
-            "clientid": recruiter.clientid,
-        }
-        result.append(RecruiterInDB.model_validate(recruiter_data))
+    recruiter_data = [RecruiterResponse.from_orm(recruiter) for recruiter in recruiters]
 
-    return result
+    return {
+        "data": recruiter_data,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": (total + page_size - 1) // page_size
+    }
 
-def add_recruiter(db: Session, recruiter: RecruiterCreate):
-    """
-    Add a new recruiter.
-    """
-    db_recruiter = Recruiter(**recruiter.dict())
-    db.add(db_recruiter)
+def add_recruiter(db: Session, recruiter_data: Recruiter) -> RecruiterResponse:
+    recruiter_dict = recruiter_data.dict()
+    if recruiter_dict.get('clientid') is None:
+        recruiter_dict['clientid'] = 0
+        
+    if not recruiter_dict.get('status'):
+        recruiter_dict['status'] = 'A'
+        
+    new_recruiter = Recruiter(**recruiter_dict)
+    db.add(new_recruiter)
     db.commit()
-    db.refresh(db_recruiter)
-    return db_recruiter
+    db.refresh(new_recruiter)
+    return RecruiterResponse.from_orm(new_recruiter)
 
-def update_recruiter(db: Session, id: int, recruiter: RecruiterUpdate):
-    """
-    Update a recruiter by ID.
-    """
-    db_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not db_recruiter:
-        return None
-    for key, value in recruiter.dict().items():
-        setattr(db_recruiter, key, value)
+def update_recruiter(db: Session, recruiter_id: int, recruiter_data: Recruiter) -> RecruiterResponse:
+    recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=404, detail="Recruiter not found")
+    
+    update_data = recruiter_data.dict()
+    if update_data.get('clientid') is None:
+        update_data['clientid'] = 0
+        
+    if not update_data.get('status'):
+        update_data['status'] = 'A'
+        
+    for key, value in update_data.items():
+        setattr(recruiter, key, value)
     db.commit()
-    db.refresh(db_recruiter)
-    return db_recruiter
+    return RecruiterResponse.from_orm(recruiter)
 
-def view_recruiter_by_id(db: Session, id: int):
-    """
-    Fetch a single recruiter by ID.
-    """
-    return db.query(Recruiter).filter(Recruiter.id == id).first()
-
-def delete_recruiter(db: Session, id: int):
-    """
-    Delete a recruiter by ID.
-    """
-    db_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not db_recruiter:
-        return False
-    db.delete(db_recruiter)
+def delete_recruiter(db: Session, recruiter_id: int) -> dict:
+    recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=404, detail="Recruiter not found")
+    db.delete(recruiter)
     db.commit()
-    return True
+    return {"message": "Recruiter deleted successfully"}

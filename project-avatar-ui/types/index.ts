@@ -427,8 +427,9 @@ export interface Vendor {
       phone: string;
       status: string;
       startdate: string;
-      mgrid: string;
-      designationid: string;
+      mgrid: string | null;
+      designationid: string | null;
+      loginid: string | null;
       personalemail: string;
       personalphone: string;
       dob: string;
@@ -448,7 +449,6 @@ export interface Vendor {
       workpermiturl: string;
       contracturl: string;
       enddate: string;
-      loginid: string;
       responsibilities: string;
       notes: string;
     
