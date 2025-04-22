@@ -1,6 +1,6 @@
 from pydantic import BaseModel,constr, conint, EmailStr, Field, validator, HttpUrl, field_validator
 from datetime import datetime, date
-from typing import Optional, List 
+from typing import Optional, List, Union 
 from pydantic_settings import BaseSettings
 
 
@@ -896,8 +896,8 @@ class EmployeeInDB(EmployeeBase):
 # Vendor Schemas
 class VendorBase(BaseModel):
     companyname: str
-    status: str = "inactive" 
-    tier: Optional[str] = None
+    status: Optional[str] = None
+    tier: Optional[Union[str, int]] = None 
     culture: Optional[str] = None
     solicited: Optional[str] = None
     minrate: Optional[float] = None
@@ -908,6 +908,7 @@ class VendorBase(BaseModel):
     defaultedpayment: Optional[str] = None
     agreementstatus: Optional[str] = None
     url: Optional[str] = None
+    accountnumber: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
     fax: Optional[str] = None
@@ -916,20 +917,18 @@ class VendorBase(BaseModel):
     state: Optional[str] = None
     country: Optional[str] = None
     zip: Optional[str] = None
-    hrname: Optional[str] = None
-    hremail: Optional[str] = None
-    hrphone: Optional[str] = None
     twitter: Optional[str] = None
     facebook: Optional[str] = None
     linkedin: Optional[str] = None
-    accountnumber: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[str] = None
+    hrphone: Optional[str] = None
     managername: Optional[str] = None
     manageremail: Optional[str] = None
     managerphone: Optional[str] = None
     secondaryname: Optional[str] = None
     secondaryemail: Optional[str] = None
     secondaryphone: Optional[str] = None
-    timsheetemail: Optional[str] = None
     agreementname: Optional[str] = None
     agreementlink: Optional[str] = None
     subcontractorlink: Optional[str] = None
@@ -937,15 +936,6 @@ class VendorBase(BaseModel):
     nonhirelink: Optional[str] = None
     clients: Optional[str] = None
     notes: Optional[str] = None
-
-    @validator('tier', 'status', 'culture', pre=True)
-    def coerce_numbers_to_str(cls, v):
-        if isinstance(v, (int, float)):
-            return str(v)
-        return v
-
-    class Config:
-        anystr_strip_whitespace = True
 
 class VendorCreate(VendorBase):
     pass
@@ -953,48 +943,73 @@ class VendorCreate(VendorBase):
 class VendorUpdate(VendorBase):
     pass
 
-class VendorBase(BaseModel):
-    companyname: str
-    status: str
-    tier: Optional[int] = None
-    culture: Optional[str] = None
-    solicited: Optional[str] = None
-    minrate: Optional[float] = None
-    hirebeforeterm: Optional[str] = None
-    hireafterterm: Optional[str] = None
-    latepayments: Optional[str] = None
-    totalnetterm: Optional[int] = None
-    defaultedpayment: Optional[str] = None
-    agreementstatus: Optional[str] = None
-    url: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    fax: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
-    zip: Optional[str] = None
-    hrname: Optional[str] = None
-    hremail: Optional[str] = None
-    hrphone: Optional[str] = None
-    twitter: Optional[str] = None
-    facebook: Optional[str] = None
-    linkedin: Optional[str] = None
-    managername: Optional[str] = None
-    manageremail: Optional[str] = None
-    managerphone: Optional[str] = None
-    secondaryname: Optional[str] = None
-    secondaryemail: Optional[str] = None
-    secondaryphone: Optional[str] = None
-    # timesheetemail: Optional[str] = None
-    agreementname: Optional[str] = None
-    agreementlink: Optional[str] = None
-    subcontractorlink: Optional[str] = None
-    nonsolicitationlink: Optional[str] = None
-    nonhirelink: Optional[str] = None
-    clients: Optional[str] = None
-    notes: Optional[str] = None
+class VendorInDB(VendorBase):
+    id: int
+    crawldate: Optional[datetime] = None
+    lastmoddatetime: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+class VendorResponse(BaseModel):
+    data: List[VendorInDB]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+class VendorDeleteResponse(BaseModel):
+    message: str
+    vendor_id: int
+
+class VendorCreate(VendorBase):
+    pass
+
+class VendorUpdate(VendorBase):
+    pass
+
+# class VendorBase(BaseModel):
+#     companyname: str
+#     status: str
+#     tier: Optional[int] = None
+#     culture: Optional[str] = None
+#     solicited: Optional[str] = None
+#     minrate: Optional[float] = None
+#     hirebeforeterm: Optional[str] = None
+#     hireafterterm: Optional[str] = None
+#     latepayments: Optional[str] = None
+#     totalnetterm: Optional[int] = None
+#     defaultedpayment: Optional[str] = None
+#     agreementstatus: Optional[str] = None
+#     url: Optional[str] = None
+#     email: Optional[str] = None
+#     phone: Optional[str] = None
+#     fax: Optional[str] = None
+#     address: Optional[str] = None
+#     city: Optional[str] = None
+#     state: Optional[str] = None
+#     country: Optional[str] = None
+#     zip: Optional[str] = None
+#     hrname: Optional[str] = None
+#     hremail: Optional[str] = None
+#     hrphone: Optional[str] = None
+#     twitter: Optional[str] = None
+#     facebook: Optional[str] = None
+#     linkedin: Optional[str] = None
+#     managername: Optional[str] = None
+#     manageremail: Optional[str] = None
+#     managerphone: Optional[str] = None
+#     secondaryname: Optional[str] = None
+#     secondaryemail: Optional[str] = None
+#     secondaryphone: Optional[str] = None
+#     # timesheetemail: Optional[str] = None
+#     agreementname: Optional[str] = None
+#     agreementlink: Optional[str] = None
+#     subcontractorlink: Optional[str] = None
+#     nonsolicitationlink: Optional[str] = None
+#     nonhirelink: Optional[str] = None
+#     clients: Optional[str] = None
+#     notes: Optional[str] = None
 
 class VendorCreate(VendorBase):
     pass
@@ -1010,10 +1025,6 @@ class VendorResponse(VendorBase):
 class VendorSearchBase(BaseModel):
     companyname: Optional[str] = None
 
-
-
-class VendorInDB(VendorBase):
-    id: int
 
     class Config:
         orm_mode = True

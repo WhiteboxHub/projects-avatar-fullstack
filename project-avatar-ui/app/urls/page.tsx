@@ -22,6 +22,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
+import { PaginationState } from "ag-grid-community";
 
 interface Url {
   id?: string;
@@ -36,6 +37,9 @@ const Urls = () => {
     { headerName: string; field: string }[]
   >([]);
   const [paginationPageSize] = useState<number>(500);
+  const [paginationState, setPaginationState] = useState<PaginationState>({
+    currentPage: 1,
+    pageSize: 500  });
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -140,36 +144,50 @@ const Urls = () => {
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        const reindexedId = selectedRows[0].reindexed_id; // Use the correct field for reindexed ID
-        if (reindexedId) {
-          const confirmation = window.confirm(
-            `Are you sure you want to delete URL with reindexed ID ${reindexedId}?`
-          );
-          if (!confirmation) return;
-  
-          try {
-            await axios.delete(`${API_URL}/urls/delete/${reindexedId}`, {
-              headers: { AuthToken: localStorage.getItem("token") },
-            });
-            alert("URL deleted successfully.");
-            fetchData();
-          } catch (error) {
-            const axiosError = error as AxiosError;
-  
-            alert(
-              `Failed to delete URL: ${
-                (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-              }`
-            );
-          }
-        } else {
-          alert("No valid reindexed ID found for the selected row.");
+      try {
+        const selectedRows = gridRef.current.api.getSelectedRows();
+        
+        if (selectedRows.length === 0) {
+          alert("Please select a row to delete.");
+          return;
         }
-      } else {
-        setAlertMessage("Please select a row to delete."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+  
+        // Get current pagination state (replace with your actual state management)
+        const currentPage = paginationState?.currentPage || 1;
+        const pageSize = paginationState?.pageSize || 500;
+  
+        const sl_no = selectedRows[0].sl_no;
+        
+        const confirmation = window.confirm(
+          `Are you sure you want to delete URL with SL No ${sl_no}?`
+        );
+  
+        if (confirmation) {
+          const response = await axios.delete(
+            `${API_URL}/urls/delete/${sl_no}`, 
+            {
+              params: {
+                page: currentPage,
+                page_size: pageSize
+              },
+              headers: { 
+                AuthToken: localStorage.getItem("token") || "" 
+              }
+            }
+          );
+  
+          if (response.status === 200) {
+            alert("URL deleted successfully.");
+            fetchData(); // Refresh your data
+          }
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert(
+          error instanceof Error 
+            ? error.message 
+            : "Failed to delete URL"
+        );
       }
     }
   };

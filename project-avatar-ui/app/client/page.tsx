@@ -1,31 +1,25 @@
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/recruiter_byClient_modals/AddRowRecruiter";
-import EditRowModal from "@/modals/recruiter_byClient_modals/EditRowRecruiter";
-import ViewRowModal from "@/modals/recruiter_byClient_modals/ViewRowRecruiter";
+import AddRowModal from "@/modals/client_modals/AddRowClient";
+import EditRowModal from "@/modals/client_modals/EditRowClient";
+import React, { useEffect, useRef, useState } from "react";
+import ViewRowModal from "@/modals/client_modals/ViewRowClient";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
+import { AxiosError } from "axios";
 import { jsPDF } from "jspdf";
-import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+import { ErrorResponse } from "@/types";
 import { Client } from "@/types/client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import {
+  FaDownload,
   FaChevronLeft,
   FaChevronRight,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
-  FaDownload,
-  FaSync,
 } from "react-icons/fa";
 import {
   AiOutlineEdit,
@@ -54,510 +48,254 @@ const Clients = () => {
   const [selectedRow, setSelectedRow] = useState<Client | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const gridRef = useRef<AgGridReact>(null);
-  const [modalState, setModalState] = useState<ModalState>({
-    add: false,
-    view: false,
-    edit: false,
-    selectedRow: null,
-  });
-  const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
-  const [searchValue, setSearchValue] = useState("");
-  const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [expandedCompanies, setExpandedCompanies] = useState<{
-    [key: number]: boolean;
-  }>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
-    null
-  );
-  const pageSize = 10;
 
-  const showAlert = (text: string, type: "success" | "error") => {
-    setAlertMessage({ text, type });
-    setTimeout(() => setAlertMessage(null), 3000);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // Updated: Fetch data with pagination
+  const fetchData = async (page: number = currentPage) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/client/client/get`, {
+        params: {
+          page: page,
+          pageSize: paginationPageSize,
+        },
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+
+      const { data, total } = response.data;
+
+      setRowData(data);
+      setTotalRows(total);
+      setupColumns(data);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Debounce search value
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchValue(searchValue);
-    }, 500);
+  const fetchClients = async (searchQuery = "") => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/client/client/search`, {
+        params: {
+          page: currentPage,
+          pageSize: paginationPageSize,
+          search: searchQuery,
+        },
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
 
-    return () => clearTimeout(timer);
+      const { data, total } = response.data;
+      setRowData(data);
+      setTotalRows(total);
+      setupColumns(data);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // debouncing for search
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      if (searchValue) {
+        fetchClients(searchValue);
+      }
+    }, 500);
+    return () => clearTimeout(delaySearch);
   }, [searchValue]);
 
-  const fetchData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/by-client`,
-        {
-          params: {
-            page: currentPage,
-            pageSize: pageSize,
-            type: "client",
-            search: debouncedSearchValue || undefined,
-          },
-        }
-      );
-      setCompanies(response.data.data);
-      setTotalPages(response.data.pages);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      showAlert("Error loading data", "error");
-    } finally {
-      setIsLoading(false);
+  const handleSearch = () => {
+    fetchClients(searchValue);
+  };
+
+  const setupColumns = (data: Client[]) => {
+    if (data.length > 0) {
+      // Define columns based on the PHP grid structure
+      const columns = [
+        { headerName: "ID", field: "id", width: 40, editable: false },
+        { headerName: "Company Name", field: "companyname", width: 250, editable: true, editoptions: { size: 75, maxlength: 250, style: "text-transform: uppercase" }, label: "Company Name" },
+        { headerName: "Email", field: "email", width: 200, editable: true, editoptions: { size: 75, maxlength: 250, style: "text-transform: lowercase" }, formatter: "email", label: "Email" },
+        { headerName: "Phone", field: "phone", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Phone" },
+        { headerName: "Status", field: "status", width: 90, editable: true, label: "Status", edittype: "select" },
+        { headerName: "URL", field: "url", width: 200, editable: true, editoptions: { size: 75, maxlength: 200, style: "text-transform: lowercase" }, formatter: "link", label: "Url" },
+        { headerName: "Fax", field: "fax", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Fax" },
+        { headerName: "Address", field: "address", width: 150, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Address" },
+        { headerName: "City", field: "city", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "City" },
+        { headerName: "State", field: "state", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "State" },
+        { headerName: "Country", field: "country", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Country" },
+        { headerName: "Zip", field: "zip", width: 120, editable: true, editoptions: { size: 75, maxlength: 250 }, label: "Zip" },
+        { headerName: "Twitter", field: "twitter", width: 200, editable: true, label: "Twitter" },
+        { headerName: "Facebook", field: "facebook", width: 200, editable: true, label: "Facebook" },
+        { headerName: "LinkedIn", field: "linkedin", width: 200, editable: true, label: "Linkedin" },
+        { headerName: "Mgr Name", field: "manager1name", width: 200, editable: true, label: "Mgr Name" },
+        { headerName: "Mgr Email", field: "manager1email", width: 150, editable: true, formatter: "email", label: "Mgr Email" },
+        { headerName: "Mgr Phone", field: "manager1phone", width: 90, editable: true, label: "Mgr Phone" },
+        { headerName: "Hiring Mgr Name", field: "hmname", width: 200, editable: true, label: "Hiring Mgr Name" },
+        { headerName: "Hiring Mgr Email", field: "hmemail", width: 150, editable: true, formatter: "email", label: "Hiring Mgr Email" },
+        { headerName: "Hiring Mgr Phone", field: "hmphone", width: 90, editable: true, label: "Hiring Mgr Phone" },
+        { headerName: "HR Name", field: "hrname", width: 200, editable: true, label: "HR Name" },
+        { headerName: "HR Email", field: "hremail", width: 150, editable: true, formatter: "email", label: "HR Email" },
+        { headerName: "HR Phone", field: "hrphone", width: 90, editable: true, label: "HR Phone" },
+        { headerName: "Notes", field: "notes", width: 400, editable: true, edittype: "textarea", editoptions: { rows: 6, cols: 60 }, label: "Notes" }
+      ];
+      setColumnDefs(columns);
     }
-  }, [currentPage, debouncedSearchValue]);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [currentPage]);
 
-  const toggleGroup = (clientId: number) => {
-    setSelectedCompanyId(clientId); // Store the selected company ID
-    setExpandedCompanies((prev) => ({
-      ...prev,
-      [clientId]: !prev[clientId],
-    }));
+  const handleRefresh = () => {
+    setSearchValue("");
+    fetchData();
   };
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/clients`
-        );
-        setClients(response.data || []);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
+  const handleAddRow = () =>
+    setModalState((prevState) => ({ ...prevState, add: true }));
+
+  const handleEditRow = () => {
+    if (gridRef.current) {
+      const selectedRows = gridRef.current.api.getSelectedRows();
+      if (selectedRows.length > 0) {
+        setSelectedRow(selectedRows[0]);
+        setModalState((prevState) => ({ ...prevState, edit: true }));
+      } else {
+        setAlertMessage("Please select a row to edit.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
-    };
-    fetchClients();
-  }, []);
+    }
+  };
 
-  const rowData = useMemo(() => {
-    const rows: RowData[] = [];
-    companies.forEach((company) => {
-      rows.push({
-        id: company.clientid,
-        name: company.companyname,
-        email: "",
-        phone: "",
-        designation: "",
-        status: "",
-        dob: undefined,
-        personalemail: "",
-        skypeid: "",
-        linkedin: "",
-        vendorid: "",
-        twitter: "",
-        facebook: "",
-        review: "",
-        notes: "",
-        clientid: company.clientid,
-        companyname: company.companyname,
-        isGroupRow: true,
-        level: 0,
-        expanded: expandedCompanies[company.clientid],
-      });
+  const handleDeleteRow = async () => {
+    if (gridRef.current) {
+      const selectedRows = gridRef.current.api.getSelectedRows();
+      if (selectedRows.length > 0) {
+        const clientId = selectedRows[0].id;
+        if (clientId) {
+          const confirmation = window.confirm(
+            `Are you sure you want to delete client ID ${clientId}?`
+          );
+          if (!confirmation) return;
 
-      if (expandedCompanies[company.clientid]) {
-        company.recruiters.forEach((recruiter) => {
-          rows.push({
-            ...recruiter,
-            name: `${recruiter.id} ${recruiter.name} - ${company.companyname}`,
-            isGroupRow: false,
-            level: 1,
-          });
-        });
-        rows.push({
-          id: -1,
-          name: "",
-          email: "",
-          phone: "",
-          designation: "",
-          status: "",
-          dob: undefined,
-          personalemail: "",
-          skypeid: "",
-          linkedin: "",
-          twitter: "",
-          facebook: "",
-          review: "",
-          notes: "",
-          clientid: -1,
-          companyname: "",
-          vendorid: "",
-          isGroupRow: false,
-          level: 1,
-        });
-      }
-    });
-    return rows;
-  }, [companies, expandedCompanies]);
-
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Name",
-        field: "name" as keyof RowData,
-        cellRenderer: (params: { data: RowData; value: string }) => {
-          if (params.data.isGroupRow) {
-            const expanded = expandedCompanies[params.data.clientid];
-            return (
-              <div className="flex items-center">
-                <span
-                  className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
-                  onClick={() => toggleGroup(params.data.clientid)}
-                >
-                  <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
-                    {expanded ? (
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M20 12H4"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="font-medium">{params.value}</span>
-                </span>
-              </div>
+          try {
+            await axios.delete(`${API_URL}/client/delete/${clientId}`, {
+              headers: { AuthToken: localStorage.getItem("token") },
+            });
+            alert("Client deleted successfully.");
+            fetchData();
+          } catch (error) {
+            const axiosError = error as AxiosError;
+            alert(
+              `Failed to delete client: ${
+                (axiosError.response?.data as ErrorResponse)?.message ||
+                axiosError.message
+              }`
             );
           }
-          return <span className="pl-3">{params.value}</span>;
-        },
-        minWidth: 200,
-        flex: 1,
-      },
-      {
-        headerName: "Email",
-        field: "email" as keyof RowData,
-        hide: false,
-        minWidth: 150,
-      },
-      {
-        headerName: "Phone",
-        field: "phone" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "Designation",
-        field: "designation" as keyof RowData,
-        hide: false,
-        minWidth: 150,
-      },
-      {
-        headerName: "Status",
-        field: "status" as keyof RowData,
-        hide: false,
-        minWidth: 100,
-        cellRenderer: (params: { value: string }) => {
-          const statusMap: { [key: string]: string } = {
-            A: "Active",
-            I: "Inactive",
-            D: "Delete",
-            R: "Rejected",
-            N: "Not Interested",
-            E: "Excellent",
-          };
-          return statusMap[params.value] || params.value;
-        },
-      },
-      {
-        headerName: "DOB",
-        field: "dob" as keyof RowData,
-        hide: false,
-        minWidth: 100,
-      },
-      {
-        headerName: "Personal Email",
-        field: "personalemail" as keyof RowData,
-        hide: false,
-        minWidth: 150,
-      },
-      {
-        headerName: "Skype ID",
-        field: "skypeid" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "LinkedIn",
-        field: "linkedin" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "Twitter",
-        field: "twitter" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "Facebook",
-        field: "facebook" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "Review",
-        field: "review" as keyof RowData,
-        hide: false,
-        minWidth: 100,
-      },
-      {
-        headerName: "Notes",
-        field: "notes" as keyof RowData,
-        hide: false,
-        minWidth: 200,
-      },
-      {
-        headerName: "Employee ID",
-        field: "employeeid" as keyof RowData,
-        hide: false,
-        minWidth: 120,
-      },
-      {
-        headerName: "Last Modified",
-        field: "lastmoddatetime" as keyof RowData,
-        hide: false,
-        minWidth: 150,
-      },
-    ],
-    [expandedCompanies]
-  );
+        } else {
+          alert("No valid client ID found for the selected row.");
+        }
+      } else {
+        setAlertMessage("Please select a row to delete.");
+        setTimeout(() => setAlertMessage(null), 3000);
+      }
+    }
+  };
 
+  // Added: Handle page change for pagination
   const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
+    if (newPage !== currentPage) {
       setCurrentPage(newPage);
+      fetchData(newPage);
     }
   };
 
-  const handleAdd = async (formData: RecruiterData) => {
-    try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/add`,
-        formData
-      );
-      showAlert("Recruiter added successfully", "success");
-      setModalState({ ...modalState, add: false });
-      fetchData();
-    } catch (error) {
-      console.error("Error adding recruiter:", error);
-      // showAlert("Error adding recruiter", "error");
+  const totalPages = Math.ceil(totalRows / paginationPageSize);
+  
+  const getPageNumbers = () => {
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = startPage + maxPagesToShow - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
 
-  const handleEdit = async (formData: RecruiterData) => {
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/update/${formData.id}`,
-        formData
-      );
-      showAlert("Recruiter updated successfully", "success");
-      setModalState({ ...modalState, edit: false });
-      fetchData();
-    } catch (error) {
-      console.error("Error updating recruiter:", error);
-      showAlert("Error updating recruiter", "error");
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this recruiter?")) {
-      try {
-        await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/remove/${id}`
-        );
-        showAlert("Recruiter deleted successfully", "success");
-        fetchData();
-      } catch (error) {
-        console.error("Error deleting recruiter:", error);
-        showAlert("Error deleting recruiter", "error");
+  const handleViewRow = () => {
+    if (gridRef.current) {
+      const selectedRows = gridRef.current.api.getSelectedRows();
+      if (selectedRows.length > 0) {
+        setSelectedRow(selectedRows[0]);
+        setModalState((prevState) => ({ ...prevState, view: true }));
+      } else {
+        setAlertMessage("Please select a row to view.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    const tableData = rowData
-      .filter((row) => !row.isGroupRow && row.id !== -1)
-      .map((row) => [
-        row.companyname,
-        row.name.split(' - ')[0], // Extract just the name part without company
-        row.email,
-        row.phone,
-        row.designation,
-        row.status === 'A' ? 'Active' : 
-          row.status === 'I' ? 'Inactive' : 
-          row.status === 'D' ? 'Delete' : 
-          row.status === 'R' ? 'Rejected' : 
-          row.status === 'N' ? 'Not Interested' : 
-          row.status === 'E' ? 'Excellent' : row.status,
-        row.dob || "",
-        row.personalemail || "",
-        row.skypeid || "",
-        row.linkedin || "",
-        row.twitter || "",
-        row.facebook || "",
-        row.review || "",
-        row.notes || "",
-      ]);
-
-    const options = {
-      head: [
-        [
-          "Company",
-          "Name",
-          "Email",
-          "Phone",
-          "Designation",
-          "Status",
-          "DOB",
-          "Personal Email",
-          "Skype ID",
-          "LinkedIn",
-          "Twitter",
-          "Facebook",
-          "Review",
-          "Notes",
-        ],
-      ],
-      body: tableData,
-      styles: { fontSize: 8 },
-      margin: { top: 20 },
-    };
-
-    // Apply autoTable to the document
-    autoTable(doc, options);
-    doc.save("recruiters-by-client.pdf");
-  };
-
-  const renderPageNumbers = () => {
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        pageNumbers.push(
-          <button
-            key={i}
-            onClick={() => handlePageChange(i)}
-            className={`text-sm px-2 py-1 rounded-md ${
-              currentPage === i
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } hidden sm:block`}
-          >
-            {i}
-          </button>
-        );
-      }
-    }
-    return pageNumbers;
+    doc.text("Client Data", 20, 10);
+    const pdfData = rowData.map((row) => Object.values(row));
+    const headers = columnDefs.map((col) => col.headerName);
+    autoTable(doc, {
+      head: [headers],
+      body: pdfData,
+      theme: "grid",
+      styles: { fontSize: 5 },
+    });
+    doc.save("client_data.pdf");
   };
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
       {alertMessage && (
-        <div
-          className={`fixed top-4 right-4 p-4 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white rounded-md shadow-md z-50`}
-        >
-          {alertMessage.text}
+        <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
+          {alertMessage}
         </div>
       )}
-
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Recruiter Management
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-800">Client Management</h1>
         <div className="flex space-x-2">
           <button
-            onClick={() => setModalState({ ...modalState, add: true })}
+            onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
           >
             <MdAdd className="mr-2" />
           </button>
           <button
-            onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
-                setModalState({
-                  ...modalState,
-                  edit: true,
-                  selectedRow: selectedRows[0],
-                });
-              } else {
-                showAlert("Please select a recruiter to edit", "error");
-              }
-            }}
+            onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
           >
             <AiOutlineEdit className="mr-2" />
           </button>
           <button
-            onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
-                handleDelete(selectedRows[0].id);
-              } else {
-                showAlert("Please select a recruiter to delete", "error");
-              }
-            }}
+            onClick={handleDeleteRow}
             className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700"
           >
             <MdDelete className="mr-2" />
           </button>
           <button
-            onClick={fetchData}
-            className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-md transition duration-300 hover:bg-gray-300"
-          >
-            <FaSync className="mr-2" />
-          </button>
-          <button
-            onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
-              if (selectedRows && selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
-                setModalState({
-                  ...modalState,
-                  view: true,
-                  selectedRow: selectedRows[0],
-                });
-              } else {
-                showAlert("Please select a recruiter to view", "error");
-              }
-            }}
+            onClick={handleViewRow}
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
           >
             <AiOutlineEye className="mr-2" />
+          </button>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900"
+          >
+            <AiOutlineReload className="mr-2" />
           </button>
           <button
             onClick={handleDownloadPDF}
@@ -567,7 +305,6 @@ const Clients = () => {
           </button>
         </div>
       </div>
-
       <div className="flex mb-4">
         <input
           type="text"
@@ -577,45 +314,55 @@ const Clients = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={fetchData}
+          onClick={handleSearch}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
         </button>
       </div>
-      
-
-      <div
-        className="ag-theme-alpine relative"
-        style={{ height: "400px", width: "100%", overflowY: "auto" }}
-      >
-        {isLoading && (
+      <div className="relative">
+        {/* {loading && (
           <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
-            <span className="ml-3 text-gray-700 font-medium">Loading...</span>
+            <span className="text-xl">Loading...</span>
           </div>
-        )}
-      
-       
-        <AgGridReact
-          ref={gridRef}
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={{
-            sortable: true,
-            filter: true,
-            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-            minWidth: 60,
-          }}
-          suppressRowClickSelection={false}
-          rowSelection="single"
-          rowHeight={30}
-          headerHeight={35}
-          onGridReady={(params) => {
-            params.api.sizeColumnsToFit();
-          }}
-        />
+        )} */}
+        <div
+          className="ag-theme-alpine"
+          style={{ height: "400px", width: "100%", overflowY: "auto" }}
+        >
+          <AgGridReact
+            ref={gridRef}
+            rowData={rowData}
+            columnDefs={columnDefs}
+            pagination={false}
+            domLayout="normal"
+            rowSelection="multiple"
+            defaultColDef={{
+              sortable: true,
+              filter: true,
+              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+              minWidth: 60,
+            }}
+            rowHeight={30}
+            headerHeight={35}
+            onGridReady={(params) => {
+              params.api.sizeColumnsToFit();
+              if (loading) {
+                params.api.showLoadingOverlay();
+              }
+            }}
+            onGridSizeChanged={(params) => {
+              params.api.sizeColumnsToFit();
+            }}
+            overlayLoadingTemplate={
+              '<span class="ag-overlay-loading-center">Loading...</span>'
+            }
+            overlayNoRowsTemplate={
+              '<span class="ag-overlay-no-rows-center">No rows to show</span>'
+            }
+          />
+        </div>
       </div>
-
       <div className="flex justify-between mt-4">
         <div className="flex items-center space-x-2">
           <button
@@ -633,7 +380,19 @@ const Clients = () => {
             <FaChevronLeft />
           </button>
 
-          {renderPageNumbers()}
+          {getPageNumbers().map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 rounded ${
+                currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
 
           <button
             onClick={() => handlePageChange(currentPage + 1)}
@@ -649,36 +408,35 @@ const Clients = () => {
           >
             <FaAngleDoubleRight />
           </button>
+          <span className="ml-4 text-sm text-gray-600">
+            Total Records: {totalRows}
+          </span>
         </div>
-        <span className="ml-4 text-sm text-gray-600">
-          Total Records: {companies.reduce((acc, company) => acc + company.recruiter_count, 0)}
-        </span>
       </div>
-
-      <AddRowModal
-        isOpen={modalState.add}
-        onClose={() => setModalState({ ...modalState, add: false })}
-        onSubmit={handleAdd}
-      />
-
-      <ViewRowModal
-        isOpen={modalState.view}
-        onClose={() => setModalState({ ...modalState, view: false })}
-        recruiter={modalState.selectedRow}
-      />
-
-      <EditRowModal
-        isOpen={modalState.edit}
-        onClose={() => setModalState({ ...modalState, edit: false })}
-        initialData={modalState.selectedRow as RecruiterData | null}
-        onSubmit={handleEdit}
-        clients={clients}
-        defaultClientId={
-          selectedCompanyId || modalState.selectedRow?.clientid || 0
-        }
-      />
+      {modalState.add && (
+        <AddRowModal
+          isOpen={modalState.add}
+          onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
+          refreshData={fetchData}
+        />
+      )}
+      {modalState.edit && selectedRow && (
+        <EditRowModal
+          isOpen={modalState.edit}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+          clientData={selectedRow}
+          onSave={fetchData}
+        />
+      )}
+      {modalState.view && selectedRow && (
+        <ViewRowModal
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          client={selectedRow}
+        />
+      )}
     </div>
   );
 };
 
-export default RecruiterByClient;
+export default Clients;
