@@ -13,6 +13,7 @@ interface DropdownOptions {
   bgvDone: string[];
   salary: string[];
   batches: string[];
+  candidateStatus: string[]; // Added candidate status dropdown options
   portalIds: Array<{id: string, name: string}>;
   referralIds: Array<{id: string, name: string}>;
 }
@@ -24,6 +25,7 @@ interface FormData {
   course: string;
   phone: string;
   status: string;
+  statuschangedate: string; // Added status change date field
   workstatus: string;
   education: string;
   workexperience: string;
@@ -82,17 +84,39 @@ const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData
 
   useEffect(() => {
     if (candidateData && isOpen) {
-      // Format dates properly
+      // Format dates properly with error handling
       const formattedData = {
         ...candidateData,
-        enrolleddate: candidateData.enrolleddate ? new Date(candidateData.enrolleddate).toISOString().split('T')[0] : '',
-        dob: candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : '',
-        wpexpirationdate: candidateData.wpexpirationdate ? new Date(candidateData.wpexpirationdate).toISOString().split('T')[0] : '',
+        enrolleddate: formatDateSafely(candidateData.enrolleddate),
+        dob: formatDateSafely(candidateData.dob),
+        wpexpirationdate: formatDateSafely(candidateData.wpexpirationdate),
+        statuschangedate: formatDateSafely(candidateData.statuschangedate) || formatDateSafely(new Date()),
       };
       
       setFormData(formattedData);
     }
   }, [candidateData, isOpen]);
+
+  // Helper function to safely format dates
+  const formatDateSafely = (dateValue: any): string => {
+    if (!dateValue) return '';
+    
+    try {
+      // Handle ISO strings, timestamps, and date objects
+      const date = new Date(dateValue);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return '';
+      }
+      
+      // Format as YYYY-MM-DD
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date:', error, dateValue);
+      return '';
+    }
+  };
 
   useEffect(() => {
     const fetchDropdownOptions = async () => {
@@ -301,6 +325,15 @@ const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData
               {renderField('course', 'Course', 'select', true, dropdownOptions?.courses)}
               {renderField('batchname', 'Batch Name', 'select', true, dropdownOptions?.batches)}
               {renderField('enrolleddate', 'Enrolled Date', 'date', true)}
+            </div>
+          </div>
+
+          {/* Status Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Status Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {renderField('status', 'Candidate Status', 'select', false, dropdownOptions?.candidateStatus)}
+              {renderField('statuschangedate', 'Status Change Date', 'date')}
             </div>
           </div>
 
