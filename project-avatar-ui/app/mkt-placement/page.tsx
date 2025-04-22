@@ -8,26 +8,24 @@ import autoTable from "jspdf-autotable";
 import axios from "axios";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
-import { FaDownload } from "react-icons/fa";
-// import { MdDelete } from "react-icons/md";
-// import { MdAdd } from "react-icons/md";
-import { CandidateOption, EmployeeOption, MktSubmission } from "@/types/mkl_submissions";
-
-import {
-    FaChevronLeft,
-    FaChevronRight,
-    FaAngleDoubleLeft,
-    FaAngleDoubleRight,
-    FaTimes,
-    FaTrash,
-    FaEdit,
-    FaSync
-} from "react-icons/fa";
-import {
+import { 
+    AiOutlineDownload,
+    AiOutlineDelete,
+    AiOutlineEdit,
+    AiOutlineSync,
+    AiOutlineClose,
     AiOutlinePlus,
     AiOutlineEye,
     AiOutlineSearch
 } from "react-icons/ai";
+import { 
+    FaAngleDoubleLeft,
+    FaChevronLeft,
+    FaChevronRight,
+    FaAngleDoubleRight
+} from "react-icons/fa";
+import { CandidateOption, EmployeeOption, MktSubmission } from "@/types/mkl_submissions";
+
 const PlacementPage = () => {
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState<string>("");
@@ -66,8 +64,8 @@ const PlacementPage = () => {
         
         searchTimeoutRef.current = setTimeout(() => {
             setSearchValue(searchInputValue);
-            setCurrentPage(1); // Reset to first page when search changes
-        }, 500); // 500ms debounce delay
+            setCurrentPage(1);
+        }, 500);
         
         return () => {
             if (searchTimeoutRef.current) {
@@ -283,9 +281,9 @@ const PlacementPage = () => {
                     </button>
                     <button
                         onClick={handleEditPlacement}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-green-700"
                     >
-                        <FaEdit className="mr-2" />
+                        <AiOutlineEdit className="mr-2" />
                     </button>
                     <button
                         onClick={handleViewDetails}
@@ -307,19 +305,19 @@ const PlacementPage = () => {
                         } rounded-md transition duration-300`}
                         disabled={!selectedRow}
                     >
-                        <FaTrash className="mr-2" />
+                        <AiOutlineDelete className="mr-2" />
                     </button>
                     <button
                         onClick={fetchPlacements}
                         className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
                     >
-                        <FaSync className="mr-2" />
+                        <AiOutlineSync className="mr-2" />
                     </button>
                     <button
                         onClick={handleDownloadPDF}
                         className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
                     >
-                        <FaDownload className="mr-2" />
+                        <AiOutlineDownload className="mr-2" />
                     </button>
                 </div>
             </div>
@@ -410,7 +408,7 @@ const PlacementPage = () => {
                             className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-colors"
                             aria-label="Close"
                         >
-                            <FaTimes size={18} />
+                            <AiOutlineClose size={18} />
                         </button>
                         <h2 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200">Placement Details</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

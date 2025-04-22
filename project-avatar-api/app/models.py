@@ -52,7 +52,58 @@ class Employee(Base):
     offerletterurl = Column(String(250))
     workpermiturl = Column(String(250))
     contracturl = Column(String(250))
+
+class PlacementModel(Base):
+    __tablename__ = "placement"
+    __table_args__ = {'extend_existing': True} 
+
+    id = Column(Integer, primary_key=True, index=True)
+    candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
+    mmid = Column(Integer, nullable=True)
+    recruiterid = Column(Integer, nullable=True)
+    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    masteragreementid = Column(String, nullable=True)
+    otheragreementsids = Column(String, nullable=True)
+    vendor2id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    vendor3id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+    clientid = Column(Integer, ForeignKey("client.id"), nullable=True)
+    startdate = Column(Date, nullable=True)
+    enddate = Column(Date, nullable=True)
+    status = Column(String, nullable=True)
+    paperwork = Column(String, nullable=True)
+    insurance = Column(String, nullable=True)
+    wrklocation = Column(String, nullable=True)
+    wrkdesignation = Column(String, nullable=True)
+    wrkemail = Column(String, nullable=True)
+    wrkphone = Column(String, nullable=True)
+    mgrname = Column(String, nullable=True)
+    mgremail = Column(String, nullable=True)
+    mgrphone = Column(String, nullable=True)
+    hiringmgrname = Column(String, nullable=True)
+    hiringmgremail = Column(String, nullable=True)
+    hiringmgrphone = Column(String, nullable=True)
+    reference = Column(String, nullable=True)
+    ipemailclear = Column(String, nullable=True)
+    feedbackid = Column(Integer, nullable=True)
+    projectdocs = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
     
+    # Relationships
+    candidate = relationship("Candidate", back_populates="placements1")
+    client_info = relationship(
+        "Client",
+        foreign_keys=[clientid],
+        uselist=False,
+        overlaps="placements",
+        viewonly=True
+)
+    
+    po_entries = relationship("PO", back_populates="placement1")
+    # Updated relationships
+    vendor = relationship("Vendor", foreign_keys=[vendorid], back_populates="placements1")
+    vendor2 = relationship("Vendor", foreign_keys=[vendor2id], back_populates="placements1_vendor2")
+    vendor3 = relationship("Vendor", foreign_keys=[vendor3id], back_populates="placements1_vendor3")
+   
 
 class Course(Base):
     __tablename__ = 'course'
@@ -221,7 +272,7 @@ class Candidate(Base):
     # Change these lines in Candidate model
     mkt_submissions = relationship("MktSubmission", back_populates="candidate", viewonly=True)
     placements = relationship("Placement", back_populates="candidate", viewonly=True)
-    
+    placements1 = relationship("PlacementModel", back_populates="candidate")
 
 class CandidateSearch(Base):    
     __tablename__ = "candidate"
@@ -299,25 +350,11 @@ class Placement(Base):
     id = Column(Integer, primary_key=True, index=True)
     candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
     vendorid = Column(Integer, ForeignKey("vendor.id"))
-    # clientid = Column(Integer, ForeignKey("client.id"s))
     clientid = Column(Integer, ForeignKey("client.id"))
-    # candidate = relationship("Candidate", back_populates="placements")
-    # candidate = relationship("Candidate", 
-    #                     back_populates="placements",
-    #                     foreign_keys=[candidateid])
     candidate = relationship("Candidate", back_populates="placements", viewonly=True)
     vendor = relationship("Vendor", back_populates="placements")
     client = relationship("Client", back_populates="placements")
     po_entries = relationship("PO", back_populates="placement")
-# Client.placements = relationship("Placement", back_populates="client")
-
-# class Candidate(Base):
-#     __tablename__ = "candidate"
-#     __table_args__ = {'extend_existing': True} 
-#     candidateid = Column(Integer, primary_key=True, index=True)
-#     name = Column(String, nullable=False)
-
-#     placements = relationship("Placement", back_populates="candidate")
 
 class Vendor(Base):
     __tablename__ = "vendor"
@@ -327,7 +364,9 @@ class Vendor(Base):
 
     placements = relationship("Placement", back_populates="vendor")
     recruiters = relationship("Recruiter", back_populates="vendor")
-
+    placements1 = relationship("PlacementModel", foreign_keys=[PlacementModel.vendorid], back_populates="vendor")
+    placements1_vendor2 = relationship("PlacementModel", foreign_keys=[PlacementModel.vendor2id], back_populates="vendor2")
+    placements1_vendor3 = relationship("PlacementModel", foreign_keys=[PlacementModel.vendor3id], back_populates="vendor3")
 class Client(Base):
     __tablename__ = "client"
 
@@ -361,7 +400,12 @@ class Client(Base):
 
     placements = relationship("Placement", back_populates="client")
     recruiters = relationship("Recruiter", back_populates="client")
-
+    # placements1 = relationship(
+    #     "PlacementModel", 
+    #     foreign_keys=[PlacementModel.clientid],
+    #     back_populates="client",
+    #     viewonly=True
+    # )
 class ClientSearch(Base):
     __tablename__ = "client"
     __table_args__ = {'extend_existing': True}
@@ -398,6 +442,9 @@ class PO(Base):
     notes = Column(String, nullable=True)
 
     placement = relationship("Placement", back_populates="po_entries")
+    invoices = relationship("Invoice", back_populates="po")
+    overdues = relationship("Overdue", back_populates="po")
+    placement1 = relationship("PlacementModel", back_populates="po_entries")
 
 class CandidateMarketing(Base):
     __tablename__ = "candidatemarketing"
@@ -427,6 +474,7 @@ class CandidateMarketing(Base):
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3)) 
     
+    candidate = relationship("Candidate", foreign_keys=[candidateid])
     
 class AuthUser(Base):
     __tablename__ = "authuser"
@@ -489,6 +537,8 @@ class CurrentMarketing(Base):
     suspensionreason = Column(CHAR(1), default='A')
     yearsofexperience = Column(CHAR(3))    
     
+    candidate = relationship("Candidate", foreign_keys=[candidateid])
+    
 
    
 class Overdue(Base):
@@ -536,6 +586,8 @@ class Overdue(Base):
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
 
+    po = relationship("PO", back_populates="overdues")
+
 class Invoice(Base):
     __tablename__ = "invoice"
 
@@ -560,6 +612,8 @@ class Invoice(Base):
     poid = Column(Integer, ForeignKey("po.id"), nullable=False)
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
+
+    po = relationship("PO", back_populates="invoices")
 
 
 # Adding recruiter model
@@ -691,3 +745,4 @@ class UCUserPermissionMatch(Base):
     permission_id = Column(Integer)
     
     user = relationship("UCUser")
+    

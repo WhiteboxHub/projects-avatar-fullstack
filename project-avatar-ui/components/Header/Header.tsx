@@ -480,6 +480,7 @@ const menuItems: MenuItem[] = [
         ]
       },
       { name: 'Placement', href: '/placement' },
+      { name: 'Mkt-Placement', href: '/mkt-placement' },
       { name: 'Search', href: '/candidateSearch' },
     ]
   },

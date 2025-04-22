@@ -1,6 +1,6 @@
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-"use client";
 import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
 import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -60,11 +60,11 @@ const Candidates = () => {
                   toggleGroup(params.value);
                 }}
               >
-                <span className="mr-2 text-gray-600 flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded-full">
+                <span className="mr-2 text-gray-600 flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded">
                   {expanded ? (
-                    <span className="text-blue-600 text-lg font-bold">−</span>
+                    <span className="text-gray-600 text-lg font-bold">−</span>
                   ) : (
-                    <span className="text-green-600 text-lg font-bold">+</span>
+                    <span className="text-gray-600 text-lg font-bold">+</span>
                   )}
                 </span>
                 <span className="font-medium">{params.value === 'No Batch' ? 'Unassigned' : params.value}</span>
@@ -321,7 +321,16 @@ const Candidates = () => {
   const handleRefresh = () => {
     setSearchValue("");
     setCurrentPage(1);
+    // Reset expanded groups to ensure fresh state
+    setExpandedGroups({});
+    setInitialDataLoaded(false);
+    // Force a complete refresh of the data
     fetchData();
+    // If using a grid API, also refresh the grid
+    if (gridRef.current?.api) {
+      gridRef.current.api.showLoadingOverlay();
+      gridRef.current.api.refreshCells({ force: true });
+    }
   };
 
   const handleViewRow = () => {
