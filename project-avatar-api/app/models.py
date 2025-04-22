@@ -371,21 +371,7 @@ class Vendor(Base):
     recruiters = relationship("Recruiter", back_populates="vendor")
 
 
-class City(Base):
-    __tablename__ = 'city'
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    zip = Column(String, nullable=True)
-
-class State(Base):
-    __tablename__ = 'state'
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-
-class Country(Base):
-    __tablename__ = 'country'
-    id = Column(Integer, primary_key=True, index=True)
-    short_name = Column(String, nullable=False)
+    
 
 class Client(Base):
     __tablename__ = "client"

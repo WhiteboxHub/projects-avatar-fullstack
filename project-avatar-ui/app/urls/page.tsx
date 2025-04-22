@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -37,7 +37,7 @@ const Urls = () => {
     { headerName: string; field: string }[]
   >([]);
   const [paginationPageSize] = useState<number>(500);
-  const [paginationState, setPaginationState] = useState<PaginationState>({
+  const [paginationState,] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 500  });
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -77,9 +77,9 @@ const Urls = () => {
     }
   };
 
-  interface ErrorResponse {
-    message: string;
-  }
+  // interface ErrorResponse {
+  //   message: string;
+  // }
 
   const fetchUrls = async (searchQuery = "") => {
     try {

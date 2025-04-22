@@ -12,6 +12,7 @@ interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
+  type: string; 
 }
 
 const AddRowVendor: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => {
