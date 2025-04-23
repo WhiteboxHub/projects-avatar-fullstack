@@ -53,56 +53,56 @@ class Employee(Base):
     workpermiturl = Column(String(250))
     contracturl = Column(String(250))
 
-class PlacementModel(Base):
-    __tablename__ = "placement"
-    __table_args__ = {'extend_existing': True} 
+# class PlacementModel(Base):
+#     __tablename__ = "placement"
+#     __table_args__ = {'extend_existing': True} 
 
-    id = Column(Integer, primary_key=True, index=True)
-    candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
-    mmid = Column(Integer, nullable=True)
-    recruiterid = Column(Integer, nullable=True)
-    vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=True)
-    masteragreementid = Column(String, nullable=True)
-    otheragreementsids = Column(String, nullable=True)
-    vendor2id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
-    vendor3id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
-    clientid = Column(Integer, ForeignKey("client.id"), nullable=True)
-    startdate = Column(Date, nullable=True)
-    enddate = Column(Date, nullable=True)
-    status = Column(String, nullable=True)
-    paperwork = Column(String, nullable=True)
-    insurance = Column(String, nullable=True)
-    wrklocation = Column(String, nullable=True)
-    wrkdesignation = Column(String, nullable=True)
-    wrkemail = Column(String, nullable=True)
-    wrkphone = Column(String, nullable=True)
-    mgrname = Column(String, nullable=True)
-    mgremail = Column(String, nullable=True)
-    mgrphone = Column(String, nullable=True)
-    hiringmgrname = Column(String, nullable=True)
-    hiringmgremail = Column(String, nullable=True)
-    hiringmgrphone = Column(String, nullable=True)
-    reference = Column(String, nullable=True)
-    ipemailclear = Column(String, nullable=True)
-    feedbackid = Column(Integer, nullable=True)
-    projectdocs = Column(String, nullable=True)
-    notes = Column(Text, nullable=True)
+#     id = Column(Integer, primary_key=True, index=True)
+#     candidateid = Column(Integer, ForeignKey("candidate.candidateid"))
+#     mmid = Column(Integer, nullable=True)
+#     recruiterid = Column(Integer, nullable=True)
+#     vendorid = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+#     masteragreementid = Column(String, nullable=True)
+#     otheragreementsids = Column(String, nullable=True)
+#     vendor2id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+#     vendor3id = Column(Integer, ForeignKey("vendor.id"), nullable=True)
+#     clientid = Column(Integer, ForeignKey("client.id"), nullable=True)
+#     startdate = Column(Date, nullable=True)
+#     enddate = Column(Date, nullable=True)
+#     status = Column(String, nullable=True)
+#     paperwork = Column(String, nullable=True)
+#     insurance = Column(String, nullable=True)
+#     wrklocation = Column(String, nullable=True)
+#     wrkdesignation = Column(String, nullable=True)
+#     wrkemail = Column(String, nullable=True)
+#     wrkphone = Column(String, nullable=True)
+#     mgrname = Column(String, nullable=True)
+#     mgremail = Column(String, nullable=True)
+#     mgrphone = Column(String, nullable=True)
+#     hiringmgrname = Column(String, nullable=True)
+#     hiringmgremail = Column(String, nullable=True)
+#     hiringmgrphone = Column(String, nullable=True)
+#     reference = Column(String, nullable=True)
+#     ipemailclear = Column(String, nullable=True)
+#     feedbackid = Column(Integer, nullable=True)
+#     projectdocs = Column(String, nullable=True)
+#     notes = Column(Text, nullable=True)
     
-    # Relationships
-    candidate = relationship("Candidate", back_populates="placements1")
-    client_info = relationship(
-        "Client",
-        foreign_keys=[clientid],
-        uselist=False,
-        overlaps="placements",
-        viewonly=True
-)
+#     # Relationships
+# #     candidate = relationship("Candidate", back_populates="placements1")
+# #     client_info = relationship(
+# #         "Client",
+# #         foreign_keys=[clientid],
+# #         uselist=False,
+# #         overlaps="placements",
+# #         viewonly=True
+# # )
     
-    po_entries = relationship("PO", back_populates="placement1")
-    # Updated relationships
-    vendor = relationship("Vendor", foreign_keys=[vendorid], back_populates="placements1")
-    vendor2 = relationship("Vendor", foreign_keys=[vendor2id], back_populates="placements1_vendor2")
-    vendor3 = relationship("Vendor", foreign_keys=[vendor3id], back_populates="placements1_vendor3")
+#     po_entries = relationship("PO", back_populates="placement1")
+#     # Updated relationships
+#     vendor = relationship("Vendor", foreign_keys=[vendorid], back_populates="placements1")
+#     vendor2 = relationship("Vendor", foreign_keys=[vendor2id], back_populates="placements1_vendor2")
+#     vendor3 = relationship("Vendor", foreign_keys=[vendor3id], back_populates="placements1_vendor3")
    
 
 class Course(Base):

@@ -32,7 +32,7 @@ from app.routes.byvendorRoute import router as byvendor_route
 from app.routes.employeeRoute import router as employee
 from app.routes.vendorSearchRoute import router as vendorSearch_router
 from app.routes.mkl_placementsRoute import router as mkl_placements_router
-from app.routes.candid_placement_router import router as candidate_placement_router
+# from app.routes.candid_placement_router import router as candidate_placement_router
 import os
 from jose import JWTError, jwt
 import secrets
@@ -95,7 +95,7 @@ app.include_router(byvendor_route, prefix="/api/admin", tags=["byvendor"])
 app.include_router(employee, prefix="/api/admin", tags=["employees"])
 app.include_router(vendorSearch_router, prefix="/api/admin", tags=["vendorSearch"])
 app.include_router(mkl_placements_router, prefix="/api/admin", tags=["placements"])
-app.include_router(candidate_placement_router, prefix="/api/admin", tags=["candid_placement"])
+# app.include_router(candidate_placement_router, prefix="/api/admin", tags=["candid_placement"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Avatar"}
