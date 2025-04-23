@@ -1121,6 +1121,26 @@ class PlacementBase(BaseModel):
     feedbackid: Optional[int] = None
     projectdocs: Optional[str] = None
     notes: Optional[str] = None
+    
+    @validator('wrkemail', 'mgremail', 'hiringmgremail', pre=True)
+    def validate_emails(cls, value):
+        if value == "" or value is None or (isinstance(value, str) and value.strip() == ""):
+            return None
+        return value
+    
+    @validator('masteragreementid', 'otheragreementsids', pre=True)
+    def validate_strings(cls, value):
+        if isinstance(value, int) and value == 0:
+            return None
+        if isinstance(value, int):
+            return str(value)
+        return value
+    
+    @validator('startdate', 'enddate', pre=True)
+    def validate_dates(cls, value):
+        if value == "0000-00-00" or value is None or value == "" or (isinstance(value, str) and value.strip() == ""):
+            return None
+        return value
 
 class PlacementCreate(PlacementBase):
     pass
@@ -1152,7 +1172,7 @@ class PlacementFilter(BaseModel):
 # Select options models
 class SelectOption(BaseModel):
     id: str
-    name: str
+    name: str = ""  # Default to empty string to avoid None validation error
 
 class PlacementSelectOptions(BaseModel):
     candidates: List[SelectOption]
