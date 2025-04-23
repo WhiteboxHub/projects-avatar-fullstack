@@ -705,9 +705,5 @@ const PlacementPage = () => {
         );
     };
     
-    export default PlacementPage;
-
-<<<<<<< HEAD
-=======
 export default PlacementPage;
->>>>>>> 8785e7a (all by vendor routes are working)
+
