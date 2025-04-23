@@ -432,7 +432,7 @@ const RecruiterByPlacement = () => {
       .filter((row) => !row.isGroupRow && row.id !== -1)
       .map((row) => [
         row.companyname,
-        row.name.split(' - ')[0], // Extract just the name part
+        row.name.split(' - ')[0],
         row.email,
         row.phone,
         row.designation,

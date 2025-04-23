@@ -145,7 +145,7 @@ const RecruiterByClient = () => {
   }, [fetchData]);
 
   const toggleGroup = (clientId: number) => {
-    setSelectedCompanyId(clientId); // Store the selected company ID
+    setSelectedCompanyId(clientId); 
     setExpandedCompanies((prev) => ({
       ...prev,
       [clientId]: !prev[clientId],

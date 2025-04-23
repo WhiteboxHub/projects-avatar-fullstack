@@ -3,7 +3,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
 import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/candidate_modals/ViewRowCandidate";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
@@ -11,23 +11,17 @@ import withAuth from "@/modals/withAuth";
 import { AgGridReact } from "ag-grid-react";
 import { AxiosError } from "axios";
 import { jsPDF } from "jspdf";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
 import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
 import { Candidate } from "@/types/index";
 
-import {
-  AiOutlineEdit,
-  AiOutlineSearch,
-  AiOutlineReload,
-  AiOutlineEye,
-} from "react-icons/ai";
-
+// import { Candidate } from "@/types/index";
 
 interface DropdownOptions {
   courses: string[];
-  processFlag: string[];
   diceCandidate: string[];
   workStatus: string[];
   ssnValid: string[];
@@ -49,9 +43,9 @@ const Candidates = () => {
   const [expandedGroups, setExpandedGroups] = useState<{[key: string]: boolean}>({});
   const [columnDefs] = useState<{ headerName: string; field: string; width?: number; cellStyle?: { [key: string]: string | number }; cellRenderer?: any;}[]>([
     { 
-      headerName: "Batchname", 
+      headerName: "Batch Name", 
       field: "batchname", 
-      width: 120, 
+      width: 90, 
       cellStyle: { fontWeight: 'bold' },
       cellRenderer: (params: any) => {
         if (params.data && params.data.isGroupRow) {
@@ -66,11 +60,11 @@ const Candidates = () => {
                   toggleGroup(params.value);
                 }}
               >
-                <span className="mr-2 text-gray-600 flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded-full">
+                <span className="mr-2 text-gray-600 flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded">
                   {expanded ? (
-                    <span className="text-blue-600 text-lg font-bold">−</span>
+                    <span className="text-gray-600 text-lg font-bold">−</span>
                   ) : (
-                    <span className="text-green-600 text-lg font-bold">+</span>
+                    <span className="text-gray-600 text-lg font-bold">+</span>
                   )}
                 </span>
                 <span className="font-medium">{params.value === 'No Batch' ? 'Unassigned' : params.value}</span>
@@ -81,16 +75,16 @@ const Candidates = () => {
         return <span className="pl-8">{params.value}</span>;
       }
     },
-    { headerName: "Candidateid", field: "candidateid", width: 120 },
-    { headerName: "Name", field: "name", width: 120 },
-    { headerName: "Email", field: "email", width: 120 },
-    { headerName: "Phone", field: "phone", width: 120 },
-    { headerName: "Course", field: "course", width: 120 },
-    { headerName: "Enrolleddate", field: "enrolleddate", width: 120 },
+    { headerName: "ID", field: "candidateid", width: 25 },
+    { headerName: "Name", field: "name", width: 200, cellStyle: { fontWeight: 'bold' } },
+    { headerName: "Email", field: "email", width: 150, cellRenderer: 'emailRenderer' },
+    { headerName: "Phone", field: "phone", width: 90 },
+    { headerName: "Course", field: "course", width: 40 },
+    { headerName: "Enrolled Date", field: "enrolleddate", width: 70, cellRenderer: 'dateRenderer' },
     { 
       headerName: "Status", 
       field: "status", 
-      width: 120,
+      width: 70,
       cellRenderer: (params: any) => {
         const statusMap: { [key: string]: string } = {
           A: "Active",
@@ -103,49 +97,49 @@ const Candidates = () => {
         return statusMap[params.value] || params.value;
       }
     },
-    { headerName: "Statuschangedate", field: "statuschangedate", width: 120 },
-    { headerName: "Processflag", field: "processflag", width: 120 },
-    { headerName: "Diceflag", field: "diceflag", width: 120 },
-    { headerName: "Workstatus", field: "workstatus", width: 120 },
-    { headerName: "Education", field: "education", width: 120 },
-    { headerName: "Workexperience", field: "workexperience", width: 120 },
-    { headerName: "SSN", field: "ssn", width: 120 },
-    { headerName: "DOB", field: "dob", width: 120 },
-    { headerName: "Portalid", field: "portalid", width: 120 },
-    { headerName: "WP Expiration", field: "wpexpirationdate", width: 120 },
-    { headerName: "SSN Validated", field: "ssnvalidated", width: 120 },
-    { headerName: "BGV", field: "bgv", width: 120 },
-    { headerName: "Secondary Email", field: "secondaryemail", width: 120 },
-    { headerName: "Secondary Phone", field: "secondaryphone", width: 120 },
-    { headerName: "Address", field: "address", width: 120 },
-    { headerName: "City", field: "city", width: 120 },
-    { headerName: "State", field: "state", width: 120 },
-    { headerName: "Country", field: "country", width: 120 },
-    { headerName: "ZIP", field: "zip", width: 120 },
-    { headerName: "Guarantor Name", field: "guarantorname", width: 120 },
-    { headerName: "Guarantor Designation", field: "guarantordesignation", width: 120 },
-    { headerName: "Guarantor Company", field: "guarantorcompany", width: 120 },
-    { headerName: "Emergency Contact", field: "emergcontactname", width: 120 },
-    { headerName: "Emergency Email", field: "emergcontactemail", width: 120 },
-    { headerName: "Emergency Phone", field: "emergcontactphone", width: 120 },
-    { headerName: "Emergency Address", field: "emergcontactaddrs", width: 120 },
-    { headerName: "Term", field: "term", width: 120 },
-    { headerName: "Fee Paid", field: "feepaid", width: 120 },
-    { headerName: "Fee Due", field: "feedue", width: 120 },
-    { headerName: "Referral ID", field: "referralid", width: 120 },
-    { headerName: "Salary 0", field: "salary0", width: 120 },
-    { headerName: "Salary 6", field: "salary6", width: 120 },
-    { headerName: "Salary 12", field: "salary12", width: 120 },
-    { headerName: "Original Resume", field: "originalresume", width: 120 },
-    { headerName: "Contract URL", field: "contracturl", width: 120 },
-    { headerName: "Emp Agreement URL", field: "empagreementurl", width: 120 },
-    { headerName: "Offer Letter URL", field: "offerletterurl", width: 120 },
-    { headerName: "DL URL", field: "dlurl", width: 120 },
-    { headerName: "Work Permit URL", field: "workpermiturl", width: 120 },
-    { headerName: "SSN URL", field: "ssnurl", width: 120 },
-    { headerName: "Notes", field: "notes", width: 120 }
+    { headerName: "Status Change Date", field: "statuschangedate", width: 70, cellRenderer: 'dateRenderer' },
+    { headerName: "Process", field: "processflag", width: 50 },
+    { headerName: "Dice Candidate", field: "diceflag", width: 50 },
+    { headerName: "US Status", field: "workstatus", width: 70 },
+    { headerName: "Education", field: "education", width: 90 },
+    { headerName: "Work Experience", field: "workexperience", width: 90 },
+    { headerName: "SSN", field: "ssn", width: 90 },
+    { headerName: "Birth Date", field: "dob", width: 70, cellRenderer: 'dateRenderer' },
+    { headerName: "Portal ID", field: "portalid", width: 200 },
+    { headerName: "Work Auth Exp Date", field: "wpexpirationdate", width: 115, cellRenderer: 'dateRenderer' },
+    { headerName: "SSN Valid", field: "ssnvalidated", width: 60 },
+    { headerName: "BGV Done", field: "bgv", width: 60 },
+    { headerName: "Sec Email", field: "secondaryemail", width: 150, cellRenderer: 'emailRenderer' },
+    { headerName: "Secondary Phone", field: "secondaryphone", width: 90 },
+    { headerName: "Address", field: "address", width: 150 },
+    { headerName: "City", field: "city", width: 90 },
+    { headerName: "State", field: "state", width: 90 },
+    { headerName: "Country", field: "country", width: 90 },
+    { headerName: "Zip", field: "zip", width: 90 },
+    { headerName: "Guarantor Name", field: "guarantorname", width: 150 },
+    { headerName: "Guarantor Desig", field: "guarantordesignation", width: 150 },
+    { headerName: "Guarantor Company", field: "guarantorcompany", width: 150 },
+    { headerName: "Emeg: Contact Name", field: "emergcontactname", width: 150 },
+    { headerName: "Emeg: Contact Email", field: "emergcontactemail", width: 150 },
+    { headerName: "Emeg: Contact Phone", field: "emergcontactphone", width: 150 },
+    { headerName: "Emeg: Contact Address", field: "emergcontactaddrs", width: 150 },
+    { headerName: "Term", field: "term", width: 90 },
+    { headerName: "Fee Paid", field: "feepaid", width: 90, cellRenderer: 'currencyRenderer' },
+    { headerName: "Fee Due", field: "feedue", width: 90, cellRenderer: 'currencyRenderer' },
+    { headerName: "Referral ID", field: "referralid", width: 200 },
+    { headerName: "Salary0-6", field: "salary0", width: 70 },
+    { headerName: "Salary6-12", field: "salary6", width: 70 },
+    { headerName: "Salary12+", field: "salary12", width: 70 },
+    { headerName: "Resume Url", field: "originalresume", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "Contract Url", field: "contracturl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "Emp Agreement Url", field: "empagreementurl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "Offer Letter Url", field: "offerletterurl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "DL Url", field: "dlurl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "Work Permit Url", field: "workpermiturl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "SSN Url", field: "ssnurl", width: 200, cellRenderer: 'linkRenderer' },
+    { headerName: "Notes", field: "notes", width: 400, cellRenderer: 'textareaRenderer' }
   ]);
-  const [paginationPageSize] = useState<number>(100);
+  const [paginationPageSize] = useState<number>(1000);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -226,8 +220,12 @@ const Candidates = () => {
         grouped[batchName].push(candidate);
       });
       
-      // Sort batch names in descending order
-      const sortedBatchNames = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      // Sort batch names in descending order, with 'No Batch' at the end
+      const sortedBatchNames = Object.keys(grouped).sort((a, b) => {
+        if (a === 'No Batch') return 1;
+        if (b === 'No Batch') return -1;
+        return b.localeCompare(a);
+      });
       
       // Initialize all groups as expanded by default
       const initialExpandedState: {[key: string]: boolean} = {};
@@ -251,7 +249,7 @@ const Candidates = () => {
         rows.push({
           batchname: batchName,
           isGroupRow: true,
-          candidateid: batchName,
+          // candidateid: batchName,
         });
         
         // Add child rows if group is expanded
@@ -323,7 +321,16 @@ const Candidates = () => {
   const handleRefresh = () => {
     setSearchValue("");
     setCurrentPage(1);
+    // Reset expanded groups to ensure fresh state
+    setExpandedGroups({});
+    setInitialDataLoaded(false);
+    // Force a complete refresh of the data
     fetchData();
+    // If using a grid API, also refresh the grid
+    if (gridRef.current?.api) {
+      gridRef.current.api.showLoadingOverlay();
+      gridRef.current.api.refreshCells({ force: true });
+    }
   };
 
   const handleViewRow = () => {
@@ -365,7 +372,9 @@ const Candidates = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0 && !selectedRows[0].isGroupRow) {
-        setSelectedRow(selectedRows[0]);
+        // Get the current candidate data including status
+        const currentCandidate = selectedRows[0];
+        setSelectedRow(currentCandidate);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         alert("Please select a candidate row to edit");

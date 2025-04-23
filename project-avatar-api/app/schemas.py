@@ -1089,3 +1089,77 @@ class PlacementRecruiterInDB(PlacementRecruiterBase):
  
      class Config:
          from_attributes = True 
+         
+
+class PlacementBase(BaseModel):
+    candidateid: Optional[int] = None
+    mmid: Optional[int] = None
+    recruiterid: Optional[int] = None
+    vendorid: Optional[int] = None
+    masteragreementid: Optional[str] = None
+    otheragreementsids: Optional[str] = None
+    vendor2id: Optional[int] = None
+    vendor3id: Optional[int] = None
+    clientid: Optional[int] = None
+    startdate: Optional[date] = None
+    enddate: Optional[date] = None
+    status: Optional[str] = None
+    paperwork: Optional[str] = None
+    insurance: Optional[str] = None
+    wrklocation: Optional[str] = None
+    wrkdesignation: Optional[str] = None
+    wrkemail: Optional[EmailStr] = None
+    wrkphone: Optional[str] = None
+    mgrname: Optional[str] = None
+    mgremail: Optional[EmailStr] = None
+    mgrphone: Optional[str] = None
+    hiringmgrname: Optional[str] = None
+    hiringmgremail: Optional[EmailStr] = None
+    hiringmgrphone: Optional[str] = None
+    reference: Optional[str] = None
+    ipemailclear: Optional[str] = None
+    feedbackid: Optional[int] = None
+    projectdocs: Optional[str] = None
+    notes: Optional[str] = None
+
+class PlacementCreate(PlacementBase):
+    pass
+
+class PlacementUpdate(PlacementBase):
+    pass
+
+class PlacementInDB(PlacementBase):
+    id: int
+    
+    class Config:
+        from_attributes = True
+
+class PlacementResponse(BaseModel):
+    data: List[PlacementInDB]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+# For pagination and filtering
+class PlacementFilter(BaseModel):
+    page: int = 1
+    rows: int = 100
+    sidx: str = "startdate"  # Sort field
+    sord: str = "desc"  # Sort order
+    filters: Optional[dict] = None
+    
+# Select options models
+class SelectOption(BaseModel):
+    id: str
+    name: str
+
+class PlacementSelectOptions(BaseModel):
+    candidates: List[SelectOption]
+    managers: List[SelectOption]
+    recruiters: List[SelectOption]
+    vendors: List[SelectOption]
+    clients: List[SelectOption]
+    statuses: List[SelectOption]
+    yesno: List[SelectOption]
+    feedbacks: List[SelectOption]
