@@ -90,6 +90,7 @@ interface InvoiceData {
 }
 
 interface RowData extends InvoiceData {
+  name: any;
   isGroupRow?: boolean;
   level?: number;
   expanded?: boolean;
