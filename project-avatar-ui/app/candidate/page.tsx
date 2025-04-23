@@ -443,15 +443,18 @@ const Candidates = () => {
   };
 
   // Fixed the getRowStyle function to properly type the return value
-  const getRowStyle = (params: any) => {
+  const getRowStyle = (params: any): { backgroundColor: string; fontWeight: string; borderBottom?: string } => {
     if (params.data.isGroupRow) {
-      return { 
+      return {
         backgroundColor: '#f0f0f0',
-        fontWeight: 'bold' as 'bold',
+        fontWeight: 'bold',
         borderBottom: '1px solid #ccc'
       };
     }
-    return { backgroundColor: '#ffffff' };
+    return {
+      backgroundColor: '#ffffff',
+      fontWeight: 'normal' // Ensure fontWeight is always defined
+    };
   };
 
   return (
