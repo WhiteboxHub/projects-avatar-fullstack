@@ -25,6 +25,7 @@ import { MdAdd } from "react-icons/md";
 import { PaginationState } from "ag-grid-community";
 
 interface Url {
+// sl_no ?:number;
   id?: string;
   url?: string;
 }
@@ -38,7 +39,7 @@ const Urls = () => {
   >([]);
   const [paginationPageSize] = useState<number>(500);
   const [paginationState,] = useState<PaginationState>({
-    currentPage: 1,
+   currentPage: 1,
     pageSize: 500  });
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);

@@ -13,7 +13,8 @@ export interface RecruiterDetails {
     linkedin: string;
     twitter: string;
     facebook: string;
-    // vendorid?:number;
+    vendorid :number;
     review: string;
     notes: string;
   }
+  

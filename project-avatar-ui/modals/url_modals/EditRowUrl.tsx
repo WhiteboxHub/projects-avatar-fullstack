@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AiOutlineClose } from 'react-icons/ai';
 
 interface Url {
-  sl_no: number;
+  // sl_no: number;
   url: string;
 }
 

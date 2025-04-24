@@ -3,12 +3,12 @@ import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
 
 interface Vendor {
-  id?: string;
+  id?: number;
   name?: string;
   email?: string;
   phone?: string;
   designation?: string;
-  vendorid?: string;
+  vendorid?: number;
   comp?: string;
   status?: string;
   dob?: string;

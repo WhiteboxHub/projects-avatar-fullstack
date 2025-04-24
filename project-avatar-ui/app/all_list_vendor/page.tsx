@@ -27,7 +27,7 @@ import {
 } from "react-icons/fa";
 
 interface Vendor {
-  id: string;
+  id: number;
   name: string;
   email: string;
   phone: string;

@@ -199,41 +199,62 @@ const Employees = () => {
     fetchData(searchValue, 1);
   };
 
+  // const handleDownloadPDF = () => {
+  //   if (gridRef.current) {
+  //     const selectedRows = gridRef.current.api.getSelectedRows();
+  //     if (selectedRows.length > 0) {
+  //       const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  //       doc.text("Selected Employee Data", 15, 10);
+
+  //       const pdfData = selectedRows.map((row) => [
+  //         row.si_no,
+  //         row.id,
+  //         row.name,
+  //         row.email,
+  //         row.phone,
+  //         row.status,
+  //         row.type,
+  //       ]);
+
+  //       doc.autoTable({
+  //         head: [["SI No", "ID", "Name", "Email", "Phone", "Status", "Type"]],
+  //         body: pdfData,
+  //         styles: { fontSize: 8, cellPadding: 4 },
+  //         margin: { top: 15, left: 15, right: 15 },
+  //         didDrawPage: function (data: { settings: { margin: { left: number } } }) {
+  //           doc.text(
+  //             "Page " + doc.internal.pages.length,
+  //             data.settings.margin.left,
+  //             doc.internal.pageSize.height - 10
+  //           );
+  //         },
+  //       });
+
+  //       doc.save("Selected_Employee_data.pdf");
+  //     } else {
+  //       setAlertMessage("Please select a row to download.");
+  //       setTimeout(() => setAlertMessage(null), 3000);
+  //     }
+  //   }
+  // };
+
+
+
+
+
   const handleDownloadPDF = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-        doc.text("Selected Employee Data", 15, 10);
-
-        const pdfData = selectedRows.map((row) => [
-          row.si_no,
-          row.id,
-          row.name,
-          row.email,
-          row.phone,
-          row.status,
-          row.type,
-        ]);
-
-        doc.autoTable({
-          head: [["SI No", "ID", "Name", "Email", "Phone", "Status", "Type"]],
-          body: pdfData,
-          styles: { fontSize: 8, cellPadding: 4 },
-          margin: { top: 15, left: 15, right: 15 },
-          didDrawPage: function (data: { settings: { margin: { left: number } } }) {
-            doc.text(
-              "Page " + doc.internal.pages.length,
-              data.settings.margin.left,
-              doc.internal.pageSize.height - 10
-            );
-          },
+        const doc = new jsPDF();
+        let y = 10;
+        
+        selectedRows.forEach(row => {
+          doc.text(`ID: ${row.id}, Name: ${row.name}`, 10, y);
+          y += 10;
         });
-
-        doc.save("Selected_Employee_data.pdf");
-      } else {
-        setAlertMessage("Please select a row to download.");
-        setTimeout(() => setAlertMessage(null), 3000);
+  
+        doc.save("simple_export.pdf");
       }
     }
   };
