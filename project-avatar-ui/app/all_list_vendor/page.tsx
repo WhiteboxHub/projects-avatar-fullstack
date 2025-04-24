@@ -26,8 +26,8 @@ import {
   FaSync
 } from "react-icons/fa";
 
-interface Recruiter {
-  id: number;
+interface Vendor {
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -40,7 +40,7 @@ interface Recruiter {
   skypeid: string;
   linkedin: string;
   twitter: string;
-  clientid:number;
+  clientid: number;
   facebook: string;
   review: string;
   notes: string;
@@ -53,8 +53,8 @@ interface SearchParams {
 }
 
 const RecruiterByAllListVendor = () => {
-  const [rowData, setRowData] = useState<Recruiter[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Recruiter | null>(null);
+  const [rowData, setRowData] = useState<Vendor[]>([]);
+  const [selectedRow, setSelectedRow] = useState<Vendor | null>(null);
   const [modalState, setModalState] = useState({
     add: false,
     edit: false,
@@ -399,11 +399,10 @@ const RecruiterByAllListVendor = () => {
 
       {modalState.view && selectedRow && (
         <ViewRowModal
-        isOpen={modalState.view}
-        onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
-        
-        rowData={selectedRow}  // Changed from recruiter to rowData
-      />
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+          rowData={selectedRow}
+        />
       )}
     </div>
   );

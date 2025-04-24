@@ -165,7 +165,7 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
             )
         
         # Get user from database
-        user = db.execute(text("SELECT * FROM wblX.authuser WHERE uname = :username"), 
+        user = db.execute(text("SELECT * FROM whiteboxqa.authuser WHERE uname = :username"), 
                          {"username": request.username}).fetchone()
         
         if not user:
