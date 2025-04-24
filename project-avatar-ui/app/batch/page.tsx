@@ -1,8 +1,4 @@
-
-
-
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
@@ -12,9 +8,9 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "../../modals/batch_modals/AddRowBatch";
-import EditRowModal from "../../modals/batch_modals/EditRowBatch";
-import ViewRowModal from "../../modals/batch_modals/ViewRowBatch";
+import AddRowModal from "@/modals/batch_modals/AddRowBatch";
+import EditRowModal from "@/modals/batch_modals/EditRowBatch";
+import ViewRowModal from "@/modals/batch_modals/ViewRowBatch";
 import { MdDelete } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import withAuth from "@/modals/withAuth";
@@ -25,7 +21,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import { Batch } from "../../types/index";
+import { Batch } from "@/types/index";
 
 jsPDF.prototype.autoTable = autoTable;
 const Batches = () => {
