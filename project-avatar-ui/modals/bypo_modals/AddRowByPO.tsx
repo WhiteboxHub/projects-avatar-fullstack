@@ -5,7 +5,9 @@ import axios from 'axios';
 interface AddRowModalProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshData: () => Promise<void>;
+  onSubmit?: (formData: any) => Promise<void>;
+  refreshData?: () => Promise<void>;
+  clients?: { id: number; pname: string; }[];
 }
 
 interface InvoiceOption {
@@ -14,7 +16,7 @@ interface InvoiceOption {
   // Add other fields if needed
 }
 
-const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
+const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData, onSubmit, clients }) => {
   const [formData, setFormData] = useState({
     invoicenumber: '',
     startdate: '',
@@ -81,10 +83,16 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         ...formData,
         poid: formData.poid, // This should now be the ID
       };
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/invoices/post/`, payload, {
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-      await refreshData();
+      
+      if (onSubmit) {
+        await onSubmit(payload);
+      } else if (refreshData) {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/invoices/post/`, payload, {
+          headers: { AuthToken: localStorage.getItem("token") },
+        });
+        await refreshData();
+      }
+      
       onClose();
     } catch (error) {
       console.error("Error adding row:", error);
@@ -158,7 +166,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
               disabled={isLoading}
             >
               <option value="">Select PO ID</option>
-              {invoiceOptions.map((item) => (
+              {(clients || invoiceOptions).map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.pname}
                 </option>

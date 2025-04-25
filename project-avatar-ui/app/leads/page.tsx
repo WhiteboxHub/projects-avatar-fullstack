@@ -50,7 +50,7 @@ interface CachedPageData {
 const Leads = () => {
   const [rowData, setRowData] = useState<Lead[]>([]);
   const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string }[]
+    { headerName: string; field: string; cellRenderer?: any; width?: number }[]
   >([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -67,16 +67,15 @@ const Leads = () => {
   const cachedPages = useRef<Map<number, CachedPageData>>(new Map());
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const pageSize = 20;
+  const pageSize = 100;
 
   const fetchData = useCallback(
     async (page = 1, useCache = true) => {
-      // Check if we have this page cached
       if (useCache && cachedPages.current.has(page)) {
         const cachedData = cachedPages.current.get(page)!;
         setRowData(cachedData.data);
         setTotalRows(cachedData.totalRows);
-        setupColumns(cachedData.data);
+        setupColumns(cachedData.data, page);
         return;
       }
 
@@ -92,9 +91,8 @@ const Leads = () => {
         const { data, totalRows } = response.data;
         setRowData(data);
         setTotalRows(totalRows);
-        setupColumns(data);
+        setupColumns(data, page);
         
-        // Cache the fetched data
         cachedPages.current.set(page, { data, totalRows });
       } catch (error) {
         console.error("Error loading data:", error);
@@ -122,7 +120,7 @@ const Leads = () => {
 
         setRowData(response.data);
         setTotalRows(response.data.length);
-        setupColumns(response.data);
+        setupColumns(response.data, 1, true);
       } catch (error) {
         console.error("Error searching leads:", error);
         setAlertMessage("Error searching leads. Please try again.");
@@ -156,13 +154,16 @@ const Leads = () => {
     };
   }, [currentPage, fetchData, searchValue, debouncedSearch, isSearching]);
 
-  const setupColumns = (data: Lead[]) => {
+  const setupColumns = (data: Lead[], page: number, isSearch = false) => {
     if (data.length > 0) {
       const keys = Object.keys(data[0]);
+      
+      // Create columns without the serial number column
       const columns = keys.map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
       }));
+      
       setColumnDefs(columns);
     }
   };

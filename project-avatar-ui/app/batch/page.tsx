@@ -1,9 +1,5 @@
-
-
-
 "use client";
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,9 +8,9 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "../../modals/batch_modals/AddRowBatch";
-import EditRowModal from "../../modals/batch_modals/EditRowBatch";
-import ViewRowModal from "../../modals/batch_modals/ViewRowBatch";
+import AddRowModal from "@/modals/batch_modals/AddRowBatch";
+import EditRowModal from "@/modals/batch_modals/EditRowBatch";
+import ViewRowModal from "@/modals/batch_modals/ViewRowBatch";
 import { MdDelete } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import withAuth from "@/modals/withAuth";
@@ -25,7 +21,7 @@ import {
   AiOutlineReload,
 } from "react-icons/ai";
 import { MdAdd } from "react-icons/md";
-import { Batch } from "../../types/index";
+import { Batch } from "@/types/index";
 
 jsPDF.prototype.autoTable = autoTable;
 const Batches = () => {
@@ -33,10 +29,10 @@ const Batches = () => {
   const [columnDefs, setColumnDefs] = useState<
     { headerName: string; field: string }[]
   >([]);
-  const [paginationPageSize] = useState<number>(100);
+  const [paginationPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
@@ -50,30 +46,27 @@ const Batches = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async () => {
+  const fetchData = async (page = currentPage, searchQuery = searchValue) => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/batches/search`, {
         params: {
-          page: currentPage,
+          page: page,
           pageSize: paginationPageSize,
+          search: searchQuery.trim(),
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
   
       const { data, totalRows } = response.data;
   
-      // Add serial numbers to each row
-      const dataWithSerials = data.map((item: Batch) => ({
-        ...item,
-       // serialNo: (currentPage - 1) * paginationPageSize + index + 1,
-      }));
-  
-      setRowData(dataWithSerials);
+      setRowData(data);
       setTotalRows(totalRows);
-      setupColumns(dataWithSerials);
+      setupColumns(data);
     } catch (error) {
       console.error("Error loading data:", error);
+      setAlertMessage("Error loading data. Please try again.");
+      setTimeout(() => setAlertMessage(null), 3000);
     } finally {
       setLoading(false);
     }
@@ -85,6 +78,7 @@ const Batches = () => {
 }
 
   const fetchBatches = async (searchQuery = "") => {
+    setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/batches/search`, {
         params: {
@@ -101,27 +95,69 @@ const Batches = () => {
       setupColumns(data); // Optional: If needed for dynamic columns
     } catch (error) {
       console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
     }
   };
   
-  // useEffect(() => {
-  //   fetchBatches(searchValue);
-  // }, [currentPage, searchValue]);
+  // Debounce function
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return function(...args: any[]) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  // Create a debounced version of fetchData
+  const debouncedFetch = useCallback(
+    debounce((query: string) => {
+      fetchData(1, query); // Reset to page 1 when searching
+    }, 500),
+    []
+  );
+  
+  // Handle search input change with debouncing
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    debouncedFetch(value);
+    if (value === '') {
+      setCurrentPage(1); // Reset to page 1 when clearing search
+    }
+  };
     
   const handleSearch = () => {
-    fetchBatches(searchValue); // Fetch data using the search term
+    fetchData(1, searchValue); // Always go to first page on manual search
+    setCurrentPage(1);
   };
   
 
   const setupColumns = (data: Batch[]) => {
     if (data.length > 0) {
-      const columns = [
-       // { headerName: "Serial No", field: "serialNo", width: 100 }, // Add this line for serial numbers
-        ...Object.keys(data[0]).map((key) => ({
-          headerName: key.charAt(0).toUpperCase() + key.slice(1),
-          field: key,
-        })),
-      ];
+      // Create an array to hold the columns
+      let columns = [];
+      
+      // First, check if batchname exists and add it as "Name"
+      if ('batchname' in data[0]) {
+        columns.push({ headerName: "Name", field: "batchname" });
+      }
+      
+      // Then, check if current exists and add it next
+      if ('current' in data[0]) {
+        columns.push({ headerName: "Current", field: "current" });
+      }
+      
+      // Add all other fields except batchname and current which we've already handled
+      Object.keys(data[0]).forEach(key => {
+        if (key !== 'batchname' && key !== 'current') {
+          columns.push({
+            headerName: key.charAt(0).toUpperCase() + key.slice(1),
+            field: key,
+          });
+        }
+      });
+      
       setColumnDefs(columns);
     }
   };
@@ -129,13 +165,15 @@ const Batches = () => {
 
   
   useEffect(() => {
-    fetchData();
+    fetchData(currentPage, searchValue);
   }, [currentPage]);
+  
   const handleRefresh = () => {
     setSearchValue(""); // Clear search value before refreshing
-    fetchData(); // Re-fetch data
-    window.location.reload(); // Trigger page reload
+    setCurrentPage(1);
+    fetchData(1, "");
   };
+  
   const handleAddRow = () =>
     setModalState((prevState) => ({ ...prevState, add: true }));
 
@@ -232,8 +270,8 @@ const handleDownloadPDF = () => {
 
   
   const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const startPage = Math.max(1, currentPage );
-  const endPage = Math.min(totalPages, currentPage + 4);
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(totalPages, startPage + 4);
   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
 
   return (
@@ -253,7 +291,7 @@ const handleDownloadPDF = () => {
               type="text"
               placeholder="Search..."
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onChange={handleSearchChange}
               className="border border-gray-300 rounded-md p-2 w-64"
             />
             <button
@@ -313,35 +351,32 @@ const handleDownloadPDF = () => {
          </div>
 
     </div>
-              {loading ? (
-              <div className="flex justify-center items-center h-48">
-                  <span className="text-xl">Loading...</span>
-              </div>
-                    ) : (
-        <div
+      <div
         className="ag-theme-alpine"
         style={{ height: "400px", width: "100%", overflowY: "auto" }}
       >
         <AgGridReact
-        ref={gridRef}
-        rowData={rowData}
-        columnDefs={columnDefs}
-        pagination={false}
-        domLayout="normal"
-        rowSelection="multiple"
-        defaultColDef={{
-          sortable: true,
-          filter: true,
-          resizable: true,
-          cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-          minWidth: 80,
-          maxWidth: 150,
-        }}
-        rowHeight={30}
-        headerHeight={35}
-      />
-      </div>  
-      )}
+          ref={gridRef}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          pagination={false}
+          domLayout="normal"
+          rowSelection="multiple"
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            resizable: true,
+            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+            minWidth: 80,
+            maxWidth: 150,
+          }}
+          rowHeight={30}
+          headerHeight={35}
+          overlayNoRowsTemplate={
+            '<span class="ag-overlay-no-rows-center" style="border: 1px solid #ccc; padding: 8px; border-radius: 4px;">Loading...</span>'
+          }
+        />
+      </div>
 
       <div className="flex justify-between mt-4">
       <div className="flex items-center">
@@ -387,6 +422,9 @@ const handleDownloadPDF = () => {
         >
           <FaAngleDoubleRight />
         </button>
+      </div>
+      <div className="text-sm text-gray-600">
+        Page {currentPage} of {totalPages} | Total: {totalRows}
       </div>
     </div>
 

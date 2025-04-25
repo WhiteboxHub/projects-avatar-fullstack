@@ -412,6 +412,57 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 
+interface InvoiceData {
+  id: number;
+  poid: string;
+  invoicenumber: string;
+  startdate: string;
+  enddate: string;
+  invoicedate: string;
+  invmonth: string;
+  quantity: string;
+  otquantity: string;
+  rate: number;
+  overtimerate: number;
+  status: string;
+  emppaiddate: string;
+  candpaymentstatus: string;
+  reminders: string;
+  amountexpected: number;
+  expecteddate: string;
+  amountreceived: string;
+  receiveddate: string;
+  releaseddate: string;
+  checknumber: string;
+  invoiceurl: string;
+  checkurl: string;
+  freqtype: string;
+  invoicenet: number;
+  companyname: string;
+  vendorfax: string;
+  vendorphone: string;
+  vendoremail: string;
+  timsheetemail: string;
+  hrname: string;
+  hremail: string;
+  hrphone: string;
+  managername: string;
+  manageremail: string;
+  managerphone: string;
+  secondaryname: string;
+  secondaryemail: string;
+  secondaryphone: string;
+  candidatename: string;
+  candidatephone: string;
+  candidateemail: string;
+  wrkemail: string;
+  wrkphone: string;
+  recruitername: string;
+  recruiterphone: string;
+  recruiteremail: string;
+  notes: string;
+}
+
 interface FormData {
   poid: string;
   invoicenumber: string;
@@ -436,10 +487,10 @@ interface FormData {
 interface AddRowModalProps {
   isOpen: boolean;
   onClose: () => void;
-  refreshData: () => Promise<void>;
+  onSubmit: (formData: InvoiceData) => Promise<void>;
 }
 
-const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData }) => {
+const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState<FormData>({
     poid: '',
     invoicenumber: '',
@@ -485,10 +536,42 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/invoices/post`, formData, {
-        headers: { AuthToken: localStorage.getItem('token') },
-      });
-      await refreshData();
+      // Convert FormData to InvoiceData with default values for missing properties
+      const invoiceData: InvoiceData = {
+        id: 0, // Default value
+        ...formData,
+        invmonth: '', // Default value
+        rate: 0, // Default value
+        overtimerate: 0, // Default value
+        amountexpected: 0, // Default value
+        expecteddate: '', // Default value
+        invoicenet: 0, // Default value
+        freqtype: '', // Default value
+        companyname: '', // Default value
+        vendorfax: '', // Default value
+        vendorphone: '', // Default value
+        vendoremail: '', // Default value
+        timsheetemail: '', // Default value
+        hrname: '', // Default value
+        hremail: '', // Default value
+        hrphone: '', // Default value
+        managername: '', // Default value
+        manageremail: '', // Default value
+        managerphone: '', // Default value
+        secondaryname: '', // Default value
+        secondaryemail: '', // Default value
+        secondaryphone: '', // Default value
+        candidatename: '', // Default value
+        candidatephone: '', // Default value
+        candidateemail: '', // Default value
+        wrkemail: '', // Default value
+        wrkphone: '', // Default value
+        recruitername: '', // Default value
+        recruiterphone: '', // Default value
+        recruiteremail: '', // Default value
+      };
+      
+      await onSubmit(invoiceData);
       onClose();
     } catch (error) {
       console.error('Error adding invoice:', error);

@@ -104,12 +104,17 @@ router = APIRouter()
 def search_batches(
     search: str = "",
     page: int = 1,
-    pageSize: int = 1000,
+    pageSize: int = 50,  # Default to 50 per page
     db: Session = Depends(get_db)
 ):
     skip = (page - 1) * pageSize
-    batches = get_batches(db=db, search_query=search, skip=skip, limit=pageSize)
-    return {"data": batches, "totalRows": len(batches)}
+    batches, total_count = get_batches(db=db, search_query=search, skip=skip, limit=pageSize)
+    return {
+        "data": batches, 
+        "totalRows": total_count,
+        "page": page,
+        "pageSize": pageSize
+    }
 
 @router.get("/batchnames")
 def get_batch_names(db: Session = Depends(get_db)):

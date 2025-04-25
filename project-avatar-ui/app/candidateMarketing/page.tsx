@@ -55,10 +55,6 @@ interface Employee {
   name: string;
 }
 
-// interface RowData {
-//   // ... your existing RowData interface
-// }
-
 interface AutoTableDoc extends jsPDF {
   autoTable: (d: jsPDF, options: UserOptions) => void;
 }
@@ -101,7 +97,6 @@ const CurrentMarketing = () => {
     }
   }, [paginationPageSize, API_URL]);
 
-  // Add this useEffect with your other effects
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -209,7 +204,7 @@ const CurrentMarketing = () => {
   //       if (!confirmation) return;
 
   //       try {
-  //         await axios.delete(`${API_URL}/currentmarketing/${id}`, {
+  //         await axios.delete(`${API_URL}/api/admin/candidatemarketing/${id}`, {
   //           headers: { AuthToken: localStorage.getItem("token") },
   //         });
   //         alert("Entry deleted successfully.");
