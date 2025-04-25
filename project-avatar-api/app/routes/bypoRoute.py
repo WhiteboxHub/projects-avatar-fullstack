@@ -1,7 +1,7 @@
 # # # new-projects-avatar-fullstack/project-avatar-api/app/routes/bypoRoute.py
 
 
-from fastapi import APIRouter, Depends, HTTPException , Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from sqlalchemy.orm import Session 
 from app.database.db import get_db
@@ -22,8 +22,24 @@ def read_invoices(page: int = 1, page_size: int = 1000, db: Session = Depends(ge
 
 
 @router.get("/invoices-po")
-def get_grouped_po_data( poid: Optional[int] = Query(None), page: int = Query(1), page_size: int = Query(1000), db: Session = Depends(get_db)):
-    return get_po_data_grouped_by_poid(db, poid=poid, page=page, page_size=page_size)
+def get_grouped_po_data(
+    poid: Optional[int] = Query(None), 
+    page: int = Query(1), 
+    page_size: int = Query(1000), 
+    search: Optional[str] = Query(None),
+    sort_field: str = Query("invoicedate"),
+    sort_order: str = Query("desc"),
+    db: Session = Depends(get_db)
+):
+    return get_po_data_grouped_by_poid(
+        db, 
+        poid=poid, 
+        page=page, 
+        page_size=page_size,
+        search=search,
+        sort_field=sort_field,
+        sort_order=sort_order
+    )
     
 @router.get("/invoices/data/{invoice_id}")
 def read_invoice_by_id(invoice_id: int, db: Session = Depends(get_db)):
@@ -43,7 +59,10 @@ def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depend
 
 @router.put("/invoices/put/{invoice_id}")
 def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
-    return update_invoice(db, invoice_id, invoice_data)
+    result = update_invoice(db, invoice_id, invoice_data)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
 
 @router.delete("/invoices/bypo/delete/{invoice_id}")
 def delete_invoice_entry(invoice_id: int, db: Session = Depends(get_db)):

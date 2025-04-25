@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.models import Invoice
 from app.schemas import InvoiceCreateSchema, InvoiceUpdateSchema
 from sqlalchemy import text
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 def get_invoice_months(db: Session):
     query = text("""
@@ -20,13 +20,17 @@ def get_invoices_grouped_by_month(
     db: Session,
     month: Optional[str] = None,
     page: int = 1,
-    page_size: int = 100
+    page_size: int = 100,
+    search_params: Optional[Dict[str, Any]] = None,
+    sort_field: str = "invoicedate",
+    sort_order: str = "desc"
 ) -> Dict[str, Any]:
     offset = (page - 1) * page_size
 
     base_query = """
         SELECT
             i.id,
+            i.poid,
             i.invoicenumber,
             i.startdate,
             i.enddate,
@@ -72,7 +76,6 @@ def get_invoices_grouped_by_month(
             r.name AS recruitername,
             r.phone AS recruiterphone,
             r.email AS recruiteremail,
-            i.poid,
             i.notes
         FROM invoice i
         JOIN po p ON i.poid = p.id
@@ -88,11 +91,28 @@ def get_invoices_grouped_by_month(
         "offset": offset
     }
 
+    # Apply search filters if provided
+    if search_params:
+        for field, value in search_params.items():
+            if value and field in ["poid", "invoicenumber", "status", "reminders", "candpaymentstatus"]:
+                base_query += f" AND i.{field} = :{field}"
+                params[field] = value
+            elif value and field in ["startdate", "enddate", "invoicedate", "receiveddate", "releaseddate", "emppaiddate"]:
+                base_query += f" AND i.{field} = :{field}"
+                params[field] = value
+            elif value and field == "companyname":
+                base_query += " AND v.companyname LIKE :companyname"
+                params[field] = f"%{value}%"
+            elif value and field == "candidatename":
+                base_query += " AND c.name LIKE :candidatename"
+                params[field] = f"%{value}%"
+
     if month:
         base_query += " AND DATE_FORMAT(i.invoicedate, '%Y-%c-%M') = :month"
         params["month"] = month
 
-    base_query += " ORDER BY i.invoicedate DESC LIMIT :limit OFFSET :offset"
+    # Apply sorting
+    base_query += f" ORDER BY {sort_field} {sort_order} LIMIT :limit OFFSET :offset"
     rows = db.execute(text(base_query), params).fetchall()
 
     grouped_data = {}
@@ -101,34 +121,82 @@ def get_invoices_grouped_by_month(
         if key not in grouped_data:
             grouped_data[key] = {
                 "invmonth": key,
-                "invoices": []
+                "invoices": [],
+                "summary": {
+                    "quantity": 0,
+                    "otquantity": 0,
+                    "amountexpected": 0,
+                    "amountreceived": 0
+                }
             }
 
-        grouped_data[key]["invoices"].append({k: v for k, v in row._mapping.items()})
+        invoice_data = {k: v for k, v in row._mapping.items()}
+        grouped_data[key]["invoices"].append(invoice_data)
+        
+        # Update summary data
+        grouped_data[key]["summary"]["quantity"] += float(row.quantity or 0)
+        grouped_data[key]["summary"]["otquantity"] += float(row.otquantity or 0)
+        grouped_data[key]["summary"]["amountexpected"] += float(row.amountexpected or 0)
+        grouped_data[key]["summary"]["amountreceived"] += float(row.amountreceived or 0)
 
     # Total count
     count_query = """
         SELECT COUNT(*)
         FROM invoice i
         JOIN po p ON i.poid = p.id
+        JOIN placement pl ON p.placementid = pl.id
+        JOIN candidate c ON pl.candidateid = c.candidateid
+        JOIN vendor v ON pl.vendorid = v.id
         WHERE i.status <> 'Delete'
     """
     count_params = {}
+    
+    # Apply the same search filters to count query
+    if search_params:
+        for field, value in search_params.items():
+            if value and field in ["poid", "invoicenumber", "status", "reminders", "candpaymentstatus"]:
+                count_query += f" AND i.{field} = :{field}"
+                count_params[field] = value
+            elif value and field in ["startdate", "enddate", "invoicedate", "receiveddate", "releaseddate", "emppaiddate"]:
+                count_query += f" AND i.{field} = :{field}"
+                count_params[field] = value
+            elif value and field == "companyname":
+                count_query += " AND v.companyname LIKE :companyname"
+                count_params[field] = f"%{value}%"
+            elif value and field == "candidatename":
+                count_query += " AND c.name LIKE :candidatename"
+                count_params[field] = f"%{value}%"
+    
     if month:
         count_query += " AND DATE_FORMAT(i.invoicedate, '%Y-%c-%M') = :month"
         count_params["month"] = month
 
     total = db.execute(text(count_query), count_params).scalar()
 
+    # Calculate totals across all groups
+    overall_summary = {
+        "quantity": 0,
+        "otquantity": 0,
+        "amountexpected": 0,
+        "amountreceived": 0
+    }
+    
+    for group in grouped_data.values():
+        overall_summary["quantity"] += group["summary"]["quantity"]
+        overall_summary["otquantity"] += group["summary"]["otquantity"]
+        overall_summary["amountexpected"] += group["summary"]["amountexpected"]
+        overall_summary["amountreceived"] += group["summary"]["amountreceived"]
+
     return {
         "data": list(grouped_data.values()),
         "total": total,
         "page": page,
         "page_size": page_size,
-        "pages": (total + page_size - 1) // page_size
+        "pages": (total + page_size - 1) // page_size,
+        "sort_field": sort_field,
+        "sort_order": sort_order,
+        "overall_summary": overall_summary
     }
-
-
 
 def create_invoice(db: Session, invoice_data: InvoiceCreateSchema):
     new_invoice = Invoice(**invoice_data.dict())

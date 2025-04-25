@@ -1,12 +1,47 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { Overdue } from '../../types/index'; // Adjust the import path accordingly
 import { AiOutlineClose } from 'react-icons/ai'; // Adjust the import path accordingly
+
+interface OverdueViewType {
+  pkid?: number;
+  candidateid?: number;
+  candidatename?: string;
+  clientname?: string;
+  startdate?: string;
+  enddate?: string;
+  invoicedate?: string;
+  amountexpected?: string;
+  amountreceived?: string;
+  expecteddate?: string;
+  receiveddate?: string;
+  checknumber?: string;
+  status?: string;
+  notes?: string;
+  serialNo?: number;
+  poid?: string;
+  invoicenumber?: string;
+  quantity?: string;
+  rate?: number;
+  remindertype?: string;
+  releaseddate?: string;
+  invoiceurl?: string;
+  checkurl?: string;
+  companyname?: string;
+  vendorfax?: string;
+  candidatephone?: string;
+  candidateemail?: string;
+  wrkemail?: string;
+  wrkphone?: string;
+  recruitername?: string;
+  recruiterphone?: string;
+  recruiteremail?: string;
+  [key: string]: string | number | undefined;
+}
 
 interface ViewRowOverdueProps {
   isOpen: boolean;
   onClose: () => void;
-  rowData: Overdue | null;
+  rowData: OverdueViewType | null;
 }
 
 const ViewRowOverdue: React.FC<ViewRowOverdueProps> = ({ isOpen, onClose, rowData }) => {
@@ -57,7 +92,7 @@ return (
                 {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
               </label>
               <p className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50">
-                {rowData[key as keyof Overdue] || 'N/A'}
+                {rowData[key] !== undefined ? String(rowData[key]) : 'N/A'}
               </p>
             </div>
           ))}

@@ -8,8 +8,8 @@ import * as XLSX from "xlsx";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import EditRowModal from "../../modals/Marketing/MarketingCandidate/EditCandidateMarketing";
-import ViewRowModal from "../../modals/Marketing/MarketingCandidate/ViewCandidateMarketing";
+import EditRowModal from "@/modals/Marketing/MarketingCandidate/EditCandidateMarketing";
+import ViewRowModal from "@/modals/Marketing/MarketingCandidate/ViewCandidateMarketing";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import { debounce } from "lodash";
 import jsPDF from "jspdf";
@@ -42,6 +42,17 @@ interface RowData {
   notes: string;
   suspensionreason: string;
   yearsofexperience: string;
+  candidate_name?: string;
+  email?: string;
+  phone?: string;
+  manager?: string;
+  instructor?: string;
+  submitter?: string;
+  secondaryemail?: string;
+  secondaryphone?: string;
+  workstatus?: string;
+  resumelink?: string;
+  ipphone?: string;
 }
 
 interface AutoTableDoc extends jsPDF {
@@ -51,7 +62,7 @@ interface AutoTableDoc extends jsPDF {
 const MarketingCandidates = () => {
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string }[]>([]);
-  const [paginationPageSize] = useState<number>(200);
+  const [paginationPageSize] = useState<number>(100);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -59,13 +70,14 @@ const MarketingCandidates = () => {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const fetchEmployees = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/employees`, {
+      const response = await axios.get(`${API_URL}/candidatemarketing/employees`, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       setEmployees(response.data);
@@ -85,12 +97,16 @@ const MarketingCandidates = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      if (Array.isArray(response.data)) {
-        setRowData(response.data);
-        setTotalRows(response.data.length);
-        setupColumns(response.data);
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        setRowData(response.data.data);
+        setTotalRows(response.data.total);
+        setTotalPages(Math.ceil(response.data.total / paginationPageSize));
+        setupColumns(response.data.data);
       } else {
-        console.error("Data is not an array:", response.data);
+        console.error("Invalid data format:", response.data);
+        setRowData([]);
+        setTotalRows(0);
+        setTotalPages(0);
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -99,30 +115,32 @@ const MarketingCandidates = () => {
 
   const searchCandidatesByName = useCallback(async (searchQuery: string) => {
     try {
-      const response = await axios.get(`${API_URL}/candidatemarketing/by-name/${searchQuery}`, {
+      const response = await axios.get(`${API_URL}/candidatemarketing/search/name?name=${searchQuery}`, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
       let data = response.data;
       if (!Array.isArray(data)) {
-        data = [data]; // Convert single object to an array with one element
+        if (data && typeof data === 'object') {
+          data = [data]; // Convert single object to an array with one element
+        } else {
+          data = [];
+        }
       }
 
-      if (Array.isArray(data)) {
-        setRowData(data);
-        setTotalRows(data.length);
-        setupColumns(data);
-      } else {
-        console.error("Data is not an array:", data);
-        setRowData([]);
-        setTotalRows(0);
-        setColumnDefs([]);
-      }
+      setRowData(data);
+      setTotalRows(data.length);
+      setTotalPages(Math.ceil(data.length / paginationPageSize));
+      setupColumns(data);
     } catch (error) {
-      console.error("Error loading data:", error);
-      alert("No candidate with that name.");
+      console.error("Error searching candidates:", error);
+      setAlertMessage("No candidate found with that name.");
+      setTimeout(() => setAlertMessage(null), 3000);
+      setRowData([]);
+      setTotalRows(0);
+      setTotalPages(0);
     }
-  }, [API_URL]);
+  }, [API_URL, paginationPageSize]);
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
@@ -188,6 +206,7 @@ const MarketingCandidates = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+    fetchData("", newPage);
   };
 
   const handleDownloadPDF = () => {
@@ -199,11 +218,14 @@ const MarketingCandidates = () => {
 
         const pdfData = selectedRows.map((row: RowData) => [
           row.candidateid,
+          row.candidate_name || "",
+          row.email || "",
+          row.phone || "",
           row.startdate,
-          row.mmid,
-          row.instructorid,
+          row.manager || "",
+          row.instructor || "",
+          row.submitter || "",
           row.status,
-          row.submitterid,
           row.priority,
           row.technology,
           row.minrate,
@@ -212,11 +234,8 @@ const MarketingCandidates = () => {
           row.locationpreference,
           row.skypeid,
           row.ipemail,
-          row.resumeid,
-          row.coverletter,
+          row.resumelink || "",
           row.intro,
-          row.closedate,
-          row.closedemail,
           row.notes,
           row.suspensionreason ?? "",
           row.yearsofexperience ?? 0,
@@ -226,11 +245,14 @@ const MarketingCandidates = () => {
           head: [
             [
               "Candidate ID",
+              "Name",
+              "Email",
+              "Phone",
               "Start Date",
-              "MMID",
-              "Instructor ID",
+              "Manager",
+              "Instructor",
+              "Submitter",
               "Status",
-              "Submitter ID",
               "Priority",
               "Technology",
               "Min Rate",
@@ -239,11 +261,8 @@ const MarketingCandidates = () => {
               "Location Preference",
               "Skype ID",
               "IP Email",
-              "Resume ID",
-              "Cover Letter",
+              "Resume Link",
               "Intro",
-              "Close Date",
-              "Closed Email",
               "Notes",
               "Suspension Reason",
               "Years of Experience",
@@ -288,10 +307,18 @@ const MarketingCandidates = () => {
 
   const defaultOption = "Download";
 
-  const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const startPage = Math.max(1, currentPage);
-  const endPage = Math.min(totalPages, currentPage + 4);
-  const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
+  // Function to get page numbers to display
+  const getPageNumbers = () => {
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  };
 
   return (
     <div className="relative">
@@ -385,47 +412,62 @@ const MarketingCandidates = () => {
           />
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center mt-4">
-          <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
-            <div className="flex space-x-1 overflow-x-auto">
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-md ${
+                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <FaAngleDoubleLeft className="text-white" />
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-md ${
+                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <FaChevronLeft className="text-white" />
+            </button>
+            
+            {getPageNumbers().map((page) => (
               <button
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-                className="p-2 disabled:opacity-50"
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === page
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                }`}
               >
-                <FaAngleDoubleLeft />
+                {page}
               </button>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 disabled:opacity-50"
-              >
-                <FaChevronLeft />
-              </button>
-              {pageOptions.map((page) => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 disabled:opacity-50"
-              >
-                <FaChevronRight />
-              </button>
-              <button
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-                className="p-2 disabled:opacity-50"
-              >
-                <FaAngleDoubleRight />
-              </button>
-            </div>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-md ${
+                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <FaChevronRight className="text-white" />
+            </button>
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-md ${
+                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <FaAngleDoubleRight className="text-white" />
+            </button>
+          </div>
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * paginationPageSize + 1} to {Math.min(currentPage * paginationPageSize, totalRows)} of {totalRows} entries
           </div>
         </div>
 
@@ -434,9 +476,9 @@ const MarketingCandidates = () => {
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={selectedRow ? {
             ...selectedRow,
-            manager_name: '',
-            instructor_name: '',
-            submitter_name: '',
+            manager_name: selectedRow.manager || '',
+            instructor_name: selectedRow.instructor || '',
+            submitter_name: selectedRow.submitter || '',
             ipemailid: 0
           } as CandidateMarketing : null}
           onSave={fetchData}
@@ -447,9 +489,9 @@ const MarketingCandidates = () => {
           onRequestClose={() => setModalState({ ...modalState, view: false })}
           rowData={selectedRow ? {
             ...selectedRow,
-            manager_name: '',
-            instructor_name: '',
-            submitter_name: '',
+            manager_name: selectedRow.manager || '',
+            instructor_name: selectedRow.instructor || '',
+            submitter_name: selectedRow.submitter || '',
             ipemailid: 0
           } as CandidateMarketing : null}
         />

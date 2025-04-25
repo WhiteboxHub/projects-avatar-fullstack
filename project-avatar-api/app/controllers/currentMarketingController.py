@@ -112,29 +112,6 @@ def get_current_marketing_by_candidate_name(db: Session, name: str):
         return dict(zip(columns, row))
     return None
 
-# def update_current_marketing(db: Session, current_marketing_id: int, current_marketing_data: CurrentMarketingUpdateSchema):
-#     """
-#     Update an existing current marketing record.
-#     """
-#     if current_marketing_data.relocation not in ["Yes", "No"]:
-#         raise HTTPException(status_code=400, detail="Relocation field must be 'Yes' or 'No'")
-
-#     candidate = db.query(Candidate).filter(Candidate.candidateid == current_marketing_data.candidateid).first()
-#     if not candidate:
-#         raise HTTPException(status_code=400, detail="Invalid candidateid")
-
-#     existing_current_marketing = db.query(CandidateMarketing).filter(CandidateMarketing.id == current_marketing_id).first()
-#     if not existing_current_marketing:
-#         raise HTTPException(status_code=404, detail="Candidate marketing data not found")
-
-#     update_data = current_marketing_data.model_dump(exclude_unset=True)
-#     for key, value in update_data.items():
-#         setattr(existing_current_marketing, key, value)
-
-#     db.commit()
-#     db.refresh(existing_current_marketing)
-#     return {"message": "Current Marketing updated successfully", "current_marketing": existing_current_marketing}
-
 def get_ipemails_dropdown(db: Session):
     """
     Retrieve IP emails for dropdown selection (email only)
@@ -173,6 +150,10 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
     if not candidate_marketing:
         return {"error": "Candidate Marketing not found"}
 
+    # Get the current status before updating
+    previous_status = candidate_marketing.status
+    
+    # Handle employee assignments
     if update_data.manager_name:
         manager = db.query(Employee).filter(Employee.name == update_data.manager_name, Employee.status == '0Active').first()
         if manager:
@@ -194,20 +175,47 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
         else:
             return {"error": f"Submitter with name {update_data.submitter_name} not found"}
 
+    # Handle ip email
     if update_data.ipemail is not None:
-        if update_data.ipemail == "":
+        if update_data.ipemail == "":  
             candidate_marketing.ipemailid = 0
         else:
             ipemail = db.execute(
                 text("SELECT id FROM ipemail WHERE email = :email"),
                 {"email": update_data.ipemail}
             ).fetchone()
-
+            
             if ipemail:
                 candidate_marketing.ipemailid = ipemail[0]
             else:
                 return {"error": f"IP email {update_data.ipemail} not found"}
 
+    # Map UI status to database status if needed
+    # This conversion maps the frontend status values to database status values
+    if update_data.status:
+        status_mapping = {
+            "To Do": "1-To Do",
+            "Inprogress": "2-Inprogress",
+            "Suspended": "6-Suspended",
+            "Closed": "5-Closed"
+        }
+        
+        # Use the mapping if it exists, otherwise use the original value
+        update_data.status = status_mapping.get(update_data.status, update_data.status)
+    
+    # Validate data for suspended status
+    if update_data.status == "6-Suspended" and not update_data.suspensionreason:
+        return {"error": "Suspension reason is required when status is Suspended"}
+        
+    # Validate data for closed status
+    if update_data.status == "5-Closed" and not update_data.closedate:
+        return {"error": "Close date is required when status is Closed"}
+    
+    # Validate relocation field
+    if update_data.relocation and update_data.relocation not in ["Yes", "No"]:
+        return {"error": "Relocation field must be 'Yes' or 'No'"}
+
+    # Update other fields
     update_fields = {
         'status': update_data.status,
         'locationpreference': update_data.locationpreference,
@@ -228,6 +236,25 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
         if value is not None:
             setattr(candidate_marketing, field, value)
 
+    # Update the candidate's record in the database
     db.commit()
     db.refresh(candidate_marketing)
-    return candidate_marketing
+    
+    # Prepare response with status transition information
+    response = {
+        "data": candidate_marketing,
+        "message": "Candidate marketing updated successfully"
+    }
+    
+    # Add status transition information
+    if previous_status != candidate_marketing.status:
+        if candidate_marketing.status in ["1-To Do", "2-Inprogress"]:
+            if previous_status in ["5-Closed", "6-Suspended"]:
+                response["statusChange"] = "added_to_current"
+                response["message"] = "Candidate has been moved to Current Marketing"
+        elif candidate_marketing.status in ["5-Closed", "6-Suspended"]:
+            if previous_status in ["1-To Do", "2-Inprogress"]:
+                response["statusChange"] = "removed_from_current"
+                response["message"] = "Candidate has been removed from Current Marketing"
+    
+    return response

@@ -447,7 +447,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-import { ByMonth } from '@/types';
+
 
 interface FormData {
   poid: string;
@@ -475,9 +475,11 @@ interface EditRowModalProps {
   onClose: () => void;
   rowData: any;
   onSave: () => Promise<void>;
+  clients: { id: number; pname: string; }[];
+  defaultClientId: string | number;
 }
 
-const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, rowData, onSave }) => {
+const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, rowData, onSave, clients, defaultClientId }) => {
   const [formData, setFormData] = useState<FormData>({
     poid: '',
     invoicenumber: '',
@@ -886,6 +888,3 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, rowData, o
 };
 
 export default EditRowModal;
-
-
-

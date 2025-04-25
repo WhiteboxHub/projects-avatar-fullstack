@@ -61,6 +61,9 @@ const Users = () => {
       if (data.totalRows !== undefined) {
         setTotalRows(data.totalRows);
         setTotalPages(Math.ceil(data.totalRows / paginationPageSize));
+      } else if (response.data.totalRows !== undefined) {
+        setTotalRows(response.data.totalRows);
+        setTotalPages(Math.ceil(response.data.totalRows / paginationPageSize));
       } else {
         const totalRows = data.length;
         setTotalRows(totalRows);

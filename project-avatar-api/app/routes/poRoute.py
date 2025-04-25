@@ -1,10 +1,10 @@
 # /Users/innovapathinc/Desktop/projects-avatar-fullstack/new-projects-avatar-fullstack/project-avatar-api/app/routes/poRoute.py
-from fastapi import APIRouter, Depends,HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from app.database.db import get_db
 from app.controllers.poController import (
-    get_po_list, get_po_by_name, create_po, update_po, delete_po ,get_po_data
+    get_po_list, get_po_by_name, create_po, update_po, delete_po, get_po_data
 )
 from app.schemas import POSchema, POCreateSchema, POUpdateSchema
 
@@ -48,5 +48,3 @@ def update_po_entry(po_id: int, po_data: POUpdateSchema, db: Session = Depends(g
 @router.delete("/api/admin/po/{po_id}")
 def delete_po_entry(po_id: int, db: Session = Depends(get_db)):
     return delete_po(db, po_id)
-
-

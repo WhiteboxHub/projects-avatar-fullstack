@@ -5,11 +5,21 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Batch, Course
 
-def get_batches(db: Session, search_query: str = "", skip: int = 0, limit: int = 100):
+def get_batches(db: Session, search_query: str = "", skip: int = 0, limit: int = 50):
+    # Create base query
     query = db.query(Batch).order_by(Batch.batchid.desc())
+    
+    # Apply search filter if provided
     if search_query:
         query = query.filter(Batch.batchname.like(f"%{search_query}%"))
-    return query.offset(skip).limit(limit).all()
+    
+    # Get total count for pagination
+    total_count = query.count()
+    
+    # Apply pagination
+    records = query.offset(skip).limit(limit).all()
+    
+    return records, total_count
 
 def get_batch_names_sorted_by_date(db: Session):
     # Assuming you want to sort by 'startdate' in descending order

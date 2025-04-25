@@ -88,7 +88,14 @@ def get_authuser_list(db: Session, skip: int = 0, limit: int = 100, sort_field: 
     count_query = text(count_query_text)
     total_count = db.execute(count_query, params).scalar()
     
-    return {"data": result, "totalRows": total_count}
+    # Format the response to match the PHP jqGrid implementation
+    return {
+        "data": result,
+        "totalRows": total_count,
+        "page": skip // limit + 1,
+        "total": (total_count + limit - 1) // limit,  # Total pages
+        "records": total_count
+    }
 
 def search_authusers(db: Session, search_term: str, fields: List[str] = None):
     """

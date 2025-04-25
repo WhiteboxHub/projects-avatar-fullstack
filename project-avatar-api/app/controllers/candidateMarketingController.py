@@ -1,19 +1,20 @@
-# # avatar/projects-avatar-api/app/controllers/candidateMarketingController.py
-
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.models import Candidate, CandidateMarketing ,Employee
+from app.models import Candidate, CandidateMarketing, Employee
 from app.schemas import CandidateMarketingUpdateSchema
+from fastapi import HTTPException
 
 def get_candidate_marketing_list(db: Session, skip: int, limit: int):
     """
     Retrieve a paginated list of candidate marketing records using a raw SQL query.
+    Default pagination is set to 100 records per page.
     """
     query = text("""
         SELECT 
             cm.id,
-            c.name AS candidate_name,
+            c.candidateid,
             cm.startdate,
+            c.name AS candidate_name,
             c.email,
             c.phone,
             mm.name AS manager,
@@ -37,7 +38,12 @@ def get_candidate_marketing_list(db: Session, skip: int, limit: int):
             cm.closedate,
             cm.suspensionreason,
             cm.intro,
-            cm.notes
+            cm.notes,
+            cm.yearsofexperience,
+            cm.mmid,
+            cm.instructorid,
+            cm.submitterid,
+            cm.ipemailid
         FROM candidatemarketing cm
         JOIN candidate c ON cm.candidateid = c.candidateid
         LEFT JOIN employee mm ON cm.mmid = mm.id AND mm.status = '0Active'
@@ -48,8 +54,36 @@ def get_candidate_marketing_list(db: Session, skip: int, limit: int):
         LIMIT :limit OFFSET :skip
     """)
 
-    result = db.execute(query, {"skip": skip, "limit": limit})
-    return result.fetchall()
+    # Get total count for pagination
+    count_query = text("""
+        SELECT COUNT(*) as total
+        FROM candidatemarketing cm
+        JOIN candidate c ON cm.candidateid = c.candidateid
+    """)
+
+    try:
+        result = db.execute(query, {"skip": skip, "limit": limit})
+        rows = result.fetchall()
+        
+        # Get column names
+        columns = result.keys()
+        
+        # Convert to list of dictionaries
+        data = [dict(zip(columns, row)) for row in rows]
+        
+        # Get total count
+        count_result = db.execute(count_query)
+        total_count = count_result.scalar()
+        
+        return {
+            "data": data,
+            "total": total_count,
+            "page": skip // limit + 1,
+            "page_size": limit,
+            "total_pages": (total_count + limit - 1) // limit
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 def get_candidate_marketing_by_name(db: Session, candidate_name: str):
     """
@@ -58,8 +92,9 @@ def get_candidate_marketing_by_name(db: Session, candidate_name: str):
     query = text("""
         SELECT 
             cm.id,
-            c.name AS candidate_name,
+            c.candidateid,
             cm.startdate,
+            c.name AS candidate_name,
             c.email,
             c.phone,
             mm.name AS manager,
@@ -74,29 +109,59 @@ def get_candidate_marketing_by_name(db: Session, candidate_name: str):
             cm.technology,
             cm.resumeid,
             cm.minrate,
-            cm.ipemailid,
+            ip.email AS ipemail,
             cm.currentlocation,
             cm.relocation,
             cm.skypeid,
             (SELECT link FROM resume WHERE id = cm.resumeid) AS resumelink,
-            (SELECT phone FROM ipemail WHERE id = cm.ipemailid) AS ipphone,
+            ip.phone AS ipphone,
             cm.closedate,
             cm.suspensionreason,
             cm.intro,
-            cm.notes
+            cm.notes,
+            cm.yearsofexperience,
+            cm.mmid,
+            cm.instructorid,
+            cm.submitterid,
+            cm.ipemailid
         FROM candidatemarketing cm
         JOIN candidate c ON cm.candidateid = c.candidateid
         LEFT JOIN employee mm ON cm.mmid = mm.id AND mm.status = '0Active'
         LEFT JOIN employee ins ON cm.instructorid = ins.id AND ins.status = '0Active'
         LEFT JOIN employee sub ON cm.submitterid = sub.id AND sub.status = '0Active'
+        LEFT JOIN ipemail ip ON cm.ipemailid = ip.id
         WHERE c.name LIKE :candidate_name
     """)
 
-    result = db.execute(query, {"candidate_name": f"%{candidate_name}%"})
-    return result.fetchall()
+    try:
+        result = db.execute(query, {"candidate_name": f"%{candidate_name}%"})
+        rows = result.fetchall()
+        
+        # Get column names
+        columns = result.keys()
+        
+        # Convert to list of dictionaries
+        data = [dict(zip(columns, row)) for row in rows]
+        
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-
-
+def get_candidate_marketing_count(db: Session):
+    """
+    Get the total count of candidate marketing records for pagination.
+    """
+    query = text("""
+        SELECT COUNT(*) as total
+        FROM candidatemarketing cm
+        JOIN candidate c ON cm.candidateid = c.candidateid
+    """)
+    
+    try:
+        result = db.execute(query)
+        return result.scalar()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 def get_employees(db: Session):
     """
