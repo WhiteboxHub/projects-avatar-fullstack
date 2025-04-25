@@ -4,7 +4,7 @@ import axios from "axios";
 import withAuth from "@/modals/withAuth";
 import { debounce } from "lodash";
 import { FaChevronDown, FaChevronRight, FaSpinner } from "react-icons/fa";
-import { Vendor } from "@/types/vendor";
+import { Vendor } from "@/types/Vendor";
 
 interface DropdownProps {
   title: string;

@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { AiOutlineClose } from 'react-icons/ai';
-
-interface Url {
-  // sl_no: number;
-  url: string;
-}
+import { Url } from '@/types/urls';
 
 interface EditRowModalProps {
   isOpen: boolean;
@@ -27,7 +23,12 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
   currentPage,
   pageSize
 }) => {
-  const [formData, setFormData] = useState<Url>({ sl_no: 0, url: '' });
+  const [formData, setFormData] = useState<Url>({
+    sl_no: initialData.sl_no,
+    url: initialData.url,
+    id: initialData.id
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {

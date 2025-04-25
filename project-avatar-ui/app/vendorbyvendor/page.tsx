@@ -1,5 +1,3 @@
-
-
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -12,7 +10,7 @@ import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Vendor } from "@/types/vendor";
+import { Vendor, RecruiterData } from '@/types/Vendor';
 
 import React, {
   useCallback,
@@ -29,42 +27,6 @@ import {
   FaDownload,
 } from "react-icons/fa";
 jsPDF.prototype.autoTable = autoTable;
-interface Vendor {
-  vendorid: number;
-  companyname: string;
-  recruiters: RecruiterData[];
-  isGroup: boolean;
-  isCollapsed: boolean;
-  recruiter_count: number;
-}
-
-interface RecruiterData {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  designation: string;
-  status: string;
-  dob?: string;
-  personalemail: string;
-  skypeid: string;
-  linkedin: string;
-  twitter: string;
-  facebook: string;
-  review: string;
-  notes: string;
-  vendorid: number;
-  companyname: string;
-  employeeid?: number;
-  lastmoddatetime?: string;
-  clientid: string;
-}
-
-interface RowData extends RecruiterData {
-  isGroupRow?: boolean;
-  level?: number;
-  expanded?: boolean;
-}
 
 interface AlertMessage {
   text: string;
@@ -180,13 +142,13 @@ const RecruiterByVendor = () => {
         personalemail: "",
         skypeid: "",
         linkedin: "",
-        vendorid: "",
         twitter: "",
         facebook: "",
         review: "",
         notes: "",
         vendorid: vendor.vendorid,
         companyname: vendor.companyname,
+        clientid: "",
         isGroupRow: true,
         level: 0,
         expanded: expandedVendors[vendor.vendorid],

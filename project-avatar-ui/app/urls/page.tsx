@@ -12,25 +12,18 @@ import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/url_modals/AddRowUrl";
 import EditRowModal from "@/modals/url_modals/EditRowUrl";
 import ViewRowModal from "@/modals/url_modals/ViewRowUrl";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdAdd } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import withAuth from "@/modals/withAuth";
 import {
   AiOutlineEdit,
   AiOutlineEye,
   AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineReload
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
 import { PaginationState } from "ag-grid-community";
+import { Url } from "@/types/urls";
 
-interface Url {
-// sl_no ?:number;
-  id?: string;
-  url?: string;
-}
-
-jsPDF.prototype.autoTable = autoTable;
 const Urls = () => {
   const [rowData, setRowData] = useState<Url[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
@@ -134,7 +127,11 @@ const Urls = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
+        setSelectedRow({
+          sl_no: selectedRows[0].sl_no || 0,
+          url: selectedRows[0].url || '',
+          id: selectedRows[0].id
+        });
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         setAlertMessage("Please select a row to edit."); // Set alert message
@@ -200,7 +197,11 @@ const Urls = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]); // Set the selected row data
+        setSelectedRow({
+          sl_no: selectedRows[0].sl_no || 0,
+          url: selectedRows[0].url || '',
+          id: selectedRows[0].id
+        });
         setModalState((prevState) => ({ ...prevState, view: true })); // Open the view modal
       } else {
         setAlertMessage("Please select a row to view."); // Set alert message
@@ -380,7 +381,9 @@ const Urls = () => {
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           onSave={fetchData}
-          initialData={selectedRow} // Added initialData prop
+          initialData={selectedRow}
+          currentPage={currentPage}
+          pageSize={paginationPageSize}
         />
       )}
       {modalState.view && selectedRow && (
@@ -393,5 +396,6 @@ const Urls = () => {
     </div>
   );
 };
+
 
 export default withAuth(Urls);

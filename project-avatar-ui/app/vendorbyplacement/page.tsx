@@ -12,7 +12,7 @@ import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Vendor } from "@/types/vendor";
+import { Vendor  } from "@/types/Vendor";
 
 import React, {
   useCallback,
@@ -29,14 +29,14 @@ import {
   FaDownload,
 } from "react-icons/fa";
 jsPDF.prototype.autoTable = autoTable;
-interface Vendor {
-  vendorid: number;
-  companyname: string;
-  recruiters: RecruiterData[];
-  isGroup: boolean;
-  isCollapsed: boolean;
-  recruiter_count: number;
-}
+// interface Vendor {
+//   vendorid: number;
+//   companyname: string;
+//   recruiters: RecruiterData[];
+//   isGroup: boolean;
+//   isCollapsed: boolean;
+//   recruiter_count: number;
+// }
 
 interface RecruiterData {
   id: number;
@@ -180,13 +180,13 @@ const RecruiterByVendor = () => {
         personalemail: "",
         skypeid: "",
         linkedin: "",
-        vendorid: "",
         twitter: "",
         facebook: "",
         review: "",
         notes: "",
         vendorid: vendor.vendorid,
         companyname: vendor.companyname,
+        clientid: "",
         isGroupRow: true,
         level: 0,
         expanded: expandedVendors[vendor.vendorid],
@@ -408,7 +408,7 @@ const RecruiterByVendor = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/update/${formData.id}`,
         formData
       );
-      showAlert("Recruiter updated successfully", "yes success");
+      showAlert("Recruiter updated successfully", "success");
       setModalState({ ...modalState, edit: false });
       fetchData();
     } catch (error) {
