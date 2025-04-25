@@ -50,11 +50,7 @@ const ViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onClose, rowData })
       <h2 className="text-2xl font-bold mb-6 text-gray-800 pr-8">View URL</h2>
 
       <div className="space-y-4">
-        {/* ID */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
-          <p className="text-sm text-gray-600">{rowData.id}</p> {/* Updated 'data' to 'rowData' */}
-        </div>
+      
 
         {/* URL */}
         <div>

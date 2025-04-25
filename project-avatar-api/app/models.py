@@ -1099,13 +1099,59 @@ class Placement(Base):
 #     placements = relationship("Placement", back_populates="candidate")
 
 class Vendor(Base):
-    __tablename__ = "vendor"
+    __tablename__ = 'vendor'
 
-    id = Column(Integer, primary_key=True, index=True)
-    companyname = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    companyname = Column(String(250), unique=True, index=True, nullable=False)
+    status = Column(String(45), nullable=False, default='Current')
+    accountnumber = Column(String(250), nullable=True)
+    tier = Column(Integer, nullable=False, default=2)
+    email = Column(String(150), unique=True, index=True, nullable=False)
+    phone = Column(String(150), nullable=False, default='000-000-0000')
+    fax = Column(String(150), nullable=False, default='000-000-0000')
+    address = Column(String(250), nullable=True)
+    city = Column(String(150), nullable=True)
+    state = Column(String(150), nullable=True)
+    country = Column(String(150), nullable=True)
+    zip = Column(String(150), nullable=True)
+    url = Column(String(150), index=True, nullable=False, default='http://nothing.com')
+    solicited = Column(String(1), nullable=False, default='N')
+    hirebeforeterm = Column(String(1), nullable=False, default='N')
+    hireafterterm = Column(String(1), nullable=False, default='N')
+    minrate = Column(Integer, nullable=False, default=62)
+    latepayments = Column(String(1), nullable=False, default='N')
+    totalnetterm = Column(Integer, nullable=False, default=45)
+    defaultedpayment = Column(String(1), nullable=False, default='N')
+    culture = Column(String(1), nullable=False, default='D')
+    hrname = Column(String(150), nullable=True)
+    hremail = Column(String(150), nullable=True)
+    hrphone = Column(String(150), nullable=True)
+    managername = Column(String(150), nullable=True)
+    twitter = Column(String(100), nullable=True)
+    facebook = Column(String(100), nullable=True)
+    linkedin = Column(String(100), nullable=True)
+    manageremail = Column(String(150), nullable=True)
+    managerphone = Column(String(150), nullable=True)
+    secondaryname = Column(String(150), nullable=True)
+    secondaryemail = Column(String(150), nullable=True)
+    secondaryphone = Column(String(150), nullable=True)
+    timsheetemail = Column(String(150), nullable=True)
+    agreementstatus = Column(String(45), nullable=False, default='Not Available')
+    agreementname = Column(String(150), nullable=True)
+    agreementlink = Column(String(250), nullable=True)
+    subcontractorlink = Column(String(250), nullable=True)
+    nonsolicitationlink = Column(String(250), nullable=True)
+    nonhirelink = Column(String(250), nullable=True)
+    clients = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
+    crawldate = Column(Date, nullable=False, default='2014-01-01')
+    lastmoddatetime = Column(DateTime, nullable=False, default='0000-00-00 00:00:00')
 
     placements = relationship("Placement", back_populates="vendor")
     recruiters = relationship("Recruiter", back_populates="vendor")
+
+
+    
 
 class Client(Base):
     __tablename__ = "client"

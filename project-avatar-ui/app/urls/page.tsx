@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -12,23 +12,18 @@ import { FaDownload } from "react-icons/fa";
 import AddRowModal from "@/modals/url_modals/AddRowUrl";
 import EditRowModal from "@/modals/url_modals/EditRowUrl";
 import ViewRowModal from "@/modals/url_modals/ViewRowUrl";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdAdd } from "react-icons/md";
 import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import withAuth from "@/modals/withAuth";
 import {
   AiOutlineEdit,
   AiOutlineEye,
   AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineReload
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
+import { PaginationState } from "ag-grid-community";
+import { Url } from "@/types/urls";
 
-interface Url {
-  id?: string;
-  url?: string;
-}
-
-jsPDF.prototype.autoTable = autoTable;
 const Urls = () => {
   const [rowData, setRowData] = useState<Url[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
@@ -36,6 +31,9 @@ const Urls = () => {
     { headerName: string; field: string }[]
   >([]);
   const [paginationPageSize] = useState<number>(500);
+  const [paginationState,] = useState<PaginationState>({
+   currentPage: 1,
+    pageSize: 500  });
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,9 +71,9 @@ const Urls = () => {
     }
   };
 
-  interface ErrorResponse {
-    message: string;
-  }
+  // interface ErrorResponse {
+  //   message: string;
+  // }
 
   const fetchUrls = async (searchQuery = "") => {
     try {
@@ -129,7 +127,11 @@ const Urls = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
+        setSelectedRow({
+          sl_no: selectedRows[0].sl_no || 0,
+          url: selectedRows[0].url || '',
+          id: selectedRows[0].id
+        });
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         setAlertMessage("Please select a row to edit."); // Set alert message
@@ -140,36 +142,50 @@ const Urls = () => {
 
   const handleDeleteRow = async () => {
     if (gridRef.current) {
-      const selectedRows = gridRef.current.api.getSelectedRows();
-      if (selectedRows.length > 0) {
-        const reindexedId = selectedRows[0].reindexed_id; // Use the correct field for reindexed ID
-        if (reindexedId) {
-          const confirmation = window.confirm(
-            `Are you sure you want to delete URL with reindexed ID ${reindexedId}?`
-          );
-          if (!confirmation) return;
-  
-          try {
-            await axios.delete(`${API_URL}/urls/delete/${reindexedId}`, {
-              headers: { AuthToken: localStorage.getItem("token") },
-            });
-            alert("URL deleted successfully.");
-            fetchData();
-          } catch (error) {
-            const axiosError = error as AxiosError;
-  
-            alert(
-              `Failed to delete URL: ${
-                (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-              }`
-            );
-          }
-        } else {
-          alert("No valid reindexed ID found for the selected row.");
+      try {
+        const selectedRows = gridRef.current.api.getSelectedRows();
+        
+        if (selectedRows.length === 0) {
+          alert("Please select a row to delete.");
+          return;
         }
-      } else {
-        setAlertMessage("Please select a row to delete."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+  
+        // Get current pagination state (replace with your actual state management)
+        const currentPage = paginationState?.currentPage || 1;
+        const pageSize = paginationState?.pageSize || 500;
+  
+        const sl_no = selectedRows[0].sl_no;
+        
+        const confirmation = window.confirm(
+          `Are you sure you want to delete URL with SL No ${sl_no}?`
+        );
+  
+        if (confirmation) {
+          const response = await axios.delete(
+            `${API_URL}/urls/delete/${sl_no}`, 
+            {
+              params: {
+                page: currentPage,
+                page_size: pageSize
+              },
+              headers: { 
+                AuthToken: localStorage.getItem("token") || "" 
+              }
+            }
+          );
+  
+          if (response.status === 200) {
+            alert("URL deleted successfully.");
+            fetchData(); // Refresh your data
+          }
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert(
+          error instanceof Error 
+            ? error.message 
+            : "Failed to delete URL"
+        );
       }
     }
   };
@@ -181,7 +197,11 @@ const Urls = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]); // Set the selected row data
+        setSelectedRow({
+          sl_no: selectedRows[0].sl_no || 0,
+          url: selectedRows[0].url || '',
+          id: selectedRows[0].id
+        });
         setModalState((prevState) => ({ ...prevState, view: true })); // Open the view modal
       } else {
         setAlertMessage("Please select a row to view."); // Set alert message
@@ -361,7 +381,9 @@ const Urls = () => {
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           onSave={fetchData}
-          initialData={selectedRow} // Added initialData prop
+          initialData={selectedRow}
+          currentPage={currentPage}
+          pageSize={paginationPageSize}
         />
       )}
       {modalState.view && selectedRow && (
@@ -374,5 +396,6 @@ const Urls = () => {
     </div>
   );
 };
+
 
 export default withAuth(Urls);

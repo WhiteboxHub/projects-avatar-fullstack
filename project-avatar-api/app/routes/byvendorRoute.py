@@ -1,211 +1,63 @@
-# from fastapi import APIRouter, Depends, HTTPException, Query
-# from fastapi.responses import Response
-# from sqlalchemy.orm import Session
-# from typing import List
-# from app.controllers.byVendorController import (
-#     get_all_recruiters_by_vendor,
-#     add_recruiter_by_vendor,
-#     update_recruiter_by_vendor,
-#     delete_recruiter_by_vendor
-# )
-# from app.schemas import RecruiterByVendorInDB, RecruiterByVendorCreate, RecruiterByVendorUpdate
-# from app.database.db import get_db
-
-# router = APIRouter()
-
-# @router.get("/byvendor", response_model=List[RecruiterByVendorInDB])
-# async def get_all_recruiters_by_vendor_route(
-#     page: int = Query(1, description="Page number"),
-#     page_size: int = Query(100, description="Items per page"),
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Get all recruiters with clientid = 0 and handle NULL values.
-#     """
-#     offset = (page - 1) * page_size
-#     recruiters = get_all_recruiters_by_vendor(db, offset=offset, limit=page_size)
-#     return [
-#         RecruiterByVendorInDB(
-#             id=recruiter.id,
-#             name=recruiter.name,
-#             email=recruiter.email,
-#             phone=recruiter.phone,
-#             designation=recruiter.designation,
-#             vendorid=recruiter.vendorid,
-#             status=recruiter.status,
-#             dob=recruiter.dob,
-#             personalemail=recruiter.personalemail,
-#             skypeid=recruiter.skypeid,
-#             linkedin=recruiter.linkedin,
-#             twitter=recruiter.twitter,
-#             facebook=recruiter.facebook,
-#             review=recruiter.review,
-#             notes=recruiter.notes,
-#             comp=recruiter.vendor.companyname if recruiter.vendor else " ",
-#         )
-#         for recruiter in recruiters
-#     ]
-# @router.post("/byvendor/add", response_model=RecruiterByVendorInDB)
-# async def create_recruiter_by_vendor(
-#     recruiter: RecruiterByVendorCreate, 
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Create a recruiter (clientid = 0).
-#     """
-#     return add_recruiter_by_vendor(db, recruiter)
-
-# @router.put("/byvendor/update/{id}", response_model=RecruiterByVendorInDB)
-# async def update_recruiter_by_vendor_route(
-#     id: int,
-#     recruiter: RecruiterByVendorUpdate,
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Update a recruiter (clientid = 0).
-#     """
-#     updated_recruiter = update_recruiter_by_vendor(db, id, recruiter)
-#     if not updated_recruiter:
-#         raise HTTPException(status_code=404, detail="Recruiter not found")
-#     return RecruiterByVendorInDB(
-#         **updated_recruiter.__dict__,
-#         comp=updated_recruiter.vendor.companyname if updated_recruiter.vendor else " "
-#     )
-
-# @router.delete("/byvendor/delete/{id}")
-# async def delete_recruiter_by_vendor_route(id: int, db: Session = Depends(get_db)):
-#     """
-#     Delete a recruiter (clientid = 0).
-#     """
-#     if not delete_recruiter_by_vendor(db, id):
-#         raise HTTPException(status_code=404, detail="Recruiter not found")
-#     return Response(status_code=204)
-
-
-
-
-
-
-
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import Response
 from sqlalchemy.orm import Session
-from typing import List, Optional
-from app.controllers.byVendorController import (
-    get_all_recruiters_by_vendor,
-    add_recruiter_by_vendor,
-    update_recruiter_by_vendor,
-    delete_recruiter_by_vendor,
-    search_recruiters_by_vendor
-)
-from app.schemas import RecruiterByVendorInDB, RecruiterByVendorCreate, RecruiterByVendorUpdate
+from typing import Optional, List
 from app.database.db import get_db
+from app.controllers.byVendorController import (
+    get_recruiters_by_vendor,
+    get_vendor_options,
+    create_recruiter,
+    update_recruiter,
+    delete_recruiter,
+    get_recruiter
+)
+from app.schemas import (
+    RecruiterCreate,
+    RecruiterUpdate,
+    RecruiterResponse,
+    VendorOption
+)
 
 router = APIRouter()
 
-@router.get("/byvendor", response_model=List[RecruiterByVendorInDB])
-async def get_all_recruiters_by_vendor_route(
-    page: int = Query(1, description="Page number"),
-    page_size: int = Query(100, description="Items per page"),
-    search: Optional[str] = Query(None, description="Search term"),
+@router.get("/recruiters/by-vendor")
+async def read_recruiters_by_vendor(
+    page: int = Query(1, alias="page"),
+    page_size: int = Query(1000, alias="pageSize"),
+    type: str = Query("vendor", alias="type"),
+    search: Optional[str] = Query(None, alias="search"),
     db: Session = Depends(get_db)
 ):
-    """
-    Get all recruiters with clientid = 0 (type=vendor)
-    Supports search functionality matching the PHP implementation
-    """
-    offset = (page - 1) * page_size
-    
-    if search:
-        recruiters = search_recruiters_by_vendor(db, search_term=search, offset=offset, limit=page_size)
-    else:
-        recruiters = get_all_recruiters_by_vendor(db, offset=offset, limit=page_size)
-    
-    return [
-        RecruiterByVendorInDB(
-            id=recruiter.id,
-            name=recruiter.name,
-            email=recruiter.email,
-            phone=recruiter.phone,
-            designation=recruiter.designation,
-            vendorid=recruiter.vendorid,
-            status=recruiter.status,
-            dob=recruiter.dob,
-            personalemail=recruiter.personalemail,
-            skypeid=recruiter.skypeid,
-            linkedin=recruiter.linkedin,
-            twitter=recruiter.twitter,
-            facebook=recruiter.facebook,
-            review=recruiter.review,
-            notes=recruiter.notes,
-            comp=recruiter.vendor.companyname if recruiter.vendor else " ",
-        )
-        for recruiter in recruiters
-    ]
+    return get_recruiters_by_vendor(db, page, page_size, type, search)
 
-@router.post("/byvendor/add", response_model=RecruiterByVendorInDB)
-async def create_recruiter_by_vendor(
-    recruiter: RecruiterByVendorCreate, 
+@router.get("/recruiters/byVendor/vendors", response_model=List[VendorOption])
+async def get_vendors_for_dropdown(db: Session = Depends(get_db)):
+    return get_vendor_options(db)
+
+@router.post("/recruiters/byVendor/add", response_model=RecruiterResponse)
+async def add_recruiter(
+    recruiter: RecruiterCreate,
     db: Session = Depends(get_db)
 ):
-    """
-    Create a recruiter (clientid = 0 enforced)
-    """
-    # Enforce clientid=0 for vendor recruiters
-    if recruiter.clientid != 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Client ID must be 0 for vendor recruiters"
-        )
-    return add_recruiter_by_vendor(db, recruiter)
+    return create_recruiter(db, recruiter)
 
-@router.put("/byvendor/update/{id}", response_model=RecruiterByVendorInDB)
-async def update_recruiter_by_vendor_route(
-    id: int,
-    recruiter: RecruiterByVendorUpdate,
+@router.put("/recruiters/byVendor/update/{recruiter_id}", response_model=RecruiterResponse)
+async def edit_recruiter(
+    recruiter_id: int,
+    recruiter: RecruiterUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Update a recruiter (clientid remains 0)
-    """
-    # First verify this is a vendor recruiter
-    existing_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not existing_recruiter:
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    if existing_recruiter.clientid != 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot update recruiter - must have clientid=0"
-        )
-    
-    # Prevent changing clientid from 0
-    if recruiter.clientid is not None and recruiter.clientid != 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot change clientid from 0 for vendor recruiters"
-        )
-    
-    updated_recruiter = update_recruiter_by_vendor(db, id, recruiter)
-    return RecruiterByVendorInDB(
-        **updated_recruiter.__dict__,
-        comp=updated_recruiter.vendor.companyname if updated_recruiter.vendor else " "
-    )
+    return update_recruiter(db, recruiter_id, recruiter)
 
-@router.delete("/byvendor/delete/{id}")
-async def delete_recruiter_by_vendor_route(id: int, db: Session = Depends(get_db)):
-    """
-    Delete a recruiter (only if clientid = 0)
-    """
-    # First verify this is a vendor recruiter
-    existing_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not existing_recruiter:
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    if existing_recruiter.clientid != 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete recruiter - must have clientid=0"
-        )
-    
-    if not delete_recruiter_by_vendor(db, id):
-        raise HTTPException(status_code=404, detail="Recruiter not found")
-    return Response(status_code=204)
+@router.delete("/recruiters/byVendor/remove/{recruiter_id}")
+async def remove_recruiter(
+    recruiter_id: int,
+    db: Session = Depends(get_db)
+):
+    return delete_recruiter(db, recruiter_id)
+
+@router.get("/recruiters/byVendor/{recruiter_id}", response_model=RecruiterResponse)
+async def view_recruiter(
+    recruiter_id: int,
+    db: Session = Depends(get_db)
+):
+    return get_recruiter(db, recruiter_id)

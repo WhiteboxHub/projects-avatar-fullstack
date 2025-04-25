@@ -705,5 +705,5 @@ const PlacementPage = () => {
         );
     };
     
-    export default PlacementPage;
+export default PlacementPage;
 

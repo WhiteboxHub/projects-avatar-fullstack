@@ -1,9 +1,7 @@
-"use client";
 import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { RecruiterDetails } from "@/types/byDetailed";
 
 interface Vendor {
   id: number;
@@ -14,38 +12,35 @@ interface AddRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
-  vendors?: Vendor[];
-  defaultVendorId?: number;
+  type: string; 
 }
 
-const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  vendors = [],
-  defaultVendorId = 0
-}) => {
+const AddRowVendor: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    status: 'A', // Default to Active
     designation: '',
-    vendorid: defaultVendorId ? String(defaultVendorId) : '',
-    comp: '',
-    status: 'A',
     dob: '',
     personalemail: '',
     skypeid: '',
     linkedin: '',
     twitter: '',
     facebook: '',
-    review: 'Y',
+    review: 'N', // Default to No
+    vendorid: '', // Changed from clientid to vendorid
     notes: '',
+    clientid: 0 // Set clientid to 0 for vendor recruiters
   });
-
-  const [availableVendors, setAvailableVendors] = useState<Vendor[]>(vendors);
-  const [vendorsFetched, setVendorsFetched] = useState(false);
-
+  
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  
+  const reviewOptions = [
+    { value: 'Y', label: 'Yes' },
+    { value: 'N', label: 'No' }
+  ];
+  
   const statusOptions = [
     { value: 'A', label: 'Active' },
     { value: 'I', label: 'Inactive' },
@@ -55,38 +50,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
     { value: 'E', label: 'Excellent' }
   ];
 
-  const reviewOptions = [
-    { value: 'Y', label: 'Yes' },
-    { value: 'N', label: 'No' }
-  ];
-
   useEffect(() => {
-    // If vendors are not provided as props and haven't been fetched yet, fetch them
-    if (vendors.length === 0 && !vendorsFetched) {
-      const fetchVendors = async () => {
-        try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL;
-          const response = await axios.get(`${API_URL}/recruiters/byVendor/vendors`, {
-            headers: { AuthToken: localStorage.getItem("token") }
-          });
-          setAvailableVendors(response.data || []);
-          setVendorsFetched(true);
-        } catch (error) {
-          console.error("Error fetching vendors:", error);
-        }
-      };
-      fetchVendors();
-    }
-
-    // Set default vendor ID if provided
-    if (defaultVendorId) {
-      setFormData(prev => ({
-        ...prev,
-        vendorid: String(defaultVendorId)
-      }));
-    }
-  }, [vendors, defaultVendorId, vendorsFetched]);
-
+    // Fetch vendors for the dropdown
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/vendors`);
+        setVendors(response.data || []);
+      } catch (error) {
+        console.error("Error fetching vendors:", error);
+      }
+    };
+    fetchVendors();
+  }, []);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -98,12 +74,17 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${API_URL}/recruiters/byVendorDetailed/add`, formData, {
+      // Ensure clientid is set to 0 for vendor recruiters
+      const submitData = {
+        ...formData,
+        clientid: 0,
+        vendorid: formData.vendorid || 0 // Set to 0 if not selected
+      };
+      
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byAllListVendor/add`, submitData, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
-      console.log(response.data.message); // Log success message
-      onSubmit(); // Call the onSubmit callback
+      onSubmit(); // Notify parent component of successful submission
       onClose(); // Close modal after successful submission
     } catch (error) {
       console.error("Error adding recruiter:", error);
@@ -134,8 +115,6 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       }}
-      contentLabel="Add Recruiter"
-      ariaHideApp={false}
     >
       <div className="relative">
         <button
@@ -145,10 +124,11 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           <AiOutlineClose />
         </button>
       </div>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Recruiter</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Vendor Recruiter</h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Name*</label>
           <input
             type="text"
             name="name"
@@ -159,8 +139,9 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             required
           />
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email*</label>
           <input
             type="email"
             name="email"
@@ -171,8 +152,9 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             required
           />
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone*</label>
           <input
             type="text"
             name="phone"
@@ -180,10 +162,27 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
+            required
           />
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Status*</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
+          >
+            {statusOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation*</label>
           <input
             type="text"
             name="designation"
@@ -191,47 +190,10 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter designation"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor</label>
-          <select
-            name="vendorid"
-            value={formData.vendorid}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             required
-          >
-            <option value="">Select Vendor</option>
-            {availableVendors.map(vendor => (
-              <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company</label>
-          <input
-            type="text"
-            name="comp"
-            value={formData.comp}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter company"
           />
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-          >
-            {statusOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
           <input
@@ -240,8 +202,10 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             value={formData.dob}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            placeholder="Enter date of birth"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Personal Email</label>
           <input
@@ -253,6 +217,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             placeholder="Enter personal email"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
           <input
@@ -264,6 +229,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             placeholder="Enter Skype ID"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
           <input
@@ -275,6 +241,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             placeholder="Enter LinkedIn URL"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Twitter</label>
           <input
@@ -286,6 +253,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             placeholder="Enter Twitter handle"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook</label>
           <input
@@ -297,6 +265,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             placeholder="Enter Facebook URL"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
           <select
@@ -310,6 +279,22 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             ))}
           </select>
         </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor</label>
+          <select
+            name="vendorid"
+            value={formData.vendorid}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+          >
+            <option value="">Select Vendor</option>
+            {vendors.map(vendor => (
+              <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
           <textarea
@@ -318,26 +303,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter notes"
+            rows={4}
           />
         </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200 font-semibold text-sm"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-          >
-            Submit
-          </button>
-        </div>
+
+        <button
+          type="submit"
+          className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
+        >
+          Submit
+        </button>
       </form>
     </Modal>
   );
 };
 
-export default AddRowRecruiter;
+export default AddRowVendor;

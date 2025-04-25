@@ -1,140 +1,165 @@
 "use client";
-
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { AxiosError } from 'axios';
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import AddRowModal from "@/modals/vendor_modals_detailed/AddRowVendor";
+import EditRowRecruiter from "@/modals/vendor_modals_detailed/EditRowVendor";
+import Modal from "react-modal";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
+import { debounce } from "lodash";
+import { AiOutlineClose } from "react-icons/ai";
 import { FaDownload } from "react-icons/fa";
-import AddRowModal from "../../modals/vendor_modals_detailed/AddRowVendor";
-import EditRowModal from "../../modals/vendor_modals_detailed/EditRowVendor";
-import ViewRowModal from "../../modals/vendor_modals_detailed/ViewRowVendor";
-import { MdDelete } from "react-icons/md";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
+import { MdAdd, MdDelete } from "react-icons/md";
+import { RecruiterDetails } from "@/types/byDetailed";
+
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaAngleDoubleLeft,
+  FaAngleDoubleRight,
+} from "react-icons/fa";
 import {
   AiOutlineEdit,
   AiOutlineEye,
-  AiOutlineSearch,
-  AiOutlineReload,
+  AiOutlineSearch
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
-import { ErrorResponse, Vendor } from "@/types";
+import { SortChangedEvent } from "ag-grid-community";
+
+interface ViewRowRecruiterComponentProps {
+  isOpen: boolean;
+  onClose: () => void;
+  recruiter: RecruiterDetails | null;
+}
+
+const ViewRowRecruiterComponent: React.FC<ViewRowRecruiterComponentProps> = ({ isOpen, onClose, recruiter }) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      style={{
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '400px',
+          width: '90%',
+          maxHeight: '80vh',
+          padding: '24px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          overflowY: 'auto',
+          fontFamily: 'Arial, sans-serif',
+        },
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      }}
+      contentLabel="View Recruiter Details"
+      ariaHideApp={false}
+    >
+      <div className="relative">
+        <button
+          onClick={onClose}
+          className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
+        >
+          <AiOutlineClose />
+        </button>
+      </div>
+
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Recruiter Details</h2>
+
+      <div className="space-y-4">
+        {recruiter ? (
+          <>
+            {Object.entries(recruiter).map(([key, value]) => (
+              <div key={key}>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</label>
+                <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
+                  {value || 'N/A'}
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <p>No data available</p>
+        )}
+      </div>
+    </Modal>
+  );
+};
 
 jsPDF.prototype.autoTable = autoTable;
 
-const VendorDetails = () => {
-  const [rowData, setRowData] = useState<Vendor[]>([]);
-  const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string }[]
-  >([]);
-  const [paginationPageSize] = useState<number>(100);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalRows, setTotalRows] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+const RecruiterByVendor = () => {
   const [modalState, setModalState] = useState<{
     add: boolean;
     edit: boolean;
     view: boolean;
   }>({ add: false, edit: false, view: false });
-  const [selectedRow, setSelectedRow] = useState<Vendor | null>(null); // Use Vendor instead of VendorDetail
+
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [rowData, setRowData] = useState<RecruiterDetails[]>([]);
+  const [selectedRecruiter, setSelectedRecruiter] = useState<RecruiterDetails | null>(null);
   const gridRef = useRef<AgGridReact>(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(1000);
+  const [sortField, setSortField] = useState("status");
+  const [sortOrder, setSortOrder] = useState("asc");
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchRecruiters = async (page: number, search?: string) => {
     try {
-      const response = await axios.get(`${API_URL}/vendordetails`, {
+      const response = await axios.get(`${API_URL}/recruiters/byVendorDetailed`, {
         params: {
-          page: currentPage,
-          pageSize: paginationPageSize,
+          page,
+          pageSize,
+          sortField,
+          sortOrder,
+          searchTerm: search || undefined
         },
-        headers: { AuthToken: localStorage.getItem("token") },
+        headers: { AuthToken: localStorage.getItem("token") }
       });
-
-      console.log("Full API Response:", response);
-      console.log("API Response Data:", response.data);
-
-      const data = response.data;
-      const totalRows = response.headers['total-rows'] || data.length;
-
-      if (!Array.isArray(data)) {
-        throw new Error("Data is not an array or is undefined");
-      }
-      const dataWithSerials = data.map((item: Vendor) => ({
-        ...item,
-        // serialNo: (currentPage - 1) * paginationPageSize + index + 1,
-      }));
-
-      setRowData(dataWithSerials);
-      setTotalRows(totalRows);
-      setupColumns(dataWithSerials);
+      setRowData(response.data.data);
+      setTotalPages(response.data.pages);
     } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchVendorDetails = async (searchQuery = "") => {
-    try {
-      const response = await axios.get(`${API_URL}/vendordetails/search`, {
-        params: {
-          page: currentPage,
-          pageSize: paginationPageSize,
-          search: searchQuery,
-        },
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-
-      const { data, totalRows } = response.data;
-      setRowData(data);
-      setTotalRows(totalRows);
-      setupColumns(data);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-  };
-
-  const handleSearch = () => {
-    fetchVendorDetails(searchValue);
-  };
-
-  const setupColumns = (data: Vendor[]) => {
-    if (data.length > 0) {
-      const columns = [
-        ...Object.keys(data[0]).map((key) => ({
-          headerName: key.charAt(0).toUpperCase() + key.slice(1),
-          field: key,
-        })),
-      ];
-      setColumnDefs(columns);
+      console.error("Error fetching recruiters:", error);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [currentPage]);
+    fetchRecruiters(currentPage);
+  }, [currentPage, sortField, sortOrder]);
 
-  const handleRefresh = () => {
-    setSearchValue("");
-    fetchData();
-    window.location.reload();
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((searchTerm: string) => {
+      fetchRecruiters(1, searchTerm);
+      setCurrentPage(1);
+    }, 500),
+    []
+  );
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    debouncedSearch(value);
   };
 
-  const handleAddRow = () =>
-    setModalState((prevState) => ({ ...prevState, add: true }));
+  const handleAddRow = () => setModalState((prevState) => ({ ...prevState, add: true }));
 
   const handleEditRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
+        setSelectedRecruiter(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
         setAlertMessage("Please select a row to edit.");
@@ -147,29 +172,24 @@ const VendorDetails = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        const vendorId = selectedRows[0].id;
-        if (vendorId) {
-          const confirmation = window.confirm(
-            `Are you sure you want to delete vendor ID ${vendorId}?`
-          );
-          if (!confirmation) return;
-
+        const confirmDelete = window.confirm("Are you sure you want to delete the selected recruiter(s)?");
+        if (confirmDelete) {
+          setAlertMessage("Deleting selected recruiters...");
           try {
-            await axios.delete(`${API_URL}/vendordetails/delete/${vendorId}`, {
-              headers: { AuthToken: localStorage.getItem("token") },
-            });
-            alert("Vendor detail deleted successfully.");
-            fetchData();
+            // Batch delete requests
+            await Promise.all(selectedRows.map(row =>
+              axios.delete(`${API_URL}/recruiters/byVendorDetailed/remove/${row.id}`, {
+                headers: { AuthToken: localStorage.getItem("token") }
+              })
+            ));
+            setAlertMessage("Recruiters deleted successfully.");
+            fetchRecruiters(currentPage, searchValue);
           } catch (error) {
-            const axiosError = error as AxiosError;
-            alert(
-              `Failed to delete vendor detail: ${
-                (axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-              }`
-            );
+            console.error("Error deleting recruiters:", error);
+            setAlertMessage("Error deleting recruiters.");
+          } finally {
+            setTimeout(() => setAlertMessage(null), 3000);
           }
-        } else {
-          alert("No valid vendor ID found for the selected row.");
         }
       } else {
         setAlertMessage("Please select a row to delete.");
@@ -177,14 +197,13 @@ const VendorDetails = () => {
       }
     }
   };
-
-  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
+  
 
   const handleViewRow = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        setSelectedRow(selectedRows[0]);
+        setSelectedRecruiter(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
         setAlertMessage("Please select a row to view.");
@@ -194,23 +213,71 @@ const VendorDetails = () => {
   };
 
   const handleDownloadPDF = () => {
+    if (!rowData.length) return;
+
     const doc = new jsPDF();
-    doc.text("Vendor Details Data", 20, 10);
-    const pdfData = rowData.map((row) => Object.values(row));
-    const headers = columnDefs.map((col) => col.headerName);
-    autoTable(doc, {
-      head: [headers],
-      body: pdfData,
-      theme: 'grid',
-      styles: { fontSize: 5 },
+    doc.text("Vendor Recruiters Data", 20, 10);
+
+    const tableColumn = ["ID", "Name", "Email", "Phone", "Designation", "Vendor", "Status"];
+    const tableRows = rowData.map(item => [
+      item.id,
+      item.name,
+      item.email,
+      item.phone,
+      item.designation,
+      item.comp,
+      item.status
+    ]);
+
+    doc.autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
     });
-    doc.save("vendor_details_data.pdf");
+
+    doc.save("vendor_recruiters_data.pdf");
   };
 
-  const totalPages = Math.ceil(totalRows / paginationPageSize);
-  const startPage = Math.max(1, currentPage);
-  const endPage = Math.min(totalPages, currentPage + 4);
-  const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pageNumbers.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`text-sm px-2 py-1 rounded-md ${
+              currentPage === i
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+            } hidden sm:block`}
+          >
+            {i}
+          </button>
+        );
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pageNumbers.push(<span key={i}>...</span>);
+      }
+    }
+    return pageNumbers;
+  };
+
+  const handleSortChanged = (event: SortChangedEvent<RecruiterDetails>) => {
+    const columnState = event.api.getColumnState();
+    if (columnState.length > 0) {
+      const sortModel = columnState.find((column) => column.sort);
+      if (sortModel) {
+        setSortField(sortModel.colId);
+        setSortOrder(sortModel.sort || "asc");
+      }
+    }
+  };
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
@@ -219,163 +286,202 @@ const VendorDetails = () => {
           {alertMessage}
         </div>
       )}
-
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800">Recruiters Management</h1>
-      </div>
-
-      <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
-        <div className="flex w-full md:w-auto mb-2 md:mb-0">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 w-64"
-          />
-          <button
-            onClick={handleSearch}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
-          >
-            <AiOutlineSearch className="mr-2" /> Search
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-800">Vendor Recruiter Management</h1>
         <div className="flex space-x-2">
           <button
             onClick={handleAddRow}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700"
+            title="Add Recruiter"
           >
             <MdAdd className="mr-2" />
           </button>
           <button
             onClick={handleEditRow}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
+            title="Edit Recruiter"
           >
             <AiOutlineEdit className="mr-2" />
           </button>
           <button
             onClick={handleDeleteRow}
             className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700"
+            title="Delete Recruiter"
           >
             <MdDelete className="mr-2" />
           </button>
           <button
             onClick={handleViewRow}
-            className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md transition duration-300 hover:bg-gray-700"
+            title="View Recruiter Details"
           >
             <AiOutlineEye className="mr-2" />
           </button>
           <button
-            onClick={handleRefresh}
-            className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900"
-          >
-            <AiOutlineReload className="mr-2" />
-          </button>
-          <button
             onClick={handleDownloadPDF}
             className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
+            title="Download PDF"
           >
             <FaDownload className="mr-2" />
           </button>
         </div>
       </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center h-48">
-          <span className="text-xl">Loading...</span>
-        </div>
-      ) : (
-        <div
-          className="ag-theme-alpine"
-          style={{ height: "400px", width: "100%", overflowY: "auto" }}
+      <div className="flex mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchValue}
+          onChange={handleSearchChange}
+          className="border border-gray-300 rounded-md p-2 w-64"
+        />
+        <button
+          onClick={() => fetchRecruiters(1, searchValue)}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            pagination={false}
-            domLayout="normal"
-            rowSelection="multiple"
-            defaultColDef={{
-              sortable: true,
-              filter: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              minWidth: 60,
-              maxWidth: 100,
-            }}
-            rowHeight={30}
-            headerHeight={35}
-          />
-        </div>
-      )}
-
+          <AiOutlineSearch className="mr-2" /> Search
+        </button>
+      </div>
+      <div
+        className="ag-theme-alpine"
+        style={{ height: "500px", width: "100%", overflowY: "auto" }}
+      >
+        <AgGridReact
+          ref={gridRef}
+          rowData={rowData}
+          columnDefs={[
+            {
+              headerName: "#",
+              width: 60,
+              valueGetter: (params) => {
+                if (params.node && params.node.rowIndex !== null) {
+                  return params.node.rowIndex + 1;
+                }
+                return null;
+              },
+              pinned: 'left',
+              cellStyle: {
+                borderRight: '2px solid #ccc'
+              }
+            },
+            { headerName: "ID", field: "id", width: 70 },
+            { headerName: "Name", field: "name", width: 150, pinned: 'left' },
+            { headerName: "Email", field: "email", width: 180 },
+            { headerName: "Phone", field: "phone", width: 120 },
+            { headerName: "Designation", field: "designation", width: 150 },
+            { headerName: "Vendor ID", field: "vendorid", width: 100 },
+            { headerName: "Company", field: "comp", width: 150 },
+            {
+              headerName: "Status",
+              field: "status",
+              width: 100,
+              cellRenderer: (params: { value: string }) => {
+                const statusMap: {[key: string]: string} = {
+                  'A': 'Active',
+                  'I': 'Inactive',
+                  'D': 'Delete',
+                  'R': 'Rejected',
+                  'N': 'Not Interested',
+                  'E': 'Excellent'
+                };
+                return statusMap[params.value] || params.value;
+              }
+            },
+            { headerName: "DOB", field: "dob", width: 110 },
+            { headerName: "Personal Email", field: "personalemail", width: 180 },
+            { headerName: "Skype ID", field: "skypeid", width: 120 },
+            { headerName: "LinkedIn", field: "linkedin", width: 120 },
+            { headerName: "Twitter", field: "twitter", width: 120 },
+            { headerName: "Facebook", field: "facebook", width: 120 },
+            {
+              headerName: "Review",
+              field: "review",
+              width: 100,
+              cellRenderer: (params: { value: string }) => {
+                return params.value === 'Y' ? 'Yes' : params.value === 'N' ? 'No' : params.value;
+              }
+            },
+            { headerName: "Notes", field: "notes", width: 200 },
+          ]}
+          pagination={false}
+          domLayout="normal"
+          rowSelection="multiple"
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            resizable: true,
+            cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+          }}
+          onSortChanged={handleSortChanged}
+          rowHeight={30}
+          headerHeight={35}
+        />
+      </div>
       <div className="flex justify-between mt-4">
-        <div className="flex items-center">
+        <div className="flex items-center flex-wrap gap-2 overflow-auto">
           <button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
-            className="p-2 disabled:opacity-50"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 disabled:opacity-50"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaChevronLeft />
           </button>
-          {pageOptions.map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-            >
-              {page}
-            </button>
-          ))}
+          {renderPageNumbers()}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 disabled:opacity-50"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaChevronRight />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="p-2 disabled:opacity-50"
+            className="text-sm px-2 py-1 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300"
           >
             <FaAngleDoubleRight />
           </button>
+          <span className="ml-4 text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+          </span>
         </div>
       </div>
-
       {modalState.add && (
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-          refreshData={fetchData}
+          onSubmit={() => {
+            fetchRecruiters(currentPage, searchValue);
+            setModalState((prev) => ({ ...prev, add: false }));
+          }}
         />
       )}
-      {modalState.edit && selectedRow && (
-        <EditRowModal
+      {modalState.edit && selectedRecruiter && (
+        <EditRowRecruiter
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
-          rowData={selectedRow}
-          onSave={fetchData}
-          refreshData={fetchData}
+          initialData={selectedRecruiter}
+          onSubmit={() => {
+            fetchRecruiters(currentPage, searchValue);
+            setModalState((prev) => ({ ...prev, edit: false }));
+          }}
         />
       )}
-      {modalState.view && selectedRow && (
-        <ViewRowModal
+      {modalState.view && selectedRecruiter && (
+        <ViewRowRecruiterComponent
           isOpen={modalState.view}
           onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
-          rowData={selectedRow}
+          recruiter={selectedRecruiter}
         />
       )}
     </div>
   );
 };
 
-export default VendorDetails;
+export default RecruiterByVendor;

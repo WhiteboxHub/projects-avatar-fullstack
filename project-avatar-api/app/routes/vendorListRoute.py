@@ -1,52 +1,74 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List
-from app.database.db import get_db
-from app.schemas import VendorInDB, VendorCreate, VendorUpdate
-from app.controllers.vendorListController import (
-    get_vendors,
-    get_vendor,
-    create_vendor,
-    update_vendor,
-    delete_vendor
-)
+# from fastapi import APIRouter, Depends
+# from typing import Optional
+# from ..controllers.vendorListController import VendorController
+# from ..schemas import VendorResponse, VendorInDB, VendorCreate, VendorUpdate, VendorDeleteResponse, VendorSearchBase
+
+# router = APIRouter()
+
+# @router.get("/vendor/get", response_model=VendorResponse)
+# async def get_vendors(
+#     page: int = 1,
+#     page_size: int = 100,
+#     search: Optional[str] = None,
+#     controller: VendorController = Depends()
+# ):
+#     return await controller.get_vendors(page, page_size, search)
+
+# @router.get("/vendor/{vendor_id}", response_model=VendorInDB)
+# async def get_vendor(vendor_id: int, controller: VendorController = Depends()):
+#     return await controller.get_vendor(vendor_id)
+
+# @router.post("/vendor/add", response_model=VendorInDB)
+# async def add_vendor(vendor_data: VendorCreate, controller: VendorController = Depends()):
+#     return await controller.add_vendor(vendor_data)
+
+# @router.put("/vendor/edit/{vendor_id}", response_model=VendorInDB)
+# async def edit_vendor(vendor_id: int, vendor_data: VendorUpdate, controller: VendorController = Depends()):
+#     return await controller.edit_vendor(vendor_id, vendor_data)
+
+# @router.delete("/vendor/delete/{vendor_id}", response_model=VendorDeleteResponse)
+# async def delete_vendor(vendor_id: int, controller: VendorController = Depends()):
+#     return await controller.delete_vendor(vendor_id)
+
+# @router.get("/vendor/search", response_model=VendorResponse)
+# async def search_vendor(search: Optional[str] = None, page: int = 1, page_size: int = 100, controller: VendorController = Depends()):
+#     search_base = VendorSearchBase(companyname=search)
+#     return await controller.search_vendor(search_base)
+
+
+from fastapi import APIRouter, Depends
+from typing import Optional
+from ..controllers.vendorListController import VendorController
+from ..schemas import VendorResponse, VendorInDB, VendorCreate, VendorUpdate, VendorDeleteResponse, VendorSearchBase
 
 router = APIRouter()
 
-@router.get("/vendor", response_model=List[VendorInDB])
-def read_vendors(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(500, ge=1, le=10000),
-    db: Session = Depends(get_db)
+@router.get("/vendor/get", response_model=VendorResponse)
+async def get_vendors(
+    page: int = 1,
+    page_size: int = 100,
+    search: Optional[str] = None,
+    controller: VendorController = Depends()
 ):
-    skip = (page - 1) * page_size
-    vendors = get_vendors(db, skip=skip, limit=page_size)
-    return vendors
-
-@router.post("/vendor", response_model=VendorInDB)
-def create_vendor_route(vendor: VendorCreate, db: Session = Depends(get_db)):
-    return create_vendor(db=db, vendor=vendor)
+    return await controller.get_vendors(page, page_size, search)
 
 @router.get("/vendor/{vendor_id}", response_model=VendorInDB)
-def read_vendor(vendor_id: int, db: Session = Depends(get_db)):
-    vendor = get_vendor(db, vendor_id)
-    if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
-    return vendor
+async def get_vendor(vendor_id: int, controller: VendorController = Depends()):
+    return await controller.get_vendor(vendor_id)
 
-@router.put("/vendor/{vendor_id}", response_model=VendorInDB)
-def update_vendor_route(
-    vendor_id: int,
-    vendor: VendorUpdate,
-    db: Session = Depends(get_db)
-):
-    db_vendor = update_vendor(db, vendor_id, vendor)
-    if not db_vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
-    return db_vendor
+@router.post("/vendor/add", response_model=VendorInDB)
+async def add_vendor(vendor_data: VendorCreate, controller: VendorController = Depends()):
+    return await controller.add_vendor(vendor_data)
 
-@router.delete("/vendor/{vendor_id}")
-def delete_vendor_route(vendor_id: int, db: Session = Depends(get_db)):
-    if not delete_vendor(db, vendor_id):
-        raise HTTPException(status_code=404, detail="Vendor not found")
-    return {"message": "Vendor deleted successfully"}
+@router.put("/vendor/edit/{vendor_id}", response_model=VendorInDB)
+async def edit_vendor(vendor_id: int, vendor_data: VendorUpdate, controller: VendorController = Depends()):
+    return await controller.edit_vendor(vendor_id, vendor_data)
+
+@router.delete("/vendor/delete/{vendor_id}", response_model=VendorDeleteResponse)
+async def delete_vendor(vendor_id: int, controller: VendorController = Depends()):
+    return await controller.delete_vendor(vendor_id)
+
+@router.get("/vendor/search", response_model=VendorResponse)
+async def search_vendor(search: Optional[str] = None, page: int = 1, page_size: int = 100, controller: VendorController = Depends()):
+    search_base = VendorSearchBase(companyname=search)
+    return await controller.search_vendor(search_base)

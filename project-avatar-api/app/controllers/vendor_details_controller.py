@@ -1,118 +1,139 @@
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, select
-from app.models import Recruiter, Vendor  # Ensure these models are imported
-from app.schemas import RecruiterCreate, RecruiterUpdate, RecruiterInDB
+from sqlalchemy import func, or_
+from app.database.db import get_db
+from app.models import Recruiter, Vendor
+from app.schemas import RecruiterResponse
+from typing import Optional
 
-def get_recruiters_for_work(db: Session, offset: int = 0, limit: int = 200):
-    """
-    Fetch recruiters for type = "work" with pagination.
-    """
-    # Subquery to get the vendor's company name
-    vendor_subquery = (
-        select(Vendor.companyname)
-        .where(Vendor.id == Recruiter.vendorid)
-        .correlate(Recruiter)
-        .as_scalar()
+router = APIRouter()
+
+def get_vendor_recruiter_details(
+    db: Session,
+    page: int = 1,
+    page_size: int = 1000,
+    sort_field: Optional[str] = "status",
+    sort_order: Optional[str] = "asc",
+    search_term: Optional[str] = None
+):
+    # Base query
+    query = db.query(
+        Recruiter.id,
+        Recruiter.name,
+        Recruiter.email,
+        Recruiter.phone,
+        Recruiter.designation,
+        Recruiter.vendorid,
+        func.coalesce(Vendor.companyname, " ").label("comp"),
+        Recruiter.status,
+        Recruiter.dob,
+        Recruiter.personalemail,
+        Recruiter.skypeid,
+        Recruiter.linkedin,
+        Recruiter.twitter,
+        Recruiter.facebook,
+        Recruiter.review,
+        Recruiter.notes
+    ).outerjoin(Vendor, Recruiter.vendorid == Vendor.id)
+
+    # Apply filters for "work" type - matching the PHP code's work condition
+    query = query.filter(
+        Recruiter.clientid == 0,
+        Recruiter.vendorid != 0,
+        Recruiter.name.isnot(None),
+        func.length(Recruiter.name) > 1,
+        Recruiter.phone.isnot(None),
+        func.length(Recruiter.phone) > 1,
+        Recruiter.designation.isnot(None),
+        func.length(Recruiter.designation) > 1
     )
 
-    # Main query
-    query = (
-        db.query(
-            Recruiter.id,
-            Recruiter.name,
-            Recruiter.email,
-            Recruiter.phone,
-            Recruiter.designation,
-            Recruiter.vendorid,
-            func.coalesce(vendor_subquery, " ").label("comp"),  # Use func.coalesce for ifnull
-            Recruiter.status,
-            Recruiter.dob,
-            Recruiter.personalemail,
-            Recruiter.skypeid,
-            Recruiter.linkedin,
-            Recruiter.twitter,
-            Recruiter.facebook,
-            Recruiter.review,
-            Recruiter.notes,
-        )
-        .filter(
-            and_(
-                Recruiter.clientid == 0,
-                Recruiter.vendorid != 0,
-                Recruiter.name.isnot(None),
-                func.length(Recruiter.name) > 1,
-                Recruiter.phone.isnot(None),
-                func.length(Recruiter.phone) > 1,
-                Recruiter.designation.isnot(None),
-                func.length(Recruiter.designation) > 1,
+    # Apply search if provided
+    if search_term and search_term.strip():
+        search_term = f"%{search_term.strip()}%"
+        query = query.filter(
+            or_(
+                Recruiter.name.ilike(search_term),
+                Recruiter.email.ilike(search_term),
+                Recruiter.phone.ilike(search_term),
+                Recruiter.designation.ilike(search_term),
+                Vendor.companyname.ilike(search_term),
+                Recruiter.status.ilike(search_term),
+                Recruiter.personalemail.ilike(search_term),
+                Recruiter.skypeid.ilike(search_term),
+                Recruiter.linkedin.ilike(search_term),
+                Recruiter.twitter.ilike(search_term),
+                Recruiter.facebook.ilike(search_term),
+                Recruiter.notes.ilike(search_term)
             )
         )
-        .order_by(Recruiter.name.asc())  # Sort by name in alphabetical order
-        .offset(offset)  # Pagination: Skip rows
-        .limit(limit)    # Pagination: Limit rows
-    )
 
-    # Fetch the data
-    recruiters = query.all()
+    # Apply sorting - matching PHP's sortname for work type
+    if sort_field and sort_order:
+        if sort_field == "status" and sort_order.lower() == "asc":
+            # Default sorting for work type in PHP is "status asc, email"
+            query = query.order_by(Recruiter.status.asc(), Recruiter.email.asc())
+        else:
+            sort_column = getattr(Recruiter, sort_field, Recruiter.status)
+            if sort_order.lower() == 'desc':
+                sort_column = sort_column.desc()
+            query = query.order_by(sort_column)
 
-    # Add a serial number (sl no) to each recruiter
-    result = []
-    for index, recruiter in enumerate(recruiters, start=offset + 1):
-        recruiter_dict = {
-            "sl_no": index,  # Serial number
-            "id": recruiter.id,  # ID comes after sl_no
-            "name": recruiter.name,
-            "email": recruiter.email,
-            "phone": recruiter.phone,
-            "designation": recruiter.designation,
-            "vendorid": recruiter.vendorid,
-            "comp": recruiter.comp,
-            "status": recruiter.status,
-            "dob": recruiter.dob,
-            "personalemail": recruiter.personalemail,
-            "skypeid": recruiter.skypeid,
-            "linkedin": recruiter.linkedin,
-            "twitter": recruiter.twitter,
-            "facebook": recruiter.facebook,
-            "review": recruiter.review,
-            "notes": recruiter.notes,
-        }
-        result.append(recruiter_dict)
+    # Get total count before pagination
+    total = query.count()
 
-    return result
-# Create a new recruiter
-def create_recruiter(db: Session, recruiter: RecruiterCreate):
-    """
-    Create a new recruiter.
-    """
-    db_recruiter = Recruiter(**recruiter.dict())
-    db.add(db_recruiter)
+    # Apply pagination
+    recruiters = query.offset((page - 1) * page_size).limit(page_size).all()
+
+    # Convert to response format
+    recruiter_data = []
+    for recruiter in recruiters:
+        # Convert SQLAlchemy row to dictionary
+        recruiter_dict = {column: getattr(recruiter, column) for column in recruiter._fields}
+        recruiter_data.append(recruiter_dict)
+
+    return {
+        "data": recruiter_data,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": (total + page_size - 1) // page_size,
+        "records": len(recruiter_data)
+    }
+
+def add_recruiter(db: Session, recruiter_data: dict) -> RecruiterResponse:
+    # Set default clientid to 0 if not provided to avoid IntegrityError
+    if 'clientid' not in recruiter_data or recruiter_data['clientid'] is None:
+        recruiter_data['clientid'] = 0
+
+    new_recruiter = Recruiter(**recruiter_data)
+    db.add(new_recruiter)
     db.commit()
-    db.refresh(db_recruiter)
-    return db_recruiter
+    db.refresh(new_recruiter)
+    return RecruiterResponse.from_orm(new_recruiter)
 
-# Update an existing recruiter
-def update_recruiter(db: Session, id: int, recruiter: RecruiterUpdate):
-    """
-    Update a recruiter by ID.
-    """
-    db_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not db_recruiter:
-        return None
-    for key, value in recruiter.dict().items():
-        setattr(db_recruiter, key, value)
-    db.commit()
-    db.refresh(db_recruiter)
-    return db_recruiter
+def update_recruiter(db: Session, recruiter_id: int, recruiter_data: dict) -> RecruiterResponse:
+    recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=404, detail="Recruiter not found")
 
-# Delete a recruiter
-def delete_recruiter(db: Session, id: int):
-    """
-    Delete a recruiter by ID.
-    """
-    db_recruiter = db.query(Recruiter).filter(Recruiter.id == id).first()
-    if not db_recruiter:
-        return False
-    db.delete(db_recruiter)
+    # Ensure clientid is not set to None
+    if 'clientid' in recruiter_data and recruiter_data['clientid'] is None:
+        recruiter_data['clientid'] = 0
+
+    for key, value in recruiter_data.items():
+        if hasattr(recruiter, key):
+            setattr(recruiter, key, value)
+
     db.commit()
-    return True
+    db.refresh(recruiter)
+    return RecruiterResponse.from_orm(recruiter)
+
+def delete_recruiter(db: Session, recruiter_id: int) -> dict:
+    recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=404, detail="Recruiter not found")
+
+    recruiter.status = 'D'  # Soft delete by setting status to 'D'
+    db.commit()
+    return {"message": "Recruiter deleted successfully"}
