@@ -3,7 +3,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { RecruiterDetails } from "@/types/byDetailed";
+// import { RecruiterDetails } from "@/types/byDetailed";
 
 interface Client {
   id: number;
@@ -33,7 +33,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
     clientid: defaultClientId ? String(defaultClientId) : '',
     comp: '',
     status: 'A',
-    dob: '',
+    dob: null as string | null,
     personalemail: '',
     skypeid: '',
     linkedin: '',
@@ -44,6 +44,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
   });
 
   const [availableClients, setAvailableClients] = useState<Client[]>(clients);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientsFetched, setClientsFetched] = useState(false);
   
   const statusOptions = [
@@ -61,52 +62,80 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
   ];
 
   useEffect(() => {
-    // If clients are not provided as props and haven't been fetched yet, fetch them
-    if (clients.length === 0 && !clientsFetched) {
+    // Only fetch clients if they weren't provided as props and haven't been fetched yet
+    if (clients.length === 0 && availableClients.length === 0 && !clientsFetched) {
       const fetchClients = async () => {
         try {
+          setClientsFetched(true); // Mark as fetched to prevent multiple calls
           const API_URL = process.env.NEXT_PUBLIC_API_URL;
           const response = await axios.get(`${API_URL}/recruiters/byClient/clients`, {
             headers: { AuthToken: localStorage.getItem("token") }
           });
           setAvailableClients(response.data || []);
-          setClientsFetched(true);
         } catch (error) {
           console.error("Error fetching clients:", error);
         }
       };
       fetchClients();
+    } else if (clients.length > 0 && availableClients.length === 0) {
+      // Use the clients provided via props
+      setAvailableClients(clients);
     }
 
     // Set default client ID if provided
-    if (defaultClientId) {
+    if (defaultClientId && formData.clientid === '') {
       setFormData(prev => ({
         ...prev,
         clientid: String(defaultClientId)
       }));
     }
-  }, [clients, defaultClientId, clientsFetched]);
+  }, [clients, defaultClientId, availableClients.length, clientsFetched, formData.clientid]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    
+    if (name === 'dob') {
+      // Handle date field specifically
+      setFormData(prevData => ({
+        ...prevData,
+        [name]: value || null, // Set to null if empty string
+      }));
+    } else {
+      setFormData(prevData => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSubmitting) return; // Prevent multiple submissions
+    
+    setIsSubmitting(true);
+    
     try {
+      // Create a copy of formData to send to the API
+      const dataToSubmit = {...formData};
+      
+      // If dob is empty or null, ensure it's sent as null to avoid validation errors
+      if (!dataToSubmit.dob) {
+        dataToSubmit.dob = null;
+      }
+      
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${API_URL}/by/recruiters/byDetailed/add`, formData, {
+      const response = await axios.post(`${API_URL}/by/recruiters/byDetailed/add`, dataToSubmit, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
+      
       console.log(response.data.message); // Log success message
       onSubmit(); // Call the onSubmit callback
       onClose(); // Close modal after successful submission
     } catch (error) {
       console.error("Error adding recruiter:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -233,11 +262,11 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth (Optional)</label>
           <input
             type="date"
             name="dob"
-            value={formData.dob}
+            value={formData.dob || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
@@ -330,9 +359,10 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           </button>
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
+            disabled={isSubmitting}
+            className={`${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 px-4 rounded-lg transition duration-200 font-semibold text-sm`}
           >
-            Submit
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </form>
