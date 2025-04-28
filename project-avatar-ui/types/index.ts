@@ -124,6 +124,68 @@ export interface ByPO {
 //   avatarid: string;
 //   notes: string;
 // }
+// export interface Candidate{
+//   isGroupRow: any;
+//   id: number;
+//   name: string;
+//   assessment: string;
+//   candidateid: number; // Ensure candidateid is always a string
+//   // name: string;
+//   enrolleddate: string;
+//   email: string;
+//   course: string;
+//   phone: string;
+//   status: string;
+//   workstatus: string;
+//   education: string;
+//   workexperience: string;
+//   ssn: string;
+//   agreement: string;
+//   promissory: boolean;
+//   driverslicense: string;
+//   workpermit: string;
+//   wpexpirationdate: string;
+//   offerletter: string;
+//   secondaryemail: string;
+//   secondaryphone: string;
+//   address: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   zip: string;
+//   linkedin: string;
+//   dob: string;
+//   emergcontactphone: string;
+//   ssnvalidated: boolean;
+//   bgv: boolean;
+//   term: string;
+//   feepaid: boolean;
+//   feedue: number;
+//   salary0: number;
+//   salary6: number;
+//   salary12: number;
+//   guarantorname: string;
+//   guarantordesignation: string;
+//   guarantorcompany: string;
+//   contracturl: string;
+//   empagreementurl: string;
+//   offerletterurl: string;
+//   workpermiturl: string;
+//   referralid: string;
+//   portalid: string;
+//   avatarid: string;
+//   notes: string;
+//   batchname: string;
+//   recruiterassesment:string;
+//   instructorassesment:string;
+//   originalresume:string;
+//   lastmoddatetime:number;
+//   statuschangedate:number;
+//   diceflag:string;
+//   batchid:number;
+//   emaillist:string;
+// }
+
 export interface Candidate{
   isGroupRow: any;
   id: number;
@@ -176,17 +238,7 @@ export interface Candidate{
   avatarid: string;
   notes: string;
   batchname: string;
-  recruiterassesment:string;
-  instructorassesment:string;
-  originalresume:string;
-  lastmoddatetime:number;
-  statuschangedate:number;
-  diceflag:string;
-  batchid:number;
-  emaillist:string;
-
 }
-
 
 export interface Candidate {
   id: number;

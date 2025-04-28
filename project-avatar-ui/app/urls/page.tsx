@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-// import { AxiosError } from 'axios';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -21,19 +20,15 @@ import {
   AiOutlineSearch,
   AiOutlineReload
 } from "react-icons/ai";
-import { PaginationState } from "ag-grid-community";
 import { Url } from "@/types/urls";
 
 const Urls = () => {
   const [rowData, setRowData] = useState<Url[]>([]);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // Added state for alert message
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<
     { headerName: string; field: string }[]
   >([]);
   const [paginationPageSize] = useState<number>(500);
-  const [paginationState,] = useState<PaginationState>({
-   currentPage: 1,
-    pageSize: 500  });
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -70,10 +65,6 @@ const Urls = () => {
       setLoading(false);
     }
   };
-
-  // interface ErrorResponse {
-  //   message: string;
-  // }
 
   const fetchUrls = async (searchQuery = "") => {
     try {
@@ -134,12 +125,12 @@ const Urls = () => {
         });
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to edit.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
-
+  
   const handleDeleteRow = async () => {
     if (gridRef.current) {
       try {
@@ -149,10 +140,6 @@ const Urls = () => {
           alert("Please select a row to delete.");
           return;
         }
-  
-        // Get current pagination state (replace with your actual state management)
-        const currentPage = paginationState?.currentPage || 1;
-        const pageSize = paginationState?.pageSize || 500;
   
         const sl_no = selectedRows[0].sl_no;
         
@@ -166,7 +153,7 @@ const Urls = () => {
             {
               params: {
                 page: currentPage,
-                page_size: pageSize
+                page_size: paginationPageSize
               },
               headers: { 
                 AuthToken: localStorage.getItem("token") || "" 
@@ -176,7 +163,7 @@ const Urls = () => {
   
           if (response.status === 200) {
             alert("URL deleted successfully.");
-            fetchData(); // Refresh your data
+            fetchData();
           }
         }
       } catch (error) {
@@ -189,7 +176,6 @@ const Urls = () => {
       }
     }
   };
-  
 
   const handlePageChange = (newPage: number) => setCurrentPage(newPage);
 
@@ -202,10 +188,10 @@ const Urls = () => {
           url: selectedRows[0].url || '',
           id: selectedRows[0].id
         });
-        setModalState((prevState) => ({ ...prevState, view: true })); // Open the view modal
+        setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
-        setAlertMessage("Please select a row to view."); // Set alert message
-        setTimeout(() => setAlertMessage(null), 3000); // Clear alert message after 3 seconds
+        setAlertMessage("Please select a row to view.");
+        setTimeout(() => setAlertMessage(null), 3000);
       }
     }
   };
@@ -231,7 +217,7 @@ const Urls = () => {
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
-      {alertMessage && ( // Conditional rendering of alert message
+      {alertMessage && (
         <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
           {alertMessage}
         </div>

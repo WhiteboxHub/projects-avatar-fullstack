@@ -406,18 +406,17 @@ const OverdueComponent = () => {
         />
       )}
       {modalState.view && selectedRow && (
-        <ViewRowModal
-          isOpen={modalState.view}
-          onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
-          rowData={{
-            ...selectedRow,
-            amountexpected: selectedRow.amountexpected?.toString(),
-            amountreceived: selectedRow.amountreceived?.toString(),
-            quantity: selectedRow.quantity?.toString(),
-            rate: selectedRow.rate?.toString()
-          }}
-        />
-      )}
+  <ViewRowModal
+    isOpen={modalState.view}
+    onClose={() => setModalState((prev) => ({ ...prev, view: false }))}
+    rowData={{
+      ...selectedRow,
+      amountexpected: selectedRow.amountexpected?.toString(),
+      amountreceived: selectedRow.amountreceived?.toString(),
+      quantity: selectedRow.quantity?.toString()
+    }}
+  />
+)}
     </div>
   );
 };

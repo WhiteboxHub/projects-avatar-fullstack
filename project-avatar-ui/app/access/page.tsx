@@ -12,10 +12,25 @@ import withAuth from "@/modals/withAuth";
 import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
 import { User } from "@/types/index";
 import debounce from "lodash/debounce";
+import { ICellRendererParams, ColDef, SortChangedEvent } from "ag-grid-community";
+
+interface CellRendererParams extends ICellRendererParams {
+  value: string | null;
+}
+
+interface ColumnConfig extends ColDef {
+  headerName: string;
+  field: string;
+  width?: number;
+  editable?: boolean;
+  frozen?: boolean;
+  hide?: boolean;
+  cellRenderer?: (params: CellRendererParams) => string;
+}
 
 const Users = () => {
   const [rowData, setRowData] = useState<User[]>([]);
-  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string; width?: number; editable?: boolean; frozen?: boolean; hide?: boolean; cellRenderer?: any }[]>([]);
+  const [columnDefs, setColumnDefs] = useState<ColumnConfig[]>([]);
   const [paginationPageSize, setPaginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -27,7 +42,7 @@ const Users = () => {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [sortField, setSortField] = useState<string>("lastlogin");
   const [sortOrder, setSortOrder] = useState<string>("desc");
-  const gridRef = useRef<AgGridReact>(null);
+  const gridRef = useRef<AgGridReact<User>>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -89,7 +104,7 @@ const Users = () => {
   const setupColumns = (data: User[]) => {
     if (Array.isArray(data) && data.length > 0) {
       // Define specific column configurations based on the PHP code
-      const columnConfigs: { [key: string]: any } = {
+      const columnConfigs: Record<string, ColumnConfig> = {
         id: { headerName: "ID", field: "id", width: 70, hide: true, editable: false },
         uname: { headerName: "LoginID", field: "uname", width: 200, editable: false, frozen: true },
         level: { headerName: "Level", field: "level", width: 70, editable: true },
@@ -101,7 +116,7 @@ const Users = () => {
           field: "registereddate", 
           width: 100, 
           editable: false,
-          cellRenderer: (params: any) => {
+          cellRenderer: (params: CellRendererParams) => {
             if (!params.value) return '';
             try {
               const date = new Date(params.value);
@@ -118,7 +133,7 @@ const Users = () => {
           field: "lastlogin", 
           width: 100, 
           editable: false,
-          cellRenderer: (params: any) => {
+          cellRenderer: (params: CellRendererParams) => {
             if (!params.value) return '';
             try {
               const date = new Date(params.value);
@@ -143,7 +158,7 @@ const Users = () => {
           field: "level3date", 
           width: 100, 
           editable: true,
-          cellRenderer: (params: any) => {
+          cellRenderer: (params: CellRendererParams) => {
             if (!params.value) return '';
             try {
               const date = new Date(params.value);
@@ -233,7 +248,7 @@ const Users = () => {
         setTimeout(() => setAlertMessage(null), 3000);
       }
     },
-    [currentPage, fetchData]
+    [currentPage, fetchData, setIsSearching]
   );
 
   // Create a debounced version of the search function
@@ -265,22 +280,35 @@ const Users = () => {
     }
   };
 
-  const handleSortChanged = () => {
-    if (gridRef.current && gridRef.current.api) {
-      const sortModel = gridRef.current.api.getModel().getSort();
-      if (sortModel && sortModel.length > 0) {
-        setSortField(sortModel[0].colId);
-        setSortOrder(sortModel[0].sort);
+  // const handleSortChanged = () => {
+  //   if (gridRef.current && gridRef.current.api) {
+  //     // Get the current sort model from the grid
+  //     const sortModel = gridRef.current.api.getSortModel();
+  //     if (sortModel && sortModel.length > 0) {
+  //       setSortField(sortModel[0].colId);
+  //       setSortOrder(sortModel[0].sort);
+  //     }
+  //   }
+  // };
+
+  const handleSortChanged = (event: SortChangedEvent<User>) => {
+    const columnState = event.api.getColumnState();
+    if (columnState.length > 0) {
+      const sortModel = columnState.find((column) => column.sort);
+      if (sortModel) {
+        setSortField(sortModel.colId);
+        setSortOrder(sortModel.sort || "asc");
       }
     }
   };
+  
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
     
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
     
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);

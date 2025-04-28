@@ -24,6 +24,21 @@ import { MdAdd } from "react-icons/md";
 import { Lead } from "@/types/index";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import debounce from "lodash/debounce";
+import { ICellRendererParams, ColDef } from "ag-grid-community";
+
+interface CellRendererParams extends ICellRendererParams {
+  value: string | null;
+}
+
+interface ColumnConfig extends ColDef {
+  headerName: string;
+  field: string;
+  width?: number;
+  editable?: boolean;
+  frozen?: boolean;
+  hide?: boolean;
+  cellRenderer?: (params: CellRendererParams) => string;
+}
 
 interface ModalState {
   add: boolean;
@@ -49,9 +64,7 @@ interface CachedPageData {
 
 const Leads = () => {
   const [rowData, setRowData] = useState<Lead[]>([]);
-  const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string; cellRenderer?: any; width?: number }[]
-  >([]);
+  const [columnDefs, setColumnDefs] = useState<ColumnConfig[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [modalState, setModalState] = useState<{
@@ -75,7 +88,7 @@ const Leads = () => {
         const cachedData = cachedPages.current.get(page)!;
         setRowData(cachedData.data);
         setTotalRows(cachedData.totalRows);
-        setupColumns(cachedData.data, page);
+        setupColumns(cachedData.data);
         return;
       }
 
@@ -91,7 +104,7 @@ const Leads = () => {
         const { data, totalRows } = response.data;
         setRowData(data);
         setTotalRows(totalRows);
-        setupColumns(data, page);
+        setupColumns(data);
         
         cachedPages.current.set(page, { data, totalRows });
       } catch (error) {
@@ -120,7 +133,7 @@ const Leads = () => {
 
         setRowData(response.data);
         setTotalRows(response.data.length);
-        setupColumns(response.data, 1, true);
+        setupColumns(response.data);
       } catch (error) {
         console.error("Error searching leads:", error);
         setAlertMessage("Error searching leads. Please try again.");
@@ -154,7 +167,7 @@ const Leads = () => {
     };
   }, [currentPage, fetchData, searchValue, debouncedSearch, isSearching]);
 
-  const setupColumns = (data: Lead[], page: number, isSearch = false) => {
+  const setupColumns = (data: Lead[]) => {
     if (data.length > 0) {
       const keys = Object.keys(data[0]);
       

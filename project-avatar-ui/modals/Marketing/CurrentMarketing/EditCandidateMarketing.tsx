@@ -1,36 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-
-interface CandidateMarketing {
-  id: number;
-  candidateid?: number;
-  startdate?: string;
-  mmid?: number;
-  instructorid?: number;
-  status: string;
-  submitterid?: number;
-  priority: string;
-  technology: string;
-  resumeid: number;
-  minrate: number;
-  ipemail: string;
-  relocation: string;
-  closedate: string;
-  suspensionreason: string;
-  intro: string;
-  notes: string;
-  skypeid: string;
-  currentlocation: string;
-  locationpreference: string;
-  yearsofexperience?: string;
-  coverletter?: string;
-  closedemail?: string;
-  ipemailid?: number;
-  manager_name: string;
-  instructor_name: string;
-  submitter_name: string;
-}
+import { CandidateMarketing } from '../../../types';
 
 interface Employee {
   id?: number;
@@ -58,11 +29,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 }) => {
   const [formData, setFormData] = useState<CandidateMarketing>({
     id: 0,
-    manager_name: '',
-    instructor_name: '',
-    submitter_name: '',
+    candidateid: 0,
+    startdate: '',
+    mmid: 0,
+    instructorid: 0,
     status: '',
-    locationpreference: '',
+    submitterid: 0,
     priority: '',
     technology: '',
     resumeid: 0,
@@ -75,6 +47,14 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     notes: '',
     skypeid: '',
     currentlocation: '',
+    locationpreference: '',
+    yearsofexperience: '',
+    coverletter: '',
+    closedemail: '',
+    ipemailid: 0,
+    manager_name: '',
+    instructor_name: '',
+    submitter_name: '',
   });
   const [ipEmails, setIpEmails] = useState<IpEmail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

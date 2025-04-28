@@ -414,14 +414,13 @@ import axios from 'axios';
 
 interface InvoiceData {
   id: number;
-  poid: string;
   invoicenumber: string;
   startdate: string;
   enddate: string;
   invoicedate: string;
   invmonth: string;
-  quantity: string;
-  otquantity: string;
+  quantity: number;
+  otquantity: number;
   rate: number;
   overtimerate: number;
   status: string;
@@ -430,7 +429,7 @@ interface InvoiceData {
   reminders: string;
   amountexpected: number;
   expecteddate: string;
-  amountreceived: string;
+  amountreceived: number;
   receiveddate: string;
   releaseddate: string;
   checknumber: string;
@@ -460,6 +459,7 @@ interface InvoiceData {
   recruitername: string;
   recruiterphone: string;
   recruiteremail: string;
+  poid: number;
   notes: string;
 }
 

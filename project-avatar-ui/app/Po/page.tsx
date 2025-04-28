@@ -21,7 +21,7 @@ import {
   AiOutlineSearch,
   AiOutlineReload,
 } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import { Po, } from "@/types/index";
 import { debounce } from "lodash";
 

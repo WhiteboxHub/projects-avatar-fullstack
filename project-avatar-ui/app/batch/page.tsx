@@ -46,7 +46,7 @@ const Batches = () => {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const fetchData = async (page = currentPage, searchQuery = searchValue) => {
+  const fetchData = useCallback(async (page = currentPage, searchQuery = searchValue) => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/batches/search`, {
@@ -70,51 +70,32 @@ const Batches = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, currentPage, paginationPageSize, searchValue]);
   
   interface ErrorResponse {
     message: string;
     // Add other properties if needed
-}
+  }
 
-  const fetchBatches = async (searchQuery = "") => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/batches/search`, {
-        params: {
-          page: currentPage, // Pass current page for pagination
-          pageSize: paginationPageSize, // Pass pageSize for pagination
-          search: searchQuery, // Pass the search query to the backend
-        },
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-  
-      const { data, totalRows } = response.data;
-      setRowData(data); // Set the table data
-      setTotalRows(totalRows); // Set the total rows for pagination
-      setupColumns(data); // Optional: If needed for dynamic columns
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Debounce function
-  const debounce = (func: Function, delay: number) => {
+  // Debounce function with proper typing
+  // Custom debounce function with proper typing for our specific use case
+  const debounce = <F extends (query: string) => void>(
+    func: F,
+    delay: number
+  ): ((query: string) => void) => {
     let timeoutId: NodeJS.Timeout;
-    return function(...args: any[]) {
+    return function(query: string) {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func(...args), delay);
+      timeoutId = setTimeout(() => func(query), delay);
     };
   };
 
-  // Create a debounced version of fetchData
+  // Create a debounced version of fetchData with correct typing
   const debouncedFetch = useCallback(
     debounce((query: string) => {
       fetchData(1, query); // Reset to page 1 when searching
     }, 500),
-    []
+    [fetchData]
   );
   
   // Handle search input change with debouncing
@@ -133,10 +114,10 @@ const Batches = () => {
   };
   
 
-  const setupColumns = (data: Batch[]) => {
+  const setupColumns = useCallback((data: Batch[]) => {
     if (data.length > 0) {
       // Create an array to hold the columns
-      let columns = [];
+      const columns = [];
       
       // First, check if batchname exists and add it as "Name"
       if ('batchname' in data[0]) {
@@ -160,13 +141,13 @@ const Batches = () => {
       
       setColumnDefs(columns);
     }
-  };
+  }, []);
   
 
   
   useEffect(() => {
     fetchData(currentPage, searchValue);
-  }, [currentPage]);
+  }, [currentPage, fetchData, searchValue]);
   
   const handleRefresh = () => {
     setSearchValue(""); // Clear search value before refreshing

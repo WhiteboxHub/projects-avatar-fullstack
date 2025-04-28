@@ -10,9 +10,11 @@ interface OverdueViewType {
   startdate?: string;
   enddate?: string;
   invoicedate?: string;
-  amountexpected?: string;
-  amountreceived?: string;
-  expecteddate?: string;
+  // amountexpected?: string;
+  // amountreceived?: string;
+  // expecteddate?: string;
+  amountexpected?: string | number;
+  amountreceived?: string | number;
   receiveddate?: string;
   checknumber?: string;
   status?: string;
@@ -20,7 +22,8 @@ interface OverdueViewType {
   serialNo?: number;
   poid?: string;
   invoicenumber?: string;
-  quantity?: string;
+  // quantity?: string;
+  quantity?: string | number;
   rate?: number;
   remindertype?: string;
   releaseddate?: string;
