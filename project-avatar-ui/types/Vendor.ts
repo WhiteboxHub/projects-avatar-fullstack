@@ -1,7 +1,10 @@
+import { ReactNode } from "react";
+
 export interface Vendor {
+  name: ReactNode;
   id: number;
   vendorid: number;
-  companyname: string;
+  companyname?: string;
   recruiters: RecruiterData[];
   recruiter_count: number;
   tier: number;

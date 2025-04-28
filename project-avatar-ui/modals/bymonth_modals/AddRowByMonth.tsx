@@ -538,37 +538,54 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit }) 
     try {
       // Convert FormData to InvoiceData with default values for missing properties
       const invoiceData: InvoiceData = {
-        id: 0, // Default value
-        ...formData,
-        invmonth: '', // Default value
-        rate: 0, // Default value
-        overtimerate: 0, // Default value
-        amountexpected: 0, // Default value
-        expecteddate: '', // Default value
-        invoicenet: 0, // Default value
-        freqtype: '', // Default value
-        companyname: '', // Default value
-        vendorfax: '', // Default value
-        vendorphone: '', // Default value
-        vendoremail: '', // Default value
-        timsheetemail: '', // Default value
-        hrname: '', // Default value
-        hremail: '', // Default value
-        hrphone: '', // Default value
-        managername: '', // Default value
-        manageremail: '', // Default value
-        managerphone: '', // Default value
-        secondaryname: '', // Default value
-        secondaryemail: '', // Default value
-        secondaryphone: '', // Default value
-        candidatename: '', // Default value
-        candidatephone: '', // Default value
-        candidateemail: '', // Default value
-        wrkemail: '', // Default value
-        wrkphone: '', // Default value
-        recruitername: '', // Default value
-        recruiterphone: '', // Default value
-        recruiteremail: '', // Default value
+        id: 0, 
+        invoicenumber: formData.invoicenumber,
+        startdate: formData.startdate,
+        enddate: formData.enddate,
+        invoicedate: formData.invoicedate,
+        invmonth: '',
+        quantity: Number(formData.quantity) || 0,
+        otquantity: Number(formData.otquantity) || 0,
+        rate: 0, 
+        overtimerate: 0, 
+        status: formData.status,
+        emppaiddate: formData.emppaiddate,
+        candpaymentstatus: formData.candpaymentstatus,
+        reminders: formData.reminders,
+        amountexpected: 0, 
+        expecteddate: '', 
+        amountreceived: Number(formData.amountreceived) || 0,
+        receiveddate: formData.receiveddate,
+        releaseddate: formData.releaseddate,
+        checknumber: formData.checknumber,
+        invoiceurl: formData.invoiceurl,
+        checkurl: formData.checkurl,
+        freqtype: '', 
+        invoicenet: 0, 
+        companyname: '', 
+        vendorfax: '', 
+        vendorphone: '', 
+        vendoremail: '', 
+        timsheetemail: '', 
+        hrname: '', 
+        hremail: '', 
+        hrphone: '', 
+        managername: '', 
+        manageremail: '', 
+        managerphone: '', 
+        secondaryname: '', 
+        secondaryemail: '',
+        secondaryphone: '',
+        candidatename: '', 
+        candidatephone: '',
+        candidateemail: '',
+        wrkemail: '', 
+        wrkphone: '', 
+        recruitername: '', 
+        recruiterphone: '',
+        recruiteremail: '',
+        poid: Number(formData.poid) || 0,
+        notes: formData.notes,
       };
       
       await onSubmit(invoiceData);

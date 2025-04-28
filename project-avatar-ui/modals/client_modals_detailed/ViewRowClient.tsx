@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { AiOutlineClose } from 'react-icons/ai';
+// import { AiOutlineClose } from 'react-icons/ai';
 
 interface Recruiter {
   id?: string;

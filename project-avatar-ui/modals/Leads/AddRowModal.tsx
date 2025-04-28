@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-import { Lead } from '@/types/index';
+// import { Lead } from '@/types/index';
 
 interface FormData {
   name: string;

@@ -1,7 +1,7 @@
 import Modal from "react-modal";
 import React, { useState } from "react";
 import axios from "axios";
-import { AiOutlineClose } from "react-icons/ai";
+// import { AiOutlineClose } from "react-icons/ai";
 import { ClientCreate } from "@/types/client";
 
 interface AddRowModalProps {

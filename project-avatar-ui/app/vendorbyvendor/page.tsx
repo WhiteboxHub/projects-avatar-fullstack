@@ -41,7 +41,7 @@ interface ModalState {
 }
 
 const RecruiterByVendor = () => {
-  const gridRef = useRef<AgGridReact>();
+  const gridRef = useRef<AgGridReact>(null);
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
     view: false,
@@ -68,6 +68,13 @@ const RecruiterByVendor = () => {
     setAlertMessage({ text, type });
     setTimeout(() => setAlertMessage(null), 3000);
   };
+
+
+  interface RowData extends RecruiterData {
+    isGroupRow?: boolean;
+    level?: number;
+    expanded?: boolean;
+  }
 
   // Debounce search value
   useEffect(() => {
@@ -133,7 +140,7 @@ const RecruiterByVendor = () => {
     vendors.forEach((vendor) => {
       rows.push({
         id: vendor.vendorid,
-        name: vendor.companyname,
+        name: vendor.companyname || '',
         email: "",
         phone: "",
         designation: "",
@@ -147,7 +154,7 @@ const RecruiterByVendor = () => {
         review: "",
         notes: "",
         vendorid: vendor.vendorid,
-        companyname: vendor.companyname,
+        companyname: vendor.companyname || '',
         clientid: "",
         isGroupRow: true,
         level: 0,
@@ -158,7 +165,9 @@ const RecruiterByVendor = () => {
         vendor.recruiters.forEach((recruiter) => {
           rows.push({
             ...recruiter,
-            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname}`,
+            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname || ''}`,
+          companyname: vendor.companyname || '',
+          clientid: recruiter.clientid || '',
             isGroupRow: false,
             level: 1,
           });
@@ -399,12 +408,12 @@ const RecruiterByVendor = () => {
     const tableData = rowData
       .filter((row) => !row.isGroupRow && row.id !== -1)
       .map((row) => [
-        row.companyname,
-        row.name,
-        row.email,
-        row.phone,
-        row.designation,
-        row.status,
+        row.companyname || "",
+        row.name || "",
+        row.email || "",
+        row.phone || "",
+        row.designation || "",
+        row.status || "",
         row.dob || "",
         row.personalemail || "",
         row.skypeid || "",
@@ -495,7 +504,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];;
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,
@@ -512,7 +521,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];;
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 handleDelete(selectedRows[0].id);
               } else {
@@ -525,7 +534,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];;
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,
