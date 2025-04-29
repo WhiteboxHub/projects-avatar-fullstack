@@ -148,7 +148,11 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onRequestCl
       };
 
       // Remove undefined values
-      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+      Object.keys(payload).forEach((key) => {
+        if (payload[key as keyof typeof payload] === undefined) {
+          delete payload[key as keyof typeof payload];
+        }
+      });
 
       console.log('Request Payload:', payload); // Log the request payload
 

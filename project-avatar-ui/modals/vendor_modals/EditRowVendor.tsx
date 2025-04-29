@@ -1,317 +1,63 @@
-// import Modal from "react-modal";
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { AiOutlineClose } from "react-icons/ai";
-// import { Recruiter } from "@/types/byVendor";
 
-// interface EditRowVendorProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   initialData: Recruiter | null;
-//   onSubmit: (formData: Recruiter) => Promise<void>;
-//   vendors: Vendor[];
-//   defaultVendorId: number;
-// }
-
-// const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialData, onSubmit, vendors, defaultVendorId }) => {
-//   const [formData, setFormData] = useState<Recruiter | null>(initialData);
-
-//   const statusOptions = [
-//     { value: 'A', label: 'Active' },
-//     { value: 'I', label: 'Inactive' },
-//     { value: 'D', label: 'Delete' },
-//     { value: 'R', label: 'Rejected' },
-//     { value: 'N', label: 'Not Interested' },
-//     { value: 'E', label: 'Excellent' },
-//   ];
-
-//   const reviewOptions = [
-//     { value: 'Y', label: 'Yes' },
-//     { value: 'N', label: 'No' },
-//   ];
-
-//   useEffect(() => {
-//     if (initialData) {
-//       setFormData({
-//         ...initialData,
-//         vendorid: defaultVendorId, // Set default vendor ID from props
-//       });
-//     }
-//   }, [initialData, defaultVendorId]);
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-//     const { name, value } = e.target;
-//     setFormData((prevData) => {
-//       if (prevData) {
-//         return {
-//           ...prevData,
-//           [name]: value,
-//         };
-//       }
-//       return null;
-//     });
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (formData) {
-//       try {
-//         await onSubmit(formData);
-//         onClose();
-//       } catch (error) {
-//         console.error("Error updating recruiter:", error);
-//       }
-//     }
-//   };
-
-//   if (!formData) return null;
-
-//   return (
-//     <Modal
-//       isOpen={isOpen}
-//       onRequestClose={onClose}
-//       style={{
-//         content: {
-//           top: '50%',
-//           left: '50%',
-//           right: 'auto',
-//           bottom: 'auto',
-//           transform: 'translate(-50%, -50%)',
-//           maxWidth: '400px',
-//           width: '90%',
-//           maxHeight: '80vh',
-//           padding: '24px',
-//           borderRadius: '12px',
-//           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-//           overflowY: 'auto',
-//           fontFamily: 'Arial, sans-serif',
-//         },
-//         overlay: {
-//           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-//         },
-//       }}
-//     >
-//       <div className="relative">
-//         <button
-//           onClick={onClose}
-//           className="absolute top-0 right-0 text-2xl font-semibold text-red-500 hover:text-red-700 transition duration-200"
-//         >
-//           <AiOutlineClose />
-//         </button>
-//       </div>
-//       <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Recruiter</h2>
-
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-//           <input
-//             type="text"
-//             name="name"
-//             value={formData.name || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter name"
-//             required
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-//           <input
-//             type="email"
-//             name="email"
-//             value={formData.email || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter email"
-//             required
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
-//           <input
-//             type="text"
-//             name="phone"
-//             value={formData.phone || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter phone"
-//             required
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-//           <input
-//             type="text"
-//             name="designation"
-//             value={formData.designation || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter designation"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor</label>
-//           <select
-//             name="vendorid"
-//             value={formData.vendorid || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             required
-//           >
-//             {vendors.map(vendor => (
-//               <option key={vendor.id} value={vendor.id}>
-//                 {vendor.name}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-//           <select
-//             name="status"
-//             value={formData.status || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             required
-//           >
-//             {statusOptions.map(option => (
-//               <option key={option.value} value={option.value}>
-//                 {option.label}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Birth Date</label>
-//           <input
-//             type="date"
-//             name="dob"
-//             value={formData.dob || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Personal Email</label>
-//           <input
-//             type="email"
-//             name="personalemail"
-//             value={formData.personalemail || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter personal email"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Skype ID</label>
-//           <input
-//             type="text"
-//             name="skypeid"
-//             value={formData.skypeid || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter Skype ID"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
-//           <input
-//             type="url"
-//             name="linkedin"
-//             value={formData.linkedin || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter LinkedIn URL"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Twitter</label>
-//           <input
-//             type="text"
-//             name="twitter"
-//             value={formData.twitter || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter Twitter handle"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook</label>
-//           <input
-//             type="text"
-//             name="facebook"
-//             value={formData.facebook || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter Facebook URL"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
-//           <select
-//             name="review"
-//             value={formData.review || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//           >
-//             {reviewOptions.map(option => (
-//               <option key={option.value} value={option.value}>
-//                 {option.label}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-//           <textarea
-//             name="notes"
-//             value={formData.notes || ''}
-//             onChange={handleChange}
-//             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-//             placeholder="Enter notes"
-//           />
-//         </div>
-
-//         <div className="flex justify-end space-x-4">
-//           <button
-//             type="button"
-//             onClick={onClose}
-//             className="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200 font-semibold text-sm"
-//           >
-//             Cancel
-//           </button>
-//           <button
-//             type="submit"
-//             className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold text-sm"
-//           >
-//             Save Changes
-//           </button>
-//         </div>
-//       </form>
-//     </Modal>
-//   );
-// };
-
-// export default EditRowVendor;
 "use client";
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { AiOutlineClose } from "react-icons/ai";
 import axios from "axios";
-import { Vendor } from "@/types/vendor";
+
+interface Vendor {
+  id?: number;
+  name: string;
+  vendorid: number;
+  companyname?: string;
+  status?: string;
+  tier: number;
+  accountnumber?: string;
+  email?: string;
+  phone?: string;
+  fax?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip?: string;
+  url?: string;
+  solicited?: string;
+  hireBeforeTerm?: string;
+  hireAfterTerm?: string;
+  minrate?: number;
+  latePayments?: string;
+  totalNetTerm?: string;
+  defaultedPayment?: string;
+  culture?: string;
+  hrName?: string;
+  hrEmail?: string;
+  hrPhone?: string;
+  managername: string;
+  manageremail?: string;
+  managerphone?: string;
+  twitter?: string;
+  facebook?: string;
+  linkedin?: string;
+  secName?: string;
+  secEmail?: string;
+  secPhone?: string;
+  timesheetEmail?: string;
+  agreementstatus?: string;
+  agreementname: string;
+  agreementlink: string;
+  subContractorLink?: string;
+  nsaLink?: string;
+  nonhirelink?: string;
+  clients?: string;
+  notes?: string;
+  recruiters?: any[];
+  recruiter_count?: number;
+  isGroup?: boolean;
+  isCollapsed?: boolean;
+  lastmoddatetime?: string;
+  clientid?: string;
+}
 
 interface EditRowModalProps {
   isOpen: boolean;
@@ -339,6 +85,8 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
       setFormData(vendorData);
     } else {
       setFormData({
+        name: '',
+        vendorid: 0,
         companyname: '',
         status: 'Current',
         accountnumber: '',
@@ -353,31 +101,31 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
         zip: '',
         url: '',
         solicited: 'N',
-        hirebeforeterm: 'N',
-        hireafterterm: 'N',
+        hireBeforeTerm: 'N',
+        hireAfterTerm: 'N',
         minrate: 62,
-        latepayments: 'N',
-        totalnetterm: 45,
-        defaultedpayment: 'N',
+        latePayments: 'N',
+        totalNetTerm: '45',
+        defaultedPayment: 'N',
         culture: 'D',
-        hrname: '',
-        hremail: '',
-        hrphone: '',
+        hrName: '',
+        hrEmail: '',
+        hrPhone: '',
         managername: '',
         twitter: '',
         facebook: '',
         linkedin: '',
         manageremail: '',
         managerphone: '',
-        secondaryname: '',
-        secondaryemail: '',
-        secondaryphone: '',
-        timsheetemail: '',
+        secName: '',
+        secEmail: '',
+        secPhone: '',
+        timesheetEmail: '',
         agreementstatus: 'Not Available',
         agreementname: '',
         agreementlink: '',
-        subcontractorlink: '',
-        nonsolicitationlink: '',
+        subContractorLink: '',
+        nsaLink: '',
         nonhirelink: '',
         clients: '',
         notes: '',
@@ -635,7 +383,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <label className="block text-sm font-semibold text-gray-700 mb-1">Hire Before Term</label>
               <select
                 name="hirebeforeterm"
-                value={formData.hirebeforeterm || ''}
+                value={formData.hireBeforeTerm || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               >
@@ -649,7 +397,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <label className="block text-sm font-semibold text-gray-700 mb-1">Hire After Term</label>
               <select
                 name="hireafterterm"
-                value={formData.hireafterterm || ''}
+                value={formData.hireAfterTerm || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               >
@@ -674,7 +422,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <label className="block text-sm font-semibold text-gray-700 mb-1">Late Payments</label>
               <select
                 name="latepayments"
-                value={formData.latepayments || ''}
+                value={formData.latePayments || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               >
@@ -689,7 +437,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <input
                 type="number"
                 name="totalnetterm"
-                value={formData.totalnetterm || ''}
+                value={formData.totalNetTerm || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               />
@@ -707,7 +455,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <input
                 type="text"
                 name="hrname"
-                value={formData.hrname || ''}
+                value={formData.hrName || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               />
@@ -718,7 +466,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <input
                 type="email"
                 name="hremail"
-                value={formData.hremail || ''}
+                value={formData.hrEmail || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               />
@@ -729,7 +477,7 @@ const EditRowVendor: React.FC<EditRowModalProps> = ({
               <input
                 type="text"
                 name="hrphone"
-                value={formData.hrphone || ''}
+                value={formData.hrPhone || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
               />

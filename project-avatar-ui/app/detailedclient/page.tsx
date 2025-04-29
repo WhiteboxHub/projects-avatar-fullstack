@@ -114,44 +114,45 @@ const RecruiterByClient = () => {
   const [sortOrder, setSortOrder] = useState("asc");
   const [isLoading, setIsLoading] = useState(false);
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const [dataFetchTrigger, setDataFetchTrigger] = useState(0);
+  const [shouldFetchData, setShouldFetchData] = useState(true);
 
-  const fetchRecruiters = useCallback(async (page: number, search?: string) => {
-    if (isLoading) return;
+  const fetchRecruiters = useCallback(async () => {
+    if (isLoading || !shouldFetchData) return;
     
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/byDetailed`, {
         params: { 
-          page,
+          page: currentPage,
           pageSize,
           sortField,
           sortOrder,
-          searchTerm: search || undefined
+          searchTerm: searchValue || undefined
         },
         headers: { AuthToken: localStorage.getItem("token") }
       });
       setRowData(response.data.data);
       setTotalPages(response.data.pages);
+      setShouldFetchData(false);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [API_URL, pageSize, sortField, sortOrder, isLoading]);
+  }, [API_URL, pageSize, sortField, sortOrder, isLoading, currentPage, searchValue, shouldFetchData]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce(() => {
       setCurrentPage(1);
-      setDataFetchTrigger(prev => prev + 1);
+      setShouldFetchData(true);
     }, 500),
     []
   );
 
   useEffect(() => {
-    fetchRecruiters(currentPage, searchValue);
-  }, [currentPage, sortField, sortOrder, fetchRecruiters, searchValue, dataFetchTrigger]);
+    fetchRecruiters();
+  }, [fetchRecruiters]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,7 +188,7 @@ const RecruiterByClient = () => {
                 headers: { AuthToken: localStorage.getItem("token") }
               })
             ));
-            setDataFetchTrigger(prev => prev + 1);
+            setShouldFetchData(true);
           } catch (error) {
             console.error("Error deleting recruiters:", error);
             setAlertMessage("Error deleting recruiters.");
@@ -241,8 +242,9 @@ const RecruiterByClient = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
+    if (newPage > 0 && newPage <= totalPages && newPage !== currentPage) {
       setCurrentPage(newPage);
+      setShouldFetchData(true);
     }
   };
 
@@ -277,14 +279,19 @@ const RecruiterByClient = () => {
       if (sortModel) {
         setSortField(sortModel.colId);
         setSortOrder(sortModel.sort || "asc");
+        setShouldFetchData(true);
       }
     }
   };
 
   const handleModalSubmit = useCallback(() => {
-    setDataFetchTrigger(prev => prev + 1);
+    setShouldFetchData(true);
     setModalState(prev => ({ ...prev, add: false, edit: false }));
   }, []);
+
+  const handleSearchClick = () => {
+    setShouldFetchData(true);
+  };
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
@@ -342,7 +349,7 @@ const RecruiterByClient = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={() => setDataFetchTrigger(prev => prev + 1)}
+          onClick={handleSearchClick}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search

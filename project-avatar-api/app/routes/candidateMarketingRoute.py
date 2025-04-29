@@ -6,6 +6,7 @@ from app.controllers.candidateMarketingController import (
     delete_candidate_marketing, get_employees, get_ipemails_dropdown
 )
 from app.schemas import CandidateMarketingSchema, CandidateMarketingCreateSchema, CandidateMarketingUpdateSchema
+from typing import List, Dict, Any
 
 router = APIRouter()
 
@@ -32,12 +33,12 @@ def update_candidate_marketing_entry(candidate_marketing_id: int, update_data: C
 def delete_candidate_marketing_entry(candidate_marketing_id: int, db: Session = Depends(get_db)):
     return delete_candidate_marketing(db, candidate_marketing_id)
 
-@router.get("/api/admin/candidatemarketing/employees")
+@router.get("/api/admin/candidatemarketing/employees", response_model=List[Dict[str, Any]])
 def get_employees_list(db: Session = Depends(get_db)):
     employees = get_employees(db)
     return employees
 
-@router.get("/api/admin/candidatemarketing/ipemails")
+@router.get("/api/admin/candidatemarketing/ipemails", response_model=List[Dict[str, str]])
 def get_ip_emails_for_dropdown(db: Session = Depends(get_db)):
     ipemails = get_ipemails_dropdown(db)
     return ipemails

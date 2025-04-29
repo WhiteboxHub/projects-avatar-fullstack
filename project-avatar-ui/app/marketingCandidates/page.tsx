@@ -479,7 +479,10 @@ const MarketingCandidates = () => {
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as CandidateMarketing : null}
           onSave={fetchData}
           employees={employees}
@@ -492,7 +495,10 @@ const MarketingCandidates = () => {
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as CandidateMarketing : null}
         />
       </div>

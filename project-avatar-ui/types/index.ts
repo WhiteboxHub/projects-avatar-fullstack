@@ -492,7 +492,7 @@ export interface Vendor {
   // }
   
 
-  export type Employee ={
+  export type Employee = {
       id: string;
       name: string;
       email: string;
@@ -502,6 +502,9 @@ export interface Vendor {
       mgrid: string | null;
       designationid: string | null;
       loginid: string | null;
+      manager_name?: string;
+      designation_name?: string;
+      login_email?: string;
       personalemail: string;
       personalphone: string;
       dob: string;
@@ -523,7 +526,6 @@ export interface Vendor {
       enddate: string;
       responsibilities: string;
       notes: string;
-    
     };
 
    export interface CandidateMarketing {

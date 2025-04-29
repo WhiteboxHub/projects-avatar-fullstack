@@ -173,8 +173,14 @@ def get_employees(db: Session):
         WHERE status = '0Active'
         ORDER BY name
     """)
-    result = db.execute(query)
-    return result.fetchall()
+    try:
+        result = db.execute(query)
+        rows = result.fetchall()
+        
+        # Convert to list of dictionaries to make it JSON serializable
+        return [{"id": row[0], "name": row[1]} for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_data: CandidateMarketingUpdateSchema):
     """

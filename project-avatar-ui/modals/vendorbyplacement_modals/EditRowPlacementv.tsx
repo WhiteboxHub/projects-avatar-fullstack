@@ -3,7 +3,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { RecruiterData } from "@/types/Vendor";
+import { RecruiterData, Vendor as VendorType } from "@/types/Vendor";
 
 interface Vendor {
   id: number;
@@ -47,7 +47,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
     if (initialData) {
       setFormData({
         ...initialData,
-        vendorid: defaultVendorId.toString() // Convert to string to fix type error
+        vendorid: defaultVendorId // Keep as number since RecruiterData.vendorid is number
       });
     }
   }, [initialData, defaultVendorId]);
@@ -58,7 +58,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
       if (prevData) {
         return {
           ...prevData,
-          [name]: value,
+          [name]: name === "vendorid" ? Number(value) : value,
         };
       }
       return null;
@@ -180,7 +180,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
             required
           >
             {vendors.map(vendor => (
-              <option key={vendor.id} value={vendor.id.toString()}>
+              <option key={vendor.id} value={vendor.id}>
                 {vendor.name}
               </option>
             ))}

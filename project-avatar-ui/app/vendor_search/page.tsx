@@ -637,7 +637,7 @@ const VendorSearch: React.FC = () => {
               <strong>NSA Link:</strong> {selectedVendor.nsaLink}
             </p>
             <p className="font-medium">
-              <strong>Non Hire Link:</strong> {selectedVendor.nonHireLink}
+              <strong>Non Hire Link:</strong> {selectedVendor.nonhirelink}
             </p>
           </Dropdown>
 

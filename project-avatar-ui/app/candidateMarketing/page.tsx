@@ -489,7 +489,10 @@ const CurrentMarketing = () => {
             manager_name: selectedRow.manager_name || '',
             instructor_name: selectedRow.instructor_name || '',
             submitter_name: selectedRow.submitter_name || '',
-            ipemailid: selectedRow.ipemail || '' // Adding the missing ipemailid property
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as unknown as CandidateMarketing : null}
           onSave={fetchAllCandidates}
           employees={employees} // Pass the fetched employees here
@@ -503,7 +506,10 @@ const CurrentMarketing = () => {
             manager_name: selectedRow.manager_name || '',
             instructor_name: selectedRow.instructor_name || '',
             submitter_name: selectedRow.submitter_name || '',
-            ipemailid: selectedRow.ipemail || '' // Adding the missing ipemailid property
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as unknown as CandidateMarketing : null}
         />
       </div>
