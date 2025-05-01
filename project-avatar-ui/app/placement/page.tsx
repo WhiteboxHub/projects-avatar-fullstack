@@ -50,7 +50,7 @@ interface Placement {
     vendor3id?: number;
     clientid: number;
     startdate: string;
-    enddate: string;
+    enddate?: string;
     status: string;
     paperwork: string;
     insurance: string;
@@ -166,7 +166,7 @@ const PlacementPage = () => {
         const doc = new jsPDF();
         doc.text("Placement Management Data", 20, 10);
         autoTable(doc, {
-            head: [["ID", "Candidate", "Manager", "Recruiter", "Vendor", "Client", "Start Date", "End Date", "Status", "Location"]],
+            head: [["ID", "Candidate", "Manager", "Recruiter", "Vendor", "Client", "Start Date", "Status", "Location"]],
             body: rowData.map((row) => [
                 row.id,
                 getCandidateName(row.candidateid),
@@ -175,7 +175,6 @@ const PlacementPage = () => {
                 getVendorName(row.vendorid),
                 getClientName(row.clientid),
                 row.startdate,
-                row.enddate,
                 row.status,
                 row.wrklocation || "",
             ]),

@@ -5,6 +5,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
+
 // import { toast } from "react-toastify";
 
 interface SelectOption {
@@ -33,7 +34,7 @@ interface Placement {
   vendor3id?: number;
   clientid: number;
   startdate: string;
-  enddate: string;
+  enddate?: string;
   status: string;
   paperwork: string;
   insurance: string;
@@ -274,7 +275,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, placement,
             <h3 className="text-lg font-semibold mb-4">Dates</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {renderField('startdate', 'Start Date', 'text', true, undefined, true)}
-              {renderField('enddate', 'End Date', 'text', true, undefined, true)}
+              {renderField('enddate', 'End Date', 'text', false, undefined, true)}
             </div>
           </div>
 
