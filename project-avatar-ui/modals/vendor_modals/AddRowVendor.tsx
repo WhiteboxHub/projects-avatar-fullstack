@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { AiOutlineClose } from 'react-icons/ai';
 import { Vendor } from '../../types/index';
 
@@ -17,7 +17,7 @@ const AddRowVendor: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData })
     email: '',
     status: 'Current',
     accountnumber: '',
-    tier: 2,
+    tier: '2',
     phone: '000-000-0000',
     fax: '000-000-0000',
     address: '',
@@ -67,7 +67,7 @@ const AddRowVendor: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData })
 
   // Options matching PHP backend
   const statusOptions = ["Current", "blacklist", "rejectedus", "duplicate"];
-  const tierOptions = [1, 2, 3, 4];
+  const tierOptions = ['1', '2', '3', '4'];
   const cultureOptions = ["D", "A", "B", "C"];
   const yesNoOptions = ["Y", "N"];
   const agreementStatusOptions = ["Not Available", "Not Complete", "Complete"];
@@ -76,7 +76,7 @@ const AddRowVendor: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData })
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'minrate' || name === 'totalnetterm' || name === 'tier' ? 
+      [name]: name === 'minrate' || name === 'totalnetterm' ? 
                Number(value) : value
     }));
   };
@@ -104,11 +104,12 @@ const AddRowVendor: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData })
           AuthToken: localStorage.getItem('token') 
         },
       });
-
+      console.log(response)
       refreshData();
       onClose();
     } catch (error) {
-      console.error('Error details:', error.response?.data);
+      const axiosError = error as AxiosError;
+      console.error('Error details:', axiosError.response?.data);
     }
   };
 

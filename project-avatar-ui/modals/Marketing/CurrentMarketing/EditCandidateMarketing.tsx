@@ -1,36 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
-
-interface CandidateMarketing {
-  id: number;
-  candidateid?: number;
-  startdate?: string;
-  mmid?: number;
-  instructorid?: number;
-  status: string;
-  submitterid?: number;
-  priority: string;
-  technology: string;
-  resumeid: number;
-  minrate: number;
-  ipemail: string;
-  relocation: string;
-  closedate: string;
-  suspensionreason: string;
-  intro: string;
-  notes: string;
-  skypeid: string;
-  currentlocation: string;
-  locationpreference: string;
-  yearsofexperience?: string;
-  coverletter?: string;
-  closedemail?: string;
-  ipemailid?: number;
-  manager_name: string;
-  instructor_name: string;
-  submitter_name: string;
-}
+import { CandidateMarketing } from '@/types';
 
 interface Employee {
   id?: number;
@@ -58,11 +29,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 }) => {
   const [formData, setFormData] = useState<CandidateMarketing>({
     id: 0,
-    manager_name: '',
-    instructor_name: '',
-    submitter_name: '',
+    candidateid: 0,
+    startdate: '',
+    mmid: 0,
+    instructorid: 0,
     status: '',
-    locationpreference: '',
+    submitterid: 0,
     priority: '',
     technology: '',
     resumeid: 0,
@@ -75,6 +47,14 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     notes: '',
     skypeid: '',
     currentlocation: '',
+    locationpreference: '',
+    yearsofexperience: '',
+    coverletter: '',
+    closedemail: '',
+    ipemailid: 0,
+    manager_name: '',
+    instructor_name: '',
+    submitter_name: '',
   });
   const [ipEmails, setIpEmails] = useState<IpEmail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -102,11 +82,16 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
       setFormData({
         ...rowData,
         startdate: typeof rowData.startdate === 'number' ? String(rowData.startdate) : rowData.startdate || '',
+        status: rowData.status || '',
+        priority: rowData.priority || '',
+        technology: rowData.technology || '',
+        relocation: rowData.relocation || '',
         manager_name: rowData.manager_name || '',
         instructor_name: rowData.instructor_name || '',
         submitter_name: rowData.submitter_name || '',
+        ipemail: rowData.ipemail || '',
+        suspensionreason: rowData.suspensionreason || ''
       });
-      // Store the original status to track changes
       setPreviousStatus(rowData.status || '');
     }
   }, [rowData]);
@@ -191,6 +176,20 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
   const showSuspensionReason = formData.status === 'Suspended';
   const showCloseDate = formData.status === 'Closed';
 
+  // Add this function to help with dropdown selection
+  const getSelectedEmployee = (employeeType: string) => {
+    switch (employeeType) {
+      case 'manager':
+        return employees.find(emp => emp.name === formData.manager_name);
+      case 'instructor':
+        return employees.find(emp => emp.name === formData.instructor_name);
+      case 'submitter':
+        return employees.find(emp => emp.name === formData.submitter_name);
+      default:
+        return null;
+    }
+  };
+
   if (loading) return <div></div>;
   return (
     <Modal
@@ -228,7 +227,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Manager */}
+          {/* Manager dropdown with default value */}
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-700 mb-1">Manager</label>
             <select
@@ -240,7 +239,11 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
             >
               <option value="">Select Manager</option>
               {employees.map((emp, index) => (
-                <option key={`manager-${index}`} value={emp.name}>
+                <option 
+                  key={`manager-${index}`} 
+                  value={emp.name}
+                  selected={emp.name === formData.manager_name}
+                >
                   {emp.name}
                 </option>
               ))}
@@ -285,7 +288,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
             </select>
           </div>
 
-          {/* Status */}
+          {/* Status dropdown with default value */}
           <div className="modal-field">
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
@@ -295,10 +298,15 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">None</option>
-              <option value="To Do">To Do</option>
-              <option value="Inprogress">Inprogress</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Closed">Closed</option>
+              {['To Do', 'Inprogress', 'Suspended', 'Closed'].map(status => (
+                <option 
+                  key={status} 
+                  value={status}
+                  selected={status === formData.status}
+                >
+                  {status}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -349,7 +357,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
             />
           </div>
 
-          {/* Priority */}
+          {/* Priority dropdown with default value */}
           <div className="modal-field">
             <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
             <select
@@ -359,11 +367,15 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               className="w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="">None</option>
-              <option value="P1">P1</option>
-              <option value="P2">P2</option>
-              <option value="P3">P3</option>
-              <option value="P4">P4</option>
-              <option value="P5">P5</option>
+              {['P1', 'P2', 'P3', 'P4', 'P5'].map(priority => (
+                <option 
+                  key={priority} 
+                  value={priority}
+                  selected={priority === formData.priority}
+                >
+                  {priority}
+                </option>
+              ))}
             </select>
           </div>
 

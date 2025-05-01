@@ -5,7 +5,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 interface SelectOption {
   id: string;

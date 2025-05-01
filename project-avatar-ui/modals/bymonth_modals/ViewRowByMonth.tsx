@@ -1,7 +1,57 @@
 import React from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
-import { InvoiceData } from '@/types/invoice';
+
+interface InvoiceData {
+  id: number;
+  invoicenumber: string;
+  startdate: string;
+  enddate: string;
+  invoicedate: string;
+  invmonth: string;
+  quantity: number;
+  otquantity: number;
+  rate: number;
+  overtimerate: number;
+  status: string;
+  emppaiddate: string;
+  candpaymentstatus: string;
+  reminders: string;
+  amountexpected: number;
+  expecteddate: string;
+  amountreceived: number;
+  receiveddate: string;
+  releaseddate: string;
+  checknumber: string;
+  invoiceurl: string;
+  checkurl: string;
+  freqtype: string;
+  invoicenet: number;
+  companyname: string;
+  vendorfax: string;
+  vendorphone: string;
+  vendoremail: string;
+  timsheetemail: string;
+  hrname: string;
+  hremail: string;
+  hrphone: string;
+  managername: string;
+  manageremail: string;
+  managerphone: string;
+  secondaryname: string;
+  secondaryemail: string;
+  secondaryphone: string;
+  candidatename: string;
+  candidatephone: string;
+  candidateemail: string;
+  wrkemail: string;
+  wrkphone: string;
+  recruitername: string;
+  recruiterphone: string;
+  recruiteremail: string;
+  poid: number;
+  notes: string;
+}
 
 interface ViewRowModalProps {
   isOpen: boolean;

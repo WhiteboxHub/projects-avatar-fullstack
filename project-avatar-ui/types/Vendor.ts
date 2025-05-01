@@ -1,13 +1,28 @@
 export interface Vendor {
+  agreementlink: string;
+  agreementname: string;
+  agreementstatus: string;
+  linkedin: string;
+  facebook: string;
+  twitter: string;
+  managername: string;
+  manageremail?: string;
+  managerphone?: string;
+  name: string;
   id: number;
   vendorid: number;
-  companyname: string;
+  companyname?: string;
   recruiters: RecruiterData[];
   recruiter_count: number;
   tier: number;
+  accountnumber?:string;
   // Additional fields that might be relevant for a vendor
   email?: string;
   phone?: string;
+  country?: string;
+  minrate?: number;
+  zip?: string;
+  state?:string;
   solicited?: string;
   address?: string;
   status?: string;
@@ -33,10 +48,11 @@ export interface Vendor {
   secName?: string;
   secEmail?: string;
   secPhone?: string;
+  city?:string;
   // Agreements
   subContractorLink?: string;
   nsaLink?: string;
-  nonHireLink?: string;
+  nonhirelink?: string;
   // Other fields
   requirements?: string;
   clients?: string;

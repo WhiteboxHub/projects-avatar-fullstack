@@ -112,45 +112,53 @@ const RecruiterByClient = () => {
   const [pageSize] = useState(1000);
   const [sortField, setSortField] = useState("status");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [isLoading, setIsLoading] = useState(false);
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const [shouldFetchData, setShouldFetchData] = useState(true);
 
-  const fetchRecruiters = async (page: number, search?: string) => {
+  const fetchRecruiters = useCallback(async () => {
+    if (isLoading || !shouldFetchData) return;
+    
+    setIsLoading(true);
     try {
       const response = await axios.get(`${API_URL}/by/recruiters/byDetailed`, {
         params: { 
-          page,
+          page: currentPage,
           pageSize,
           sortField,
           sortOrder,
-          searchTerm: search || undefined
+          searchTerm: searchValue || undefined
         },
         headers: { AuthToken: localStorage.getItem("token") }
       });
       setRowData(response.data.data);
       setTotalPages(response.data.pages);
+      setShouldFetchData(false);
     } catch (error) {
       console.error("Error fetching recruiters:", error);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchRecruiters(currentPage);
-  }, [currentPage, sortField, sortOrder, fetchRecruiters]);
+  }, [API_URL, pageSize, sortField, sortOrder, isLoading, currentPage, searchValue, shouldFetchData]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce((searchTerm: string) => {
-      fetchRecruiters(1, searchTerm);
+    debounce(() => {
       setCurrentPage(1);
+      setShouldFetchData(true);
     }, 500),
     []
   );
+
+  useEffect(() => {
+    fetchRecruiters();
+  }, [fetchRecruiters]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
-    debouncedSearch(value);
+    debouncedSearch();
   };
 
   const handleAddRow = () => setModalState((prevState) => ({ ...prevState, add: true }));
@@ -180,7 +188,7 @@ const RecruiterByClient = () => {
                 headers: { AuthToken: localStorage.getItem("token") }
               })
             ));
-            fetchRecruiters(currentPage, searchValue);
+            setShouldFetchData(true);
           } catch (error) {
             console.error("Error deleting recruiters:", error);
             setAlertMessage("Error deleting recruiters.");
@@ -234,8 +242,9 @@ const RecruiterByClient = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
+    if (newPage > 0 && newPage <= totalPages && newPage !== currentPage) {
       setCurrentPage(newPage);
+      setShouldFetchData(true);
     }
   };
 
@@ -270,8 +279,18 @@ const RecruiterByClient = () => {
       if (sortModel) {
         setSortField(sortModel.colId);
         setSortOrder(sortModel.sort || "asc");
+        setShouldFetchData(true);
       }
     }
+  };
+
+  const handleModalSubmit = useCallback(() => {
+    setShouldFetchData(true);
+    setModalState(prev => ({ ...prev, add: false, edit: false }));
+  }, []);
+
+  const handleSearchClick = () => {
+    setShouldFetchData(true);
   };
 
   return (
@@ -330,7 +349,7 @@ const RecruiterByClient = () => {
           className="border border-gray-300 rounded-md p-2 w-64"
         />
         <button
-          onClick={() => fetchRecruiters(1, searchValue)}
+          onClick={handleSearchClick}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
         >
           <AiOutlineSearch className="mr-2" /> Search
@@ -454,10 +473,7 @@ const RecruiterByClient = () => {
         <AddRowModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-          onSubmit={() => {
-            fetchRecruiters(currentPage, searchValue);
-            setModalState((prev) => ({ ...prev, add: false }));
-          }}
+          onSubmit={handleModalSubmit}
         />
       )}
       {modalState.edit && selectedRecruiter && (
@@ -465,10 +481,7 @@ const RecruiterByClient = () => {
           isOpen={modalState.edit}
           onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
           initialData={selectedRecruiter}
-          onSubmit={() => {
-            fetchRecruiters(currentPage, searchValue);
-            setModalState((prev) => ({ ...prev, edit: false }));
-          }}
+          onSubmit={handleModalSubmit}
         />
       )}
       {modalState.view && selectedRecruiter && (

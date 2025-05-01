@@ -167,12 +167,28 @@ def add_recruiter(db: Session, recruiter: RecruiterCreate):
     db.refresh(new_recruiter)
     return RecruiterResponse.from_orm(new_recruiter)
 
+# def update_recruiter(db: Session, recruiter_id: int, recruiter_update: RecruiterUpdate):
+#     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
+#     if not recruiter:
+#         raise HTTPException(status_code=404, detail="Recruiter not found")
+    
+#     update_data = recruiter_update.dict(exclude_unset=True)
+#     for key, value in update_data.items():
+#         setattr(recruiter, key, value)
+    
+#     db.commit()
+#     db.refresh(recruiter)
+#     return RecruiterResponse.from_orm(recruiter)
+
 def update_recruiter(db: Session, recruiter_id: int, recruiter_update: RecruiterUpdate):
     recruiter = db.query(Recruiter).filter(Recruiter.id == recruiter_id).first()
     if not recruiter:
         raise HTTPException(status_code=404, detail="Recruiter not found")
     
     update_data = recruiter_update.dict(exclude_unset=True)
+    # Prevent vendorid from being set to None
+    if "vendorid" in update_data and update_data["vendorid"] is None:
+        update_data["vendorid"] = 0
     for key, value in update_data.items():
         setattr(recruiter, key, value)
     

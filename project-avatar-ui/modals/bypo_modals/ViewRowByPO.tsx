@@ -1,7 +1,47 @@
 import React from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
-import { InvoiceData } from '@/types/invoice';
+
+interface InvoiceData {
+  id?: number;
+  invoicenumber?: string;
+  startdate?: string;
+  enddate?: string;
+  invoicedate?: string;
+  quantity?: string | number;
+  otquantity?: string | number;
+  status?: string;
+  amountreceived?: string | number;
+  releaseddate?: string;
+  receiveddate?: string;
+  checknumber?: string;
+  invoiceurl?: string;
+  checkurl?: string;
+  reminders?: string;
+  remindertype?: string;
+  emppaiddate?: string;
+  candpaymentstatus?: string;
+  poid?: string | number;
+  notes?: string;
+  lastmoddatetime?: string;
+  companyname?: string;
+  invmonth?: string;
+  invoicenet?: number;
+  rate?: number;
+  overtimerate?: number;
+  amountexpected?: number;
+  expecteddate?: string;
+  hrname?: string;
+  hremail?: string;
+  hrphone?: string;
+  managername?: string;
+  manageremail?: string;
+  managerphone?: string;
+  candidatename?: string;
+  candidateemail?: string;
+  candidatephone?: string;
+  pname?: string;
+}
 
 interface ViewRowModalProps {
   isOpen: boolean;
@@ -164,7 +204,7 @@ const ViewRowModal: React.FC<ViewRowModalProps> = ({ isOpen, onClose, invoice })
             <div className="modal-field">
               <label htmlFor="Amount Received">Amount Received</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {invoice.amountreceived ? `$${invoice.amountreceived.toFixed(2)}` : 'N/A'}
+                {typeof invoice.amountreceived === 'number' ? `$${invoice.amountreceived.toFixed(2)}` : (invoice.amountreceived || 'N/A')}
               </div>
             </div>
 

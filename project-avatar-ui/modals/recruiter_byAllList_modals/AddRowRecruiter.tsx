@@ -21,7 +21,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     phone: '',
     status: '',
     designation: '',
-    dob: '',
+    dob: null as string | null,
     personalemail: '',
     skypeid: '',
     linkedin: '',
@@ -54,16 +54,33 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    
+    // Special handling for date of birth field
+    if (name === 'dob') {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value || null,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/add`, formData, {
+      // Create a copy of formData to send to the API
+      const dataToSubmit = {...formData};
+      
+      // If dob is empty string, set it to null to avoid validation errors
+      if (dataToSubmit.dob === '' || dataToSubmit.dob === undefined) {
+        dataToSubmit.dob = null;
+      }
+      
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/by/recruiters/byAllList/add`, dataToSubmit, {
         headers: { AuthToken: localStorage.getItem("token") },
       });
       onSubmit(); // Notify parent component of successful submission
@@ -175,14 +192,13 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth (Optional)</label>
           <input
             type="date"
             name="dob"
-            value={formData.dob}
+            value={formData.dob || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter date of birth"
           />
         </div>
 

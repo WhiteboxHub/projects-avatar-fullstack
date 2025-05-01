@@ -2148,7 +2148,7 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
-import { CellClassParams, ColDef } from "ag-grid-community";
+import { ICellRendererParams, ColDef, CellClassParams } from "ag-grid-community";
 
 jsPDF.prototype.autoTable = autoTable;
 
@@ -2217,7 +2217,7 @@ interface InvoiceData {
 }
 
 interface RowData extends InvoiceData {
-  name: any;
+  name: string;
   isGroupRow?: boolean;
   isSummaryRow?: boolean;
   level?: number;
@@ -2239,13 +2239,6 @@ interface ModalState {
 interface SortState {
   field: string;
   order: string;
-}
-
-interface AddRowModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (formData: InvoiceData) => Promise<void>;
-  clients: { id: number; pname: string }[];
 }
 
 const ByPo = () => {
@@ -2357,24 +2350,24 @@ const ByPo = () => {
         startdate: "",
         enddate: "",
         invoicedate: "",
-        quantity: null,
-        otquantity: null,
-        rate: null,
-        overtimerate: null,
+        quantity: 0,
+        otquantity: 0,
+        rate: 0,
+        overtimerate: 0,
         status: "",
         emppaiddate: "",
         candpaymentstatus: "",
         reminders: "",
-        amountexpected: null,
+        amountexpected: 0,
         expecteddate: "",
-        amountreceived: null,
+        amountreceived: 0,
         receiveddate: "",
         releaseddate: "",
         checknumber: "",
         invoiceurl: "",
         checkurl: "",
         freqtype: "",
-        invoicenet: null,
+        invoicenet: 0,
         companyname: "",
         vendorfax: "",
         vendorphone: "",
@@ -2423,9 +2416,9 @@ const ByPo = () => {
           enddate: "",
           invoicedate: "",
           quantity: poGroup.summary.quantity,
-          otquantity: null,
-          rate: null,
-          overtimerate: null,
+          otquantity: 0,
+          rate: 0,
+          overtimerate: 0,
           status: "",
           emppaiddate: "",
           candpaymentstatus: "",
@@ -2439,7 +2432,7 @@ const ByPo = () => {
           invoiceurl: "",
           checkurl: "",
           freqtype: "",
-          invoicenet: null,
+          invoicenet: 0,
           companyname: "",
           vendorfax: "",
           vendorphone: "",
@@ -2478,14 +2471,16 @@ const ByPo = () => {
       {
         headerName: "Name",
         field: "name",
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<RowData>) => {
+          if (!params.data) return null;
+          
           if (params.data.isGroupRow) {
             const expanded = expandedPoGroups[params.data.poid];
             return (
               <div className="flex items-center">
                 <span
                   className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
-                  onClick={() => toggleGroup(params.data.poid)}
+                  onClick={() => params.data && toggleGroup(params.data.poid)}
                 >
                   <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
                     {expanded ? (
@@ -2579,35 +2574,35 @@ const ByPo = () => {
           }
           return null;
         },
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "OT Quantity",
         field: "otquantity",
         hide: false,
         minWidth: 100,
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Rate",
         field: "rate",
         hide: false,
         minWidth: 100,
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Overtime Rate",
         field: "overtimerate",
         hide: false,
         minWidth: 120,
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Status",
         field: "status",
         hide: false,
         minWidth: 100,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<RowData>) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",
@@ -2630,7 +2625,7 @@ const ByPo = () => {
           }
           return null;
         },
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Expected Date",
@@ -2650,7 +2645,7 @@ const ByPo = () => {
           }
           return null;
         },
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Received Date",
@@ -2699,7 +2694,7 @@ const ByPo = () => {
         field: "invoicenet",
         hide: false,
         minWidth: 100,
-        valueFormatter: (params) => params.value === null ? '' : params.value,
+        valueFormatter: (params) => params.value === 0 && !params.data?.isSummaryRow ? '' : params.value,
       },
       {
         headerName: "Company Name",
@@ -2869,7 +2864,7 @@ const ByPo = () => {
         valueFormatter: (params) => params.value || '',
       },
     ],
-    [expandedPoGroups]
+    [expandedPoGroups, toggleGroup]
   );
 
   const handlePageChange = (newPage: number) => {
@@ -2882,7 +2877,7 @@ const ByPo = () => {
     const pageNumbers = [];
     const maxVisiblePages = 4;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     // Adjust if we're at the start or end
     if (endPage - startPage + 1 < maxVisiblePages) {
@@ -2973,19 +2968,19 @@ const ByPo = () => {
     }
   };
 
-  const handleEdit = async (formData: InvoiceData) => {
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/invoices/put/${formData.id}`,
-        formData
-      );
-      showAlert("Invoice updated successfully", "success");
-      setModalState({ ...modalState, edit: false });
-      fetchData();
-    } catch (error) {
-      showAlert("Error updating invoice", "error");
-    }
-  };
+  // const _handleEdit = async (formData: InvoiceData) => {
+  //   try {
+  //     await axios.put(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/invoices/put/${formData.id}`,
+  //       formData
+  //     );
+  //     showAlert("Invoice updated successfully", "success");
+  //     setModalState({ ...modalState, edit: false });
+  //     fetchData();
+  //   } catch (_error) {
+  //     showAlert("Error updating invoice", "error");
+  //   }
+  // };
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this invoice?")) {
@@ -2996,7 +2991,11 @@ const ByPo = () => {
         showAlert("Invoice deleted successfully", "success");
         fetchData();
       } catch (error) {
-        showAlert("Error deleting invoice", "error");
+        console.error("Error deleting invoice:", error);
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : "Unknown error";
+        showAlert(`Error deleting invoice: ${errorMessage}`, "error");
       }
     }
   };

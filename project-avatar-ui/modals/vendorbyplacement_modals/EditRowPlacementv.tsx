@@ -3,7 +3,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { Recruiter } from "@/types/byPlacement";
+import { RecruiterData, Vendor as VendorType } from "@/types/Vendor";
 
 interface Vendor {
   id: number;
@@ -13,8 +13,8 @@ interface Vendor {
 interface EditRowRecruiterProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: Recruiter | null;
-  onSubmit: (formData: Recruiter) => Promise<void>;
+  initialData: RecruiterData | null;
+  onSubmit: (formData: RecruiterData) => Promise<void>;
   vendors: Vendor[];
   defaultVendorId: number;
 }
@@ -27,7 +27,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
   vendors,
   defaultVendorId
 }) => {
-  const [formData, setFormData] = useState<Recruiter | null>(null);
+  const [formData, setFormData] = useState<RecruiterData | null>(null);
 
   const statusOptions = [
     { value: 'A', label: 'Active' },
@@ -47,7 +47,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
     if (initialData) {
       setFormData({
         ...initialData,
-        vendorid: defaultVendorId // Set default vendor ID from props
+        vendorid: defaultVendorId // Keep as number since RecruiterData.vendorid is number
       });
     }
   }, [initialData, defaultVendorId]);
@@ -58,7 +58,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({
       if (prevData) {
         return {
           ...prevData,
-          [name]: value,
+          [name]: name === "vendorid" ? Number(value) : value,
         };
       }
       return null;

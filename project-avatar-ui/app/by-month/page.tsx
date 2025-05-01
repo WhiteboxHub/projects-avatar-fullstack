@@ -1,4 +1,3 @@
-
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -19,6 +18,7 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
+import { ICellRendererParams, ColDef } from "ag-grid-community";
 
 jsPDF.prototype.autoTable = autoTable;
 
@@ -152,7 +152,7 @@ const ByMonth = () => {
       setIsLoading(true);
       
       // Prepare search parameters
-      const params: any = {
+      const params: Record<string, string | number> = {
         page: currentPage,
         page_size: pageSize,
         sort_field: sortField,
@@ -162,7 +162,7 @@ const ByMonth = () => {
       // Add search parameters if they exist
       Object.keys(searchParams).forEach(key => {
         if (searchParams[key]) {
-          params[`search_${key}`] = searchParams[key];
+          params[`search_${key}`] = searchParams[key] as string;
         }
       });
 
@@ -211,7 +211,7 @@ const ByMonth = () => {
     try {
       setIsLoading(true);
       
-      const params: any = {
+      const params: Record<string, string | number> = {
         month: month,
         page: currentPage,
         page_size: pageSize,
@@ -222,7 +222,7 @@ const ByMonth = () => {
       // Add search parameters if they exist
       Object.keys(searchParams).forEach(key => {
         if (searchParams[key]) {
-          params[`search_${key}`] = searchParams[key];
+          params[`search_${key}`] = searchParams[key] as string;
         }
       });
 
@@ -341,19 +341,19 @@ const ByMonth = () => {
     return rows;
   }, [monthGroups, expandedMonthGroups]);
 
-  const columnDefs = useMemo(
+  const columnDefs = useMemo<ColDef<RowData>[]>(
     () => [
       {
         headerName: "Month",
         field: "name",
-        cellRenderer: (params: { data: RowData; value: string }) => {
-          if (params.data.isGroupRow) {
-            const expanded = expandedMonthGroups[params.data.invmonth];
+        cellRenderer: (params: ICellRendererParams<RowData>) => {
+          if (params.data && params.data.isGroupRow) {
+            const expanded = params.data.invmonth ? expandedMonthGroups[params.data.invmonth] : false;
             return (
               <div className="flex items-center">
                 <span
                   className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
-                  onClick={() => toggleGroup(params.data.invmonth)}
+                  onClick={() => params.data && params.data.invmonth ? toggleGroup(params.data.invmonth) : undefined}
                 >
                   <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
                     {expanded ? (
@@ -452,7 +452,7 @@ const ByMonth = () => {
         field: "status",
         hide: false,
         minWidth: 100,
-        cellRenderer: (params: { value: string }) => {
+        cellRenderer: (params: ICellRendererParams<RowData>) => {
           const statusMap: { [key: string]: string } = {
             A: "Active",
             I: "Inactive",
@@ -461,7 +461,7 @@ const ByMonth = () => {
             N: "Not Interested",
             E: "Excellent",
           };
-          return statusMap[params.value] || params.value;
+          return statusMap[params.value as string] || params.value;
         },
       },
       {
@@ -536,19 +536,19 @@ const ByMonth = () => {
     }
   };
 
-  const handleEdit = async (formData: InvoiceData) => {
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/invoices/put/${formData.id}`,
-        formData
-      );
-      showAlert("Invoice updated successfully", "success");
-      setModalState({ ...modalState, edit: false });
-      fetchData();
-    } catch (error) {
-      showAlert("Error updating invoice", "error");
-    }
-  };
+  // const handleEdit = async (formData: InvoiceData) => {
+  //   try {
+  //     await axios.put(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/invoices/put/${formData.id}`,
+  //       formData
+  //     );
+  //     showAlert("Invoice updated successfully", "success");
+  //     setModalState({ ...modalState, edit: false });
+  //     fetchData();
+  //   } catch (error) {
+  //     showAlert("Error updating invoice", "error");
+  //   }
+  // };
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this invoice?")) {
@@ -559,7 +559,11 @@ const ByMonth = () => {
         showAlert("Invoice deleted successfully", "success");
         fetchData();
       } catch (error) {
-        showAlert("Error deleting invoice", "error");
+        console.error("Error deleting invoice:", error);
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : "Unknown error";
+        showAlert(`Error deleting invoice: ${errorMessage}`, "error");
       }
     }
   };
@@ -646,14 +650,14 @@ const ByMonth = () => {
     }));
   };
 
-  const handleSortChange = (field: string) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
+  // const handleSortChange = (field: string) => {
+  //   if (sortField === field) {
+  //     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  //   } else {
+  //     setSortField(field);
+  //     setSortOrder("asc");
+  //   }
+  // };
 
   return (
     <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
@@ -872,11 +876,14 @@ const ByMonth = () => {
           onGridReady={(params) => {
             params.api.sizeColumnsToFit();
           }}
-          onSortChanged={(params) => {
-            const sortModel = params.api.getSortModel();
-            if (sortModel.length > 0) {
-              setSortField(sortModel[0].colId);
-              setSortOrder(sortModel[0].sort);
+          onSortChanged={(event) => {
+            const columnState = event.api.getColumnState();
+            if (columnState.length > 0) {
+              const sortModel = columnState.find((column) => column.sort);
+              if (sortModel) {
+                setSortField(sortModel.colId);
+                setSortOrder(sortModel.sort || "asc");
+              }
             }
           }}
         />

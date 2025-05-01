@@ -12,7 +12,7 @@ import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { Vendor  } from "@/types/Vendor";
+import { Vendor, RecruiterData } from "@/types/Vendor";
 
 import React, {
   useCallback,
@@ -38,28 +38,6 @@ jsPDF.prototype.autoTable = autoTable;
 //   recruiter_count: number;
 // }
 
-interface RecruiterData {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  designation: string;
-  status: string;
-  dob?: string;
-  personalemail: string;
-  skypeid: string;
-  linkedin: string;
-  twitter: string;
-  facebook: string;
-  review: string;
-  notes: string;
-  vendorid: number;
-  companyname: string;
-  employeeid?: number;
-  lastmoddatetime?: string;
-  clientid: string;
-}
-
 interface RowData extends RecruiterData {
   isGroupRow?: boolean;
   level?: number;
@@ -79,7 +57,7 @@ interface ModalState {
 }
 
 const RecruiterByVendor = () => {
-  const gridRef = useRef<AgGridReact>();
+  const gridRef = useRef<AgGridReact>(null);
   const [modalState, setModalState] = useState<ModalState>({
     add: false,
     view: false,
@@ -171,7 +149,7 @@ const RecruiterByVendor = () => {
     vendors.forEach((vendor) => {
       rows.push({
         id: vendor.vendorid,
-        name: vendor.companyname,
+        name: vendor.companyname || '',
         email: "",
         phone: "",
         designation: "",
@@ -185,7 +163,7 @@ const RecruiterByVendor = () => {
         review: "",
         notes: "",
         vendorid: vendor.vendorid,
-        companyname: vendor.companyname,
+        companyname: vendor.companyname || '',
         clientid: "",
         isGroupRow: true,
         level: 0,
@@ -196,7 +174,9 @@ const RecruiterByVendor = () => {
         vendor.recruiters.forEach((recruiter) => {
           rows.push({
             ...recruiter,
-            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname}`,
+            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname || ''}`,
+          companyname: vendor.companyname || '',
+          clientid: recruiter.clientid || '',
             isGroupRow: false,
             level: 1,
           });
@@ -437,12 +417,12 @@ const RecruiterByVendor = () => {
     const tableData = rowData
       .filter((row) => !row.isGroupRow && row.id !== -1)
       .map((row) => [
-        row.companyname,
-        row.name,
-        row.email,
-        row.phone,
-        row.designation,
-        row.status,
+        row.companyname || "",
+        row.name || "",
+        row.email || "",
+        row.phone || "",
+        row.designation || "",
+        row.status || "",
         row.dob || "",
         row.personalemail || "",
         row.skypeid || "",
@@ -533,7 +513,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];;
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,
@@ -550,7 +530,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];;
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 handleDelete(selectedRows[0].id);
               } else {
@@ -563,7 +543,7 @@ const RecruiterByVendor = () => {
           </button>
           <button
             onClick={() => {
-              const selectedRows = gridRef.current?.api.getSelectedRows();
+              const selectedRows = gridRef.current?.api.getSelectedRows() || [];
               if (selectedRows?.length > 0 && !selectedRows[0].isGroupRow) {
                 setModalState({
                   ...modalState,

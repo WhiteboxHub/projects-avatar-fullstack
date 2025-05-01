@@ -22,7 +22,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     designation: '',
     clientid: '',
     status: '',
-    dob: '',
+    dob: null,
     personalemail: '',
     skypeid: '',
     linkedin: '',
@@ -59,11 +59,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/add`, formData, {
+        // Create a copy of formData to send to the API
+        const dataToSubmit = {...formData};
+        
+        // If dob is empty, set it to null to avoid validation errors
+        if (!dataToSubmit.dob) {
+          dataToSubmit.dob = null;
+        }
+        
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byClient/add`, dataToSubmit, {
             headers: { AuthToken: localStorage.getItem("token") },
         });
         console.log(response.data.message);
-      onSubmit(formData);
+        onSubmit(dataToSubmit);
         onClose();
     } catch (error) {
         console.error("Error adding recruiter:", error);
@@ -179,11 +187,11 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth (Optional)</label>
           <input
             type="date"
             name="dob"
-            value={formData.dob}
+            value={formData.dob || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />

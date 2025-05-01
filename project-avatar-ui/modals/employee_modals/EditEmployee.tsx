@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Employee } from '../../types/index';
 
 interface DropdownOption {
@@ -21,8 +21,15 @@ interface EditEmployeeModalProps {
   onSave: () => void;
 }
 
+// Extended Employee type to include the UI-specific fields
+interface EmployeeFormData extends Employee {
+  manager?: string;
+  designation?: string;
+  loginid_display?: string;
+}
+
 const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
-  const [formData, setFormData] = useState<Employee | null>(null);
+  const [formData, setFormData] = useState<EmployeeFormData | null>(null);
   const [dropdownOptions, setDropdownOptions] = useState<DropdownOptions>({
     managers: [],
     designations: [],
@@ -39,7 +46,7 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
           ...rowData,
           manager: rowData.manager_name || '',
           designation: rowData.designation_name || '',
-          loginid: rowData.login_email || ''
+          loginid_display: rowData.login_email || ''
         });
       }
     }
@@ -84,19 +91,31 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
     setIsLoading(true);
     try {
       // Transform the form data back to API expected format
-      const payload = {
+      const payload: Record<string, any> = {
         ...formData,
         mgrid: dropdownOptions.managers.find(m => m.name === formData.manager)?.id || null,
         designationid: dropdownOptions.designations.find(d => d.name === formData.designation)?.id || null,
-        loginid: dropdownOptions.loginids.find(l => l.name === formData.loginid)?.id || null,
+        loginid: dropdownOptions.loginids.find(l => l.name === formData.loginid_display)?.id || null,
         commission: formData.commission === 'Y', // Convert commission to boolean
         startdate: formData.startdate || null, // Ensure date fields are in the correct format
         dob: formData.dob || null,
         enddate: formData.enddate || null,
       };
 
+      // Remove UI-specific fields that shouldn't be sent to the API
+      delete payload.manager;
+      delete payload.designation;
+      delete payload.loginid_display;
+      delete payload.manager_name;
+      delete payload.designation_name;
+      delete payload.login_email;
+
       // Remove any undefined or null values to avoid validation errors
-      Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === undefined) {
+          delete payload[key];
+        }
+      });
 
       // Log the payload to verify its structure
       console.log('Payload:', payload);
@@ -107,7 +126,9 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
       onSave();
       onRequestClose();
     } catch (error) {
-      console.error('Error updating employee:', error.response ? error.response.data : error.message);
+      const axiosError = error as AxiosError;
+      console.error('Error updating employee:', 
+        axiosError.response ? axiosError.response.data : axiosError.message);
     } finally {
       setIsLoading(false);
     }
@@ -260,8 +281,8 @@ const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, onRequest
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Login ID (Email)</label>
               <select
-                name="loginid"
-                value={formData.loginid || ''}
+                name="loginid_display"
+                value={formData.loginid_display || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               >

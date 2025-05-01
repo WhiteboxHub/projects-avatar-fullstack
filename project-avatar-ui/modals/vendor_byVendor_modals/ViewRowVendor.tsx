@@ -1,7 +1,11 @@
 import Modal from "react-modal";
 import React from "react";
 import { AiOutlineClose } from "react-icons/ai";
-import { Recruiter } from "@/types/byVendor";
+import { RecruiterData } from "@/types/Vendor";
+
+interface Recruiter extends RecruiterData {
+  companyname?: string; // Ensure companyname is required, not optional
+}
 
 interface ViewRowRecruiterProps {
   isOpen: boolean;
@@ -139,6 +143,13 @@ const ViewRowRecruiter: React.FC<ViewRowRecruiterProps> = ({ isOpen, onClose, re
               <label className="block text-sm font-semibold text-gray-700 mb-1">Review</label>
               <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
                 {recruiter.review || 'N/A'}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>
+              <div className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md">
+                {recruiter.companyname}
               </div>
             </div>
 

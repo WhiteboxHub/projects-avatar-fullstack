@@ -311,7 +311,7 @@ const MarketingCandidates = () => {
   const getPageNumbers = () => {
     const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
     
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
@@ -479,7 +479,10 @@ const MarketingCandidates = () => {
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as CandidateMarketing : null}
           onSave={fetchData}
           employees={employees}
@@ -492,7 +495,10 @@ const MarketingCandidates = () => {
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0
+            ipemailid: 0,
+            mmid: selectedRow.mmid || 0,
+            instructorid: selectedRow.instructorid || 0,
+            submitterid: selectedRow.submitterid || 0
           } as CandidateMarketing : null}
         />
       </div>
