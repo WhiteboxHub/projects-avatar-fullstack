@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { CandidateMarketing } from '@/types';
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { CandidateMarketing } from "@/types";
 
 interface Employee {
   id?: number;
@@ -48,7 +48,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     skypeid: '',
     currentlocation: '',
     locationpreference: '',
-    yearsofexperience: '',
+    yearsofexperience:0,
     coverletter: '',
     closedemail: '',
     ipemailid: 0,

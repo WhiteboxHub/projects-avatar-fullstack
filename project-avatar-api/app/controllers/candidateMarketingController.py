@@ -282,3 +282,21 @@ def get_ipemails_dropdown(db: Session):
     result = db.execute(query)
   
     return [{"email": str(row[0])} for row in result]
+
+def get_resumes_dropdown(db: Session):
+    """
+    Retrieve resumes for dropdown selection
+    """
+    query = text("""
+        SELECT '' AS id, '' AS name 
+        FROM dual 
+        UNION 
+        SELECT DISTINCT cr.id, CONCAT(c.name, ' ', r.resumekey) AS name 
+        FROM resume r, candidateresume cr, candidate c 
+        WHERE r.id = cr.resumeid 
+        AND c.candidateid = cr.candidateid 
+        ORDER BY name
+    """)
+    result = db.execute(query)
+    
+    return [{"id": row[0], "name": row[1]} for row in result]

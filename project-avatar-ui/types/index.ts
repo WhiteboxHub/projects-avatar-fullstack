@@ -545,14 +545,14 @@ export interface Vendor {
       skypeid: string;
       ipemailid: number;
       ipemail: string;
-      resumeid: number;
+      resumeid: string;
       coverletter: string;
       intro: string;
       closedate: string;
       closedemail: string;
       notes: string;
       suspensionreason: string;
-      yearsofexperience: string;
+      yearsofexperience: number;
       manager_name: string;
       instructor_name: string;
       submitter_name: string;
@@ -608,31 +608,31 @@ export interface Vendor {
   }
 
 
-  export interface CandidateMarketing {
+  // export interface CandidateMarketing {
   
-    candidateid: number;
-    startdate: number |string;
-    mmid: number;
-    instructorid: number;
-    status: string;
-    submitterid: number;
-    priority: string;
-    technology: string;
-    minrate: number;
-    currentlocation: string;
-    relocation: string;
-    locationpreference: string;
-    skypeid: string;
-    ipemailid: number;
-    resumeid: number;
-    coverletter: string;
-    intro: string;
-    closedate: string;
-    closedemail: string;
-    notes: string;
-    suspensionreason: string;
-    yearsofexperience: string;
-  }
+  //   candidateid: number;
+  //   startdate: number |string;
+  //   mmid: number;
+  //   instructorid: number;
+  //   status: string;
+  //   submitterid: number;
+  //   priority: string;
+  //   technology: string;
+  //   minrate: number;
+  //   currentlocation: string;
+  //   relocation: string;
+  //   locationpreference: string;
+  //   skypeid: string;
+  //   ipemailid: number;
+  //   resumeid: string;
+  //   coverletter: string;
+  //   intro: string;
+  //   closedate: string;
+  //   closedemail: string;
+  //   notes: string;
+  //   suspensionreason: string;
+  //   yearsofexperience: number;
+  // }
   
 
 // In your types file (e.g., types/index.ts)

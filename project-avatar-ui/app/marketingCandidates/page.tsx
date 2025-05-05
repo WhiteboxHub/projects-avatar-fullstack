@@ -1,22 +1,22 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import "jspdf-autotable";
-import Dropdown, { Option } from "react-dropdown";
-import "react-dropdown/style.css";
-import * as XLSX from "xlsx";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import "jspdf-autotable";
+import "react-dropdown/style.css";
+import * as XLSX from "xlsx";
+import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "@/modals/Marketing/MarketingCandidate/EditCandidateMarketing";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/Marketing/MarketingCandidate/ViewCandidateMarketing";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-import { debounce } from "lodash";
+import axios from "axios";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
-import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
-import { UserOptions } from 'jspdf-autotable';
-import { CandidateMarketing } from '@/types/index';
+import { AgGridReact } from "ag-grid-react";
+import { UserOptions } from "jspdf-autotable";
+import { debounce } from "lodash";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { CandidateMarketing } from "@/types/index";
 
 interface RowData {
   id: number;
@@ -59,6 +59,22 @@ interface AutoTableDoc extends jsPDF {
   autoTable: (d: jsPDF, options: UserOptions) => void;
 }
 
+interface Employee {
+  id: number;
+  name: string;
+}
+
+interface IPEmail {
+  id: number;
+  email: string;
+}
+
+interface Resume {
+  id: string;
+  name: string;
+  link?: string;
+}
+
 const MarketingCandidates = () => {
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string }[]>([]);
@@ -69,7 +85,9 @@ const MarketingCandidates = () => {
   const [modalState, setModalState] = useState<{ add: boolean; edit: boolean; view: boolean }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [ipEmails, setIpEmails] = useState<IPEmail[]>([]);
+  const [resumes, setResumes] = useState<Resume[]>([]);
   const [totalPages, setTotalPages] = useState<number>(0);
   const gridRef = useRef<AgGridReact>(null);
 
@@ -83,6 +101,28 @@ const MarketingCandidates = () => {
       setEmployees(response.data);
     } catch (error) {
       console.error("Error fetching employees:", error);
+    }
+  }, [API_URL]);
+
+  const fetchIpEmails = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/candidatemarketing/ipemails`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      setIpEmails(response.data);
+    } catch (error) {
+      console.error("Error fetching IP emails:", error);
+    }
+  }, [API_URL]);
+
+  const fetchResumes = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/candidatemarketing/resumes`, {
+        headers: { AuthToken: localStorage.getItem("token") },
+      });
+      setResumes(response.data);
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
     }
   }, [API_URL]);
 
@@ -152,7 +192,9 @@ const MarketingCandidates = () => {
   useEffect(() => {
     fetchData();
     fetchEmployees();
-  }, [fetchData, fetchEmployees]);
+    fetchIpEmails();
+    fetchResumes();
+  }, [fetchData, fetchEmployees, fetchIpEmails, fetchResumes]);
 
   useEffect(() => {
     if (searchValue) {
@@ -476,30 +518,38 @@ const MarketingCandidates = () => {
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={selectedRow ? {
             ...selectedRow,
+            ipemail: selectedRow.ipemail || '',
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0,
+            ipemailid: ipEmails.find(email => email.email === selectedRow.ipemail)?.id || 0,
             mmid: selectedRow.mmid || 0,
             instructorid: selectedRow.instructorid || 0,
-            submitterid: selectedRow.submitterid || 0
-          } as CandidateMarketing : null}
+            submitterid: selectedRow.submitterid || 0,
+            resume_name: resumes.find(resume => resume.id === String(selectedRow.resumeid))?.name || '',
+            status: selectedRow.status || '',
+            manager: selectedRow.manager || ''
+          } as unknown as CandidateMarketing : null}
           onSave={fetchData}
           employees={employees}
+          ipEmails={ipEmails}
+          resumes={resumes}
         />
        <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
           rowData={selectedRow ? {
             ...selectedRow,
+            ipemail: selectedRow.ipemail || '',
             manager_name: selectedRow.manager || '',
             instructor_name: selectedRow.instructor || '',
             submitter_name: selectedRow.submitter || '',
-            ipemailid: 0,
+            ipemailid: ipEmails.find(email => email.email === selectedRow.ipemail)?.id || 0,
             mmid: selectedRow.mmid || 0,
             instructorid: selectedRow.instructorid || 0,
-            submitterid: selectedRow.submitterid || 0
-          } as CandidateMarketing : null}
+            submitterid: selectedRow.submitterid || 0,
+            resume_name: resumes.find(resume => resume.id === String(selectedRow.resumeid))?.name || ''
+          } as unknown as CandidateMarketing : null}
         />
       </div>
     </div>

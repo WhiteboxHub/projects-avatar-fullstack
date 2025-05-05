@@ -1,35 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-
-interface CandidateMarketing {
-  id: number;
-  manager_name: string;
-  instructor_name: string;
-  submitter_name: string;
-  status: string;
-  locationpreference: string;
-  priority: string;
-  technology: string;
-  resumeid: number;
-  minrate: number;
-  ipemail: string;
-  relocation: string;
-  closedate: string;
-  suspensionreason: string;
-  intro: string;
-  notes: string;
-  skypeid: string;
-  currentlocation: string;
-}
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { CandidateMarketing } from "@/types";
 
 interface Employee {
+  id: number;
   name: string;
-  // Remove 'id' property since it doesn't exist on type 'Employee'
 }
 
-interface IpEmail {
+interface IPEmail {
+  id: number;
   email: string;
+}
+
+interface Resume {
+  id: string;
+  name: string;
+  link?: string;
 }
 
 interface EditCandidateMarketingModalProps {
@@ -38,6 +25,8 @@ interface EditCandidateMarketingModalProps {
   rowData: CandidateMarketing | null;
   onSave: () => void;
   employees: Employee[];
+  ipEmails: IPEmail[];
+  resumes: Resume[];
 }
 
 const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = ({
@@ -46,9 +35,17 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
   rowData,
   onSave,
   employees,
+  ipEmails,
+  resumes,
 }) => {
   const [formData, setFormData] = useState<CandidateMarketing>({
     id: 0,
+    candidateid: 0,
+    startdate: '',
+    ipemail: '',
+    coverletter: '',
+    closedemail: '',
+    yearsofexperience: 0,
     manager_name: '',
     instructor_name: '',
     submitter_name: '',
@@ -56,9 +53,8 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     locationpreference: '',
     priority: '',
     technology: '',
-    resumeid: 0,
+    resumeid: '',
     minrate: 0,
-    ipemail: '',
     relocation: '',
     closedate: '',
     suspensionreason: '',
@@ -66,37 +62,28 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     notes: '',
     skypeid: '',
     currentlocation: '',
+    ipemailid: 0,
+    mmid: 0,
+    instructorid: 0,
+    submitterid: 0
   });
-  const [ipEmails, setIpEmails] = useState<IpEmail[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchIpEmails = async () => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/currentmarketing/ipemails`, {
-          headers: { AuthToken: localStorage.getItem('token') },
-        });
-        setIpEmails(response.data);
-      } catch (error) {
-        console.error('Error fetching IP emails:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchIpEmails();
-  }, []);
 
   useEffect(() => {
     if (rowData) {
       setFormData({
         ...rowData,
-        manager_name: employees.find(e => e.name === rowData.manager_name) ? rowData.manager_name : '',
-        instructor_name: employees.find(e => e.name === rowData.instructor_name) ? rowData.instructor_name : '',
-        submitter_name: employees.find(e => e.name === rowData.submitter_name) ? rowData.submitter_name : '',
+        manager_name: rowData.manager_name || '',
+        instructor_name: rowData.instructor_name || '',
+        submitter_name: rowData.submitter_name || '',
+        ipemailid: rowData.ipemailid || 0,
+        mmid: rowData.mmid || 0,
+        instructorid: rowData.instructorid || 0,
+        submitterid: rowData.submitterid || 0,
+        status: rowData.status || '',
+        resumeid: rowData.resumeid || ''
       });
     }
-  }, [rowData, employees]);
+  }, [rowData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -116,18 +103,18 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
     try {
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/candidatemarketing/put/${formData.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/candidatemarketing/update/${formData.id}`,
         {
-          manager_name: formData.manager_name,
-          instructor_name: formData.instructor_name,
-          submitter_name: formData.submitter_name,
+          mmid: formData.mmid,
+          instructorid: formData.instructorid,
+          submitterid: formData.submitterid,
           status: formData.status,
           locationpreference: formData.locationpreference,
           priority: formData.priority,
           technology: formData.technology,
           resumeid: formData.resumeid,
           minrate: formData.minrate,
-          ipemail: formData.ipemail,
+          ipemailid: formData.ipemailid,
           relocation: formData.relocation,
           closedate: formData.closedate,
           suspensionreason: formData.suspensionreason,
@@ -149,7 +136,6 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     }
   };
 
-  if (loading) return <div></div>;
   return (
     <Modal
       isOpen={isOpen}
@@ -188,17 +174,17 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Manager */}
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Manager</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Manager <span className="text-red-500">*</span></label>
             <select
-              name="manager_name"
-              value={formData.manager_name}
+              name="mmid"
+              value={formData.mmid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
               <option value="">Select Manager</option>
-              {employees.map((emp, index) => (
-                <option key={`manager-${index}`} value={emp.name}>
+              {employees && employees.map((emp) => (
+                <option key={`manager-${emp.id}`} value={emp.id}>
                   {emp.name}
                 </option>
               ))}
@@ -207,17 +193,17 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Instructor */}
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instructor <span className="text-red-500">*</span></label>
             <select
-              name="instructor_name"
-              value={formData.instructor_name}
+              name="instructorid"
+              value={formData.instructorid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
               <option value="">Select Instructor</option>
-              {employees.map((emp, index) => (
-                <option key={`instructor-${index}`} value={emp.name}>
+              {employees && employees.map((emp) => (
+                <option key={`instructor-${emp.id}`} value={emp.id}>
                   {emp.name}
                 </option>
               ))}
@@ -226,17 +212,17 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Submitter */}
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Submitter</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Submitter <span className="text-red-500">*</span></label>
             <select
-              name="submitter_name"
-              value={formData.submitter_name}
+              name="submitterid"
+              value={formData.submitterid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             >
               <option value="">Select Submitter</option>
-              {employees.map((emp, index) => (
-                <option key={`submitter-${index}`} value={emp.name}>
+              {employees && employees.map((emp) => (
+                <option key={`submitter-${emp.id}`} value={emp.id}>
                   {emp.name}
                 </option>
               ))}
@@ -245,12 +231,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Status */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="">None</option>
               <option value="To Do">To Do</option>
@@ -274,12 +261,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Priority */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority <span className="text-red-500">*</span></label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="">None</option>
               <option value="P1">P1</option>
@@ -292,12 +280,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Technology */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Technology</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Technology <span className="text-red-500">*</span></label>
             <select
               name="technology"
               value={formData.technology}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="">None</option>
               <option value="QA">QA</option>
@@ -308,40 +297,50 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Resume ID */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID</label>
-            <input
-              type="number"
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID <span className="text-red-500">*</span></label>
+            <select
               name="resumeid"
               value={formData.resumeid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-            />
+              required
+            >
+              <option value="">Select Resume</option>
+              {resumes && resumes.map((resume) => (
+                <option key={resume.id} value={resume.id}>
+                  {resume.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Min Rate */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Min Rate</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Min Rate <span className="text-red-500">*</span></label>
             <input
               type="number"
               name="minrate"
               value={formData.minrate}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              min="45"
+              required
             />
           </div>
 
           {/* IP Email */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email <span className="text-red-500">*</span></label>
             <select
-              name="ipemail"
-              value={formData.ipemail}
+              name="ipemailid"
+              value={formData.ipemailid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="">Select IP Email</option>
-              {ipEmails.map((email) => (
-                <option key={email.email} value={email.email}>
+              {ipEmails && ipEmails.map((email) => (
+                <option key={email.id} value={email.id}>
                   {email.email}
                 </option>
               ))}
@@ -350,12 +349,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Relocation */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation <span className="text-red-500">*</span></label>
             <select
               name="relocation"
               value={formData.relocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="">Select</option>
               <option value="Yes">Yes</option>
@@ -377,12 +377,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Suspension Reason */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Suspension Reason</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Suspension Reason <span className="text-red-500">*</span></label>
             <select
               name="suspensionreason"
               value={formData.suspensionreason}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
+              required
             >
               <option value="A">Active</option>
               <option value="B">Break</option>

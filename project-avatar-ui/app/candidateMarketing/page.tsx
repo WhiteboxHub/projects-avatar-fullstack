@@ -1,25 +1,26 @@
-// new-projects-avatar-fullstack/project-avatar-ui/app/candidateMarketing/page.tsx
-
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import "jspdf-autotable";
-import Dropdown, { Option } from "react-dropdown";
-import "react-dropdown/style.css";
-import * as XLSX from "xlsx";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import "jspdf-autotable";
+import "react-dropdown/style.css";
+import * as XLSX from "xlsx";
+import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "../../modals/Marketing/CurrentMarketing/EditCandidateMarketing";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "../../modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
-// import { MdDelete } from "react-icons/md";
-import { debounce } from "lodash";
+import axios from "axios";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
-import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
+import { AgGridReact } from "ag-grid-react";
+import { UserOptions } from "jspdf-autotable";
+import { debounce } from "lodash";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { CandidateMarketing } from "@/types";
-import { UserOptions } from 'jspdf-autotable';
+
+// new-projects-avatar-fullstack/project-avatar-ui/app/candidateMarketing/page.tsx
+
+// import { MdDelete } from "react-icons/md";
 
 interface RowData {
   id: number;

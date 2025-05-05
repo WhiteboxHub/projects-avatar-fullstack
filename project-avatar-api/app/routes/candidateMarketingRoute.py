@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database.db import get_db
 from app.controllers.candidateMarketingController import (
     get_candidate_marketing_list, get_candidate_marketing_by_name, update_candidate_marketing, 
-    delete_candidate_marketing, get_employees, get_ipemails_dropdown
+    delete_candidate_marketing, get_employees, get_ipemails_dropdown, get_resumes_dropdown
 )
 from app.schemas import CandidateMarketingSchema, CandidateMarketingCreateSchema, CandidateMarketingUpdateSchema
 from typing import List, Dict, Any
@@ -42,3 +42,8 @@ def get_employees_list(db: Session = Depends(get_db)):
 def get_ip_emails_for_dropdown(db: Session = Depends(get_db)):
     ipemails = get_ipemails_dropdown(db)
     return ipemails
+
+@router.get("/api/admin/candidatemarketing/resumes", response_model=List[Dict[str, Any]])
+def get_resumes_for_dropdown(db: Session = Depends(get_db)):
+    resumes = get_resumes_dropdown(db)
+    return resumes
