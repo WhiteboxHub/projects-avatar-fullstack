@@ -1,3 +1,9 @@
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { toast } from "react-toastify";
+
 // import Modal from "react-modal";
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
@@ -459,11 +465,6 @@
 // export default EditRowCandidate;
 
 
-import Modal from "react-modal";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { AiOutlineClose } from "react-icons/ai";
-import { toast } from "react-toastify";
 
 interface DropdownOptions {
   courses: string[];
