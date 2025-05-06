@@ -26,7 +26,8 @@ def get_current_marketing_list(db: Session, skip: int, limit: int):
             cm.status,
             cm.locationpreference,
             cm.priority,
-            cm.technology,
+            COALESCE(cm.technology, c.course) AS technology,
+            COALESCE(cm.yearsofexperience, c.workexperience) AS yearsofexperience,
             cm.resumeid,
             cm.minrate,
             ip.email AS ipemail,
@@ -77,8 +78,8 @@ def get_current_marketing_by_candidate_name(db: Session, name: str):
             c.workstatus,
             cm.status,
             cm.priority,
-            cm.yearsofexperience,
-            cm.technology,
+            COALESCE(cm.yearsofexperience, c.workexperience) AS yearsofexperience,
+            COALESCE(cm.technology, c.course) AS technology,
             cm.resumeid,
             cm.minrate,
             ip.email AS ipemail,
@@ -141,6 +142,23 @@ def get_employees(db: Session):
     result = db.execute(query)
     # Convert Row objects to dictionaries
     return [{"name": row[0]} for row in result.fetchall()]
+
+def get_resumes_dropdown(db: Session):
+    """
+    Retrieve resumes for dropdown selection
+    """
+    query = text("""
+        SELECT '' AS id, '' AS name 
+        FROM dual 
+        UNION 
+        SELECT DISTINCT cr.id, CONCAT(c.name, ' ', r.resumekey) AS name 
+        FROM resume r, candidateresume cr, candidate c 
+        WHERE r.id = cr.resumeid 
+        AND c.candidateid = cr.candidateid 
+        ORDER BY name
+    """)
+    result = db.execute(query)
+    return [{"id": row[0], "name": row[1]} for row in result]
 
 def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_data: CandidateMarketingUpdateSchema):
     """

@@ -53,7 +53,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
     locationpreference: '',
     priority: '',
     technology: '',
-    resumeid: '',
+    resumeid: 0,
     minrate: 0,
     relocation: '',
     closedate: '',
@@ -79,8 +79,8 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
         mmid: rowData.mmid || 0,
         instructorid: rowData.instructorid || 0,
         submitterid: rowData.submitterid || 0,
-        status: rowData.status || '',
-        resumeid: rowData.resumeid || ''
+        status: rowData.status ? rowData.status.split('-')[1]?.charAt(0).toUpperCase() + rowData.status.split('-')[1]?.slice(1).toLowerCase() : '',
+        resumeid: rowData.resumeid || 0
       });
     }
   }, [rowData]);
@@ -349,13 +349,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Relocation */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation</label>
             <select
               name="relocation"
               value={formData.relocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+              // required
             >
               <option value="">Select</option>
               <option value="Yes">Yes</option>

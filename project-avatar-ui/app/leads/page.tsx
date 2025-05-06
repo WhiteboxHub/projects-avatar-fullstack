@@ -1,30 +1,31 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import "jspdf-autotable";
-import * as XLSX from "xlsx";
-import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 import AddRowModal from "@/modals/Leads/AddRowModal";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 import EditRowModal from "@/modals/Leads/EditRowModal";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/Leads/ViewRowModal";
-import { MdDelete } from "react-icons/md";
+import axios from "axios";
+import debounce from "lodash/debounce";
 import jsPDF from "jspdf";
-import { faFilePdf, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import withAuth from "@/modals/withAuth";
+import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
+import { Lead } from "@/types/index";
+
 import {
   AiOutlineEdit,
   AiOutlineSearch,
   AiOutlineReload,
   AiOutlineEye,
 } from "react-icons/ai";
-import { MdAdd } from "react-icons/md";
-import { Lead } from "@/types/index";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import debounce from "lodash/debounce";
-import { ICellRendererParams, ColDef } from "ag-grid-community";
 
 interface CellRendererParams extends ICellRendererParams {
   value: string | null;
@@ -377,10 +378,26 @@ const handleDownloadPDF = () => {
   const endPage = Math.min(totalPages, currentPage + 4);
   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
 
+  // Function to handle successful lead addition
+  const handleLeadAdded = (newLead: Lead) => {
+    // Update the grid with the new lead data
+    setRowData(prevData => [newLead, ...prevData]);
+    
+    // Clear cache to ensure fresh data on next fetch
+    cachedPages.current.clear();
+    
+    // Refresh the data to show the newly added lead
+    fetchData(currentPage, false);
+    
+    // Show success message
+    setAlertMessage("Lead added successfully!");
+    setTimeout(() => setAlertMessage(null), 3000);
+  };
+
   return (
     <div className="relative">
       {alertMessage && (
-        <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
+        <div className={`fixed top-4 right-4 p-4 ${alertMessage.includes("successfully") ? "bg-green-500" : "bg-red-500"} text-white rounded-md shadow-md z-50`}>
           {alertMessage}
         </div>
       )}
@@ -526,9 +543,12 @@ const handleDownloadPDF = () => {
         <AddRowModal
           isOpen={modalState.add}
           onRequestClose={() => setModalState({ ...modalState, add: false })}
-          onSave={() => {
+          onSave={(newLead: Lead) => {
+            // Pass the newly added lead data to update the UI immediately
+            handleLeadAdded(newLead);
             cachedPages.current.clear(); 
-            fetchData(currentPage, false);
+            fetchData(1, false); // Fetch first page to show the new lead
+            setCurrentPage(1); // Reset to first page to see the new lead
           }}
         />
         <EditRowModal
@@ -549,5 +569,4 @@ const handleDownloadPDF = () => {
     </div>
   );
 };
-
 export default withAuth(Leads);

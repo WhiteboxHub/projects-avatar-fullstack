@@ -52,7 +52,8 @@ class LeadBase(BaseModel):
     source: Optional[str] = None
     workexperience: Optional[str] = None
     sourcename: Optional[str] = None
-    course: Optional[str] = 'QA'
+    # course: Optional[str] = 'QA'
+    course: Optional[str] = None
     intent: Optional[str] = None
     attendedclass: Optional[str] = None
     siteaccess: Optional[str] = None

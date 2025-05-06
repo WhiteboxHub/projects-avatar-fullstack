@@ -133,6 +133,7 @@ const MarketingCandidates = () => {
           page: page,
           page_size: paginationPageSize,
           search: searchQuery,
+          status_filter: "active" // Exclude suspended/closed
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
@@ -516,20 +517,34 @@ const MarketingCandidates = () => {
         <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
-          rowData={selectedRow ? {
-            ...selectedRow,
-            ipemail: selectedRow.ipemail || '',
-            manager_name: selectedRow.manager || '',
-            instructor_name: selectedRow.instructor || '',
-            submitter_name: selectedRow.submitter || '',
-            ipemailid: ipEmails.find(email => email.email === selectedRow.ipemail)?.id || 0,
-            mmid: selectedRow.mmid || 0,
-            instructorid: selectedRow.instructorid || 0,
-            submitterid: selectedRow.submitterid || 0,
-            resume_name: resumes.find(resume => resume.id === String(selectedRow.resumeid))?.name || '',
-            status: selectedRow.status || '',
-            manager: selectedRow.manager || ''
-          } as unknown as CandidateMarketing : null}
+          rowData={
+            selectedRow
+              ? {
+                  ...selectedRow,
+                  mmid: selectedRow.mmid || 0,
+                  instructorid: selectedRow.instructorid || 0,
+                  submitterid: selectedRow.submitterid || 0,
+                  ipemailid:
+                    selectedRow.ipemail ||
+                    ipEmails.find((email) => email.email === selectedRow.ipemail)?.id ||
+                    0,
+                  resumeid:
+                    selectedRow.resumeid !== undefined
+                      ? String(selectedRow.resumeid)
+                      : "",
+                  status: selectedRow.status || "",
+                  relocation: selectedRow.relocation || "",
+                  manager_name:
+                    employees.find((emp) => emp.id === selectedRow.mmid)?.name || "",
+                  instructor_name:
+                    employees.find((emp) => emp.id === selectedRow.instructorid)
+                      ?.name || "",
+                  submitter_name:
+                    employees.find((emp) => emp.id === selectedRow.submitterid)
+                      ?.name || "",
+                }
+              : null
+          }
           onSave={fetchData}
           employees={employees}
           ipEmails={ipEmails}

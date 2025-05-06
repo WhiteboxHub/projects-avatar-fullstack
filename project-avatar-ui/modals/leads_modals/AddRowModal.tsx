@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { Lead } from '@/types/index'; // Adjust the import path accordingly
+import Modal from "react-modal";
+import React, { useState } from "react";
+import axios from "axios";
+import { Lead } from "@/types/index";
 
 interface FormData {
   name: string;
@@ -31,7 +31,7 @@ interface FormData {
   country: string;
   zip: string;
   faq: string;
-  callsmade: string;
+  callsmade?: number;
   closedate: string;
   notes: string;
 }
@@ -71,7 +71,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
     country: '',
     zip: '',
     faq: '',
-    callsmade: '',
+    callsmade: 0,
     closedate: '',
     notes: '',
   });

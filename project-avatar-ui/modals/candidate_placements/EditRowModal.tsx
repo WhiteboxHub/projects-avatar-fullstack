@@ -203,6 +203,14 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, placement,
               </option>
             ))}
           </select>
+        ) : type === 'textarea' ? (
+          <textarea
+            name={name}
+            value={(formData?.[name] || '') as string}
+            onChange={handleInputChange}
+            className={`${baseClassName} border-gray-300 min-h-[100px]`}
+            required={required}
+          />
         ) : (
           <input
             type={type}
@@ -263,7 +271,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, placement,
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {renderField('candidateid', 'Candidate', 'select', true, selectOptions?.candidates)}
               {renderField('mmid', 'Manager', 'select', true, selectOptions?.managers)}
-              {renderField('recruiterid', 'Recruiter', 'select', true, selectOptions?.recruiters)}
+              {renderField('recruiterid', 'Recruiter', 'select', false, selectOptions?.recruiters)}
               {renderField('vendorid', 'Vendor', 'select', true, selectOptions?.vendors)}
               {renderField('vendor2id', 'Vendor 2', 'select', false, selectOptions?.vendors)}
               {renderField('vendor3id', 'Vendor 3', 'select', false, selectOptions?.vendors)}
@@ -284,7 +292,23 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, placement,
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {renderField('wrklocation', 'Work Location')}
               {renderField('wrkdesignation', 'Designation')}
-              {renderField('status', 'Status', 'select', true, selectOptions?.statuses)}
+              <div className="modal-field">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Status <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="status"
+                  value={formData?.status || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 border-gray-300"
+                  required={true}
+                >
+                  <option value="">Select Status</option>
+                  {selectOptions?.statuses?.map((option) => (
+                    <option key={option.id} value={option.id}>{option.name}</option>
+                  ))}
+                </select>
+              </div>
               {renderField('paperwork', 'Paperwork', 'select', false, selectOptions?.yesno)}
               {renderField('insurance', 'Insurance', 'select', false, selectOptions?.yesno)}
             </div>

@@ -47,3 +47,11 @@ def get_ip_emails_for_dropdown(db: Session = Depends(get_db)):
 def get_resumes_for_dropdown(db: Session = Depends(get_db)):
     resumes = get_resumes_dropdown(db)
     return resumes
+
+
+@router.put("/api/admin/candidatemarketing/update/{candidate_marketing_id}")
+def update_candidate_marketing_entry(candidate_marketing_id: int, update_data: CandidateMarketingUpdateSchema, db: Session = Depends(get_db)):
+    result = update_candidate_marketing(db, candidate_marketing_id, update_data)
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result

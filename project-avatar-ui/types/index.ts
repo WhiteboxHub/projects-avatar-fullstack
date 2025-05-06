@@ -1,8 +1,9 @@
 // types.ts
 export interface Lead {
-    leadid?: string; // make leadid optional if it's not always present
+    workstatus: string;
+    leadid?: string; 
     name: string;
-    startdate:string;
+    startdate: string;
     course: string;
     workexperience: string;
     email: string;
@@ -21,6 +22,7 @@ export interface Lead {
     faq: string;
     closedate: string;
     assignedto: string;
+    intent: string;
     callsmade: string;
     source: string;
     sourcename: string;
@@ -30,7 +32,6 @@ export interface Lead {
     country: string;
     zip: string;
     notes: string;
-    // Add other fields as necessary
   }
 
   // Define the ByPO interface
@@ -543,19 +544,28 @@ export interface Vendor {
       relocation: string;
       locationpreference: string;
       skypeid: string;
-      ipemailid: number;
+      ipemailid: number | string;
       ipemail: string;
-      resumeid: string;
+      resumeid: number;
       coverletter: string;
       intro: string;
       closedate: string;
       closedemail: string;
       notes: string;
       suspensionreason: string;
-      yearsofexperience: number;
+      yearsofexperience: number | string;
       manager_name: string;
       instructor_name: string;
       submitter_name: string;
+      candidate_name?: string;
+      email?: string;
+      phone?: string;
+      secondaryemail?: string;
+      secondaryphone?: string;
+      workstatus?: string;
+      resumelink?: string;
+      ipphone?: string;
+      resume_name?: string;
     }
 
 

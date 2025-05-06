@@ -1,15 +1,22 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { CandidateMarketing } from '@/types/index'; // Adjust the import path accordingly
+import Modal from "react-modal";
+import React from "react";
+import { CandidateMarketing } from "@/types/index";
+
 // import { AiOutlineClose } from 'react-icons/ai'; // Import any icons if needed
+
+interface Resume {
+  id: number;
+  name: string;
+}
 
 interface ViewEmployeeProps {
   isOpen: boolean;
   onRequestClose: () => void;
   rowData: CandidateMarketing | null;
+  resumes: Resume[];
 }
 
-const ViewEmployee: React.FC<ViewEmployeeProps> = ({ isOpen, onRequestClose, rowData }) => {
+const ViewEmployee: React.FC<ViewEmployeeProps> = ({ isOpen, onRequestClose, rowData, resumes }) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -68,5 +75,6 @@ const ViewEmployee: React.FC<ViewEmployeeProps> = ({ isOpen, onRequestClose, row
     </Modal>
   );
 };
+
 
 export default ViewEmployee;

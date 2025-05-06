@@ -1,8 +1,9 @@
+import Modal from "react-modal";
+import React, { useState } from "react";
+import axios from "axios";
+
 // new-projects-avatar-fullstack/project-avatar-ui/modals/Leads/AddRowModal.tsx
 
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
 // import { Lead } from '@/types/index';
 
 interface FormData {
@@ -16,7 +17,7 @@ interface FormData {
   secondaryphone: string;
   status: string;
   priority: string;
-  usstatus: string;
+  workstatus: string;
   spousename: string;
   spouseemail: string;
   spousephone: string;
@@ -55,7 +56,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
     secondaryphone: '',
     status: 'Open',
     priority: 'P1',
-    usstatus: 'None',
+    workstatus: 'None',
     spousename: '',
     spouseemail: '',
     spousephone: '',
@@ -65,7 +66,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
     faq: 'N',
     closedate: '',
     assignedto: '',
-    callsmade: '',
+    callsmade: '0',
     source: 'Student',
     sourcename: '',
     address: '',
@@ -82,8 +83,17 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Create a copy of the form data
+    const submissionData = { ...formData };
+    
+    // Convert empty callsmade to 0
+    if (submissionData.callsmade === '') {
+      submissionData.callsmade = '0';
+    }
+    
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/insert`, formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/insert`, submissionData, {
         headers: { AuthToken: localStorage.getItem('token') },
       });
       onSave();
@@ -132,7 +142,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
         {/* Basic Information */}
         <div className="modal-field">
           <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
-            Name *
+            Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -161,18 +171,20 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="course" className="block text-sm font-semibold text-gray-700 mb-1">
-            Course *
+            Course <span className="text-red-500">*</span>
           </label>
           <select
             id="course"
             name="course"
             value={formData.course}
-            onChange={handleChange}
+            onChange={(e) => setFormData({...formData, course: e.target.value})}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
+            <option value="ML">ML</option>
             <option value="QA">QA</option>
             <option value="UI">UI</option>
-            <option value="ML">ML</option>
+            <option value=".NET">.NET</option>
           </select>
         </div>
 
@@ -192,7 +204,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
-            Email *
+            Email <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
@@ -207,7 +219,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1">
-            Phone *
+            Phone <span className="text-red-500">*</span>
           </label>
           <input
             type="tel"
@@ -250,13 +262,14 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-1">
-            Status *
+            Status <span className="text-red-500">*</span>
           </label>
           <select
             id="status"
             name="status"
             value={formData.status}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="Open">Open</option>
@@ -274,13 +287,14 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="priority" className="block text-sm font-semibold text-gray-700 mb-1">
-            Priority *
+            Priority <span className="text-red-500">*</span>
           </label>
           <select
             id="priority"
             name="priority"
             value={formData.priority}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="P1">P1</option>
@@ -292,14 +306,15 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
         </div>
 
         <div className="modal-field">
-          <label htmlFor="usstatus" className="block text-sm font-semibold text-gray-700 mb-1">
-            US Status *
+          <label htmlFor="workstatus" className="block text-sm font-semibold text-gray-700 mb-1">
+            Work Status <span className="text-red-500">*</span>
           </label>
           <select
-            id="usstatus"
-            name="usstatus"
-            value={formData.usstatus}
+            id="workstatus"
+            name="workstatus"
+            value={formData.workstatus}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="None">None</option>
@@ -374,13 +389,15 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="siteaccess" className="block text-sm font-semibold text-gray-700 mb-1">
-            Access *
+            Access 
+            {/* <span className="text-red-500">*</span> */}
           </label>
           <select
             id="siteaccess"
             name="siteaccess"
             value={formData.siteaccess}
             onChange={handleChange}
+            // required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="N">N</option>
@@ -390,13 +407,15 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="faq" className="block text-sm font-semibold text-gray-700 mb-1">
-            FAQ *
+            FAQ 
+            {/* <span className="text-red-500">*</span> */}
           </label>
           <select
             id="faq"
             name="faq"
             value={formData.faq}
             onChange={handleChange}
+            // required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="N">N</option>
@@ -448,13 +467,14 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="source" className="block text-sm font-semibold text-gray-700 mb-1">
-            Source *
+            Source <span className="text-red-500">*</span>
           </label>
           <select
             id="source"
             name="source"
             value={formData.source}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
             <option value="Student">Student</option>
@@ -496,7 +516,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
         <div className="modal-field">
           <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-1">
-            City
+            City <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -504,6 +524,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
             name="city"
             value={formData.city}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>

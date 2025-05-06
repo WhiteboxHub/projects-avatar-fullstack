@@ -5,9 +5,9 @@ import "jspdf-autotable";
 import "react-dropdown/style.css";
 import * as XLSX from "xlsx";
 import Dropdown, { Option } from "react-dropdown";
-import EditRowModal from "../../modals/Marketing/CurrentMarketing/EditCandidateMarketing";
+import EditRowModal from "@/modals/Marketing/CurrentMarketing/EditCandidateMarketing";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ViewRowModal from "../../modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
+import ViewRowModal from "@/modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
 import axios from "axios";
 import jsPDF from "jspdf";
 import withAuth from "@/modals/withAuth";
@@ -56,6 +56,11 @@ interface Employee {
   name: string;
 }
 
+interface Resume {
+  id: number;
+  name: string;
+}
+
 interface AutoTableDoc extends jsPDF {
   autoTable: (d: jsPDF, options: UserOptions) => void;
 }
@@ -71,12 +76,58 @@ const CurrentMarketing = () => {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  const fetchEmployeesAndResumes = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const [employeesResponse, resumesResponse] = await Promise.all([
+        axios.get(`${API_URL}/currentmarketing/employees`, {
+          headers: { AuthToken: localStorage.getItem("token") },
+        }),
+        axios.get(`${API_URL}/currentmarketing/resumes`, {
+          headers: { AuthToken: localStorage.getItem("token") },
+        })
+      ]);
+      
+      setEmployees(employeesResponse.data);
+      setResumes(resumesResponse.data);
+      return {
+        employees: employeesResponse.data,
+        resumes: resumesResponse.data
+      };
+    } catch (error) {
+      console.error("Error fetching employees and resumes:", error);
+      return { employees: [], resumes: [] };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [API_URL]);
+
+  const mapEmployeeNamesToData = useCallback((data: RowData[], employeesList: Employee[]) => {
+    return data.map(row => {
+      const manager = employeesList.find(emp => emp.id === row.mmid);
+      const instructor = employeesList.find(emp => emp.id === row.instructorid);
+      const submitter = employeesList.find(emp => emp.id === row.submitterid);
+      
+      return {
+        ...row,
+        manager_name: manager ? manager.name : 'Unknown',
+        instructor_name: instructor ? instructor.name : 'Unknown',
+        submitter_name: submitter ? submitter.name : 'Unknown'
+      };
+    });
+  }, []);
+
   const fetchAllCandidates = useCallback(async (page = 1) => {
     try {
+      setIsLoading(true);
+      const { employees: employeesList } = await fetchEmployeesAndResumes();
+      
       const response = await axios.get(`${API_URL}/currentmarketing`, {
         params: { page: page, page_size: paginationPageSize },
         headers: { AuthToken: localStorage.getItem("token") },
@@ -84,37 +135,33 @@ const CurrentMarketing = () => {
 
       const data = response.data;
       if (Array.isArray(data)) {
-        setRowData(data);
-        setTotalRows(data.length);
-        setupColumns(data);
+        const mappedData = mapEmployeeNamesToData(data, employeesList);
+        setRowData(mappedData);
+        setTotalRows(mappedData.length);
+        setupColumns(mappedData);
       } else {
         console.error("Data is not an array:", data);
         setRowData([]);
         setTotalRows(0);
         setColumnDefs([]);
       }
-    } catch {
-      alert("No candidate with that name ");
+    } catch (error) {
+      console.error("Error loading candidates:", error);
+      alert("Failed to load candidates");
+    } finally {
+      setIsLoading(false);
     }
-  }, [paginationPageSize, API_URL]);
+  }, [paginationPageSize, API_URL, fetchEmployeesAndResumes, mapEmployeeNamesToData]);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/currentmarketing/employees`, {
-          headers: { AuthToken: localStorage.getItem("token") },
-        });
-        setEmployees(response.data);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-      }
-    };
-    fetchEmployees();
-  }, [API_URL]);
-
+    fetchAllCandidates(currentPage);
+  }, [fetchAllCandidates, currentPage]);
 
   const searchCandidatesByName = useCallback(async (searchQuery: string) => {
     try {
+      setIsLoading(true);
+      const { employees: employeesList } = await fetchEmployeesAndResumes();
+      
       const response = await axios.get(`${API_URL}/currentmarketing/search/name`, {
         params: { name: searchQuery },
         headers: { AuthToken: localStorage.getItem("token") },
@@ -126,20 +173,23 @@ const CurrentMarketing = () => {
       }
 
       if (Array.isArray(data)) {
-        setRowData(data);
-        setTotalRows(data.length);
-        setupColumns(data);
+        const mappedData = mapEmployeeNamesToData(data, employeesList);
+        setRowData(mappedData);
+        setTotalRows(mappedData.length);
+        setupColumns(mappedData);
       } else {
         console.error("Data is not an array:", data);
         setRowData([]);
         setTotalRows(0);
         setColumnDefs([]);
       }
-    } catch {
-      // console.error("Error loading data:", error);
-      alert("No candidate with that name .");
+    } catch (error) {
+      console.error("Error searching candidates:", error);
+      alert("No candidate with that name.");
+    } finally {
+      setIsLoading(false);
     }
-  }, [API_URL]);
+  }, [API_URL, fetchEmployeesAndResumes, mapEmployeeNamesToData]);
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
@@ -244,10 +294,10 @@ const CurrentMarketing = () => {
         const pdfData = selectedRows.map((row: RowData) => [
           row.candidateid,
           row.startdate,
-          row.mmid,
-          row.instructorid,
+          row.manager_name || row.mmid,
+          row.instructor_name || row.instructorid,
           row.status,
-          row.submitterid,
+          row.submitter_name || row.submitterid,
           row.priority,
           row.technology,
           row.minrate,
@@ -271,10 +321,10 @@ const CurrentMarketing = () => {
             [
               "Candidate ID",
               "Start Date",
-              "MMID",
-              "Instructor ID",
+              "Manager",
+              "Instructor",
               "Status",
-              "Submitter ID",
+              "Submitter",
               "Priority",
               "Technology",
               "Min Rate",
@@ -417,29 +467,35 @@ const CurrentMarketing = () => {
             />
           </div>
         </div>
-        <div
-          className="ag-theme-alpine"
-          style={{ height: "400px", width: "100%", overflowY: "auto" }}
-        >
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs}
-            pagination={false}
-            domLayout="normal"
-            rowSelection="multiple"
-            defaultColDef={{
-              sortable: true,
-              filter: true,
-              resizable: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              minWidth: 80,
-              maxWidth: 150,
-            }}
-            rowHeight={30}
-            headerHeight={35}
-          />
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div
+            className="ag-theme-alpine"
+            style={{ height: "400px", width: "100%", overflowY: "auto" }}
+          >
+            <AgGridReact
+              ref={gridRef}
+              rowData={rowData}
+              columnDefs={columnDefs}
+              pagination={false}
+              domLayout="normal"
+              rowSelection="multiple"
+              defaultColDef={{
+                sortable: true,
+                filter: true,
+                resizable: true,
+                cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
+                minWidth: 80,
+                maxWidth: 150,
+              }}
+              rowHeight={30}
+              headerHeight={35}
+            />
+          </div>
+        )}
         <div className="flex justify-between mt-4">
           <div className="flex items-center">
             <button
@@ -490,13 +546,26 @@ const CurrentMarketing = () => {
             manager_name: selectedRow.manager_name || '',
             instructor_name: selectedRow.instructor_name || '',
             submitter_name: selectedRow.submitter_name || '',
-            ipemailid: 0,
+            ipemailid: selectedRow.ipemail || 0,
             mmid: selectedRow.mmid || 0,
             instructorid: selectedRow.instructorid || 0,
-            submitterid: selectedRow.submitterid || 0
+            submitterid: selectedRow.submitterid || 0,
+            priority: selectedRow.priority || '',
+            technology: selectedRow.technology || '',
+            status: selectedRow.status || '',
+            yearsofexperience: selectedRow.yearsofexperience || 0,
+            currentlocation: selectedRow.currentlocation || '',
+            locationpreference: selectedRow.locationpreference || '',
+            relocation: selectedRow.relocation || '',
+            suspensionreason: selectedRow.suspensionreason || '',
+            closedate: selectedRow.closedate || '',
+            notes: selectedRow.notes || '',
+            intro: selectedRow.intro || '',
+            resumeid: selectedRow.resumeid || 0
           } as unknown as CandidateMarketing : null}
-          onSave={fetchAllCandidates}
-          employees={employees} // Pass the fetched employees here
+          onSave={() => fetchAllCandidates(currentPage)}
+          employees={employees}
+          resumes={resumes}
         />
         <ViewRowModal
           isOpen={modalState.view}
@@ -507,11 +576,13 @@ const CurrentMarketing = () => {
             manager_name: selectedRow.manager_name || '',
             instructor_name: selectedRow.instructor_name || '',
             submitter_name: selectedRow.submitter_name || '',
-            ipemailid: 0,
+            ipemailid: selectedRow.ipemail || 0,
             mmid: selectedRow.mmid || 0,
             instructorid: selectedRow.instructorid || 0,
-            submitterid: selectedRow.submitterid || 0
+            submitterid: selectedRow.submitterid || 0,
+            resumeid: selectedRow.resumeid || 0
           } as unknown as CandidateMarketing : null}
+          resumes={resumes}
         />
       </div>
     </div>

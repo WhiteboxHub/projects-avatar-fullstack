@@ -242,33 +242,33 @@ const PlacementPage = () => {
 
     const getCandidateName = (candidateId: number) => {
         const candidate = selectOptions?.candidates.find(c => parseInt(c.id) === candidateId);
-        return candidate ? candidate.name : "Unknown";
+        return candidate ? candidate.name : "";
     };
 
     const getManagerName = (managerId: number) => {
         const manager = selectOptions?.managers.find(m => parseInt(m.id) === managerId);
-        return manager ? manager.name : "Unknown";
+        return manager ? manager.name : "";
     };
 
     const getRecruiterName = (recruiterId: number) => {
         const recruiter = selectOptions?.recruiters.find(r => parseInt(r.id) === recruiterId);
-        return recruiter ? recruiter.name : "Unknown";
+        return recruiter ? recruiter.name : "";
     };
 
     const getVendorName = (vendorId: number) => {
         const vendor = selectOptions?.vendors.find(v => parseInt(v.id) === vendorId);
-        return vendor ? vendor.name : "Unknown";
+        return vendor ? vendor.name : "";
     };
 
     const getClientName = (clientId: number) => {
         const client = selectOptions?.clients.find(c => parseInt(c.id) === clientId);
-        return client ? client.name : "Unknown";
+        return client ? client.name : "";
     };
 
     const getFeedbackName = (feedbackId?: number) => {
-        if (!feedbackId) return "None";
+        if (!feedbackId) return "";
         const feedback = selectOptions?.feedbacks.find(f => parseInt(f.id) === feedbackId);
-        return feedback ? feedback.name : "Unknown";
+        return feedback ? feedback.name : "";
     };
 
     const getPageNumbers = () => {
@@ -604,7 +604,7 @@ const PlacementPage = () => {
                         <div className="mt-4 space-y-2">
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-gray-800">Notes</span>
-                                <span className="text-sm bg-gray-50 p-2 rounded border-b border-gray-200">{selectedRow.notes || "No notes available"}</span>
+                                <span className="text-sm bg-gray-50 p-2 rounded border-b border-gray-200">{selectedRow.notes || ""}</span>
                             </div>
                         </div>
                         <div className="mt-4 flex justify-end border-t border-gray-200 pt-3">
