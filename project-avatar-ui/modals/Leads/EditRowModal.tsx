@@ -28,14 +28,38 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData) {
+      // Add validation
+      if (!formData.course) {
+        alert('Please select a course');
+        return;
+      }
+      if (!['QA', 'UI', 'ML'].includes(formData.course)) {
+        alert('Please select a valid course (QA, UI, or ML)');
+        return;
+      }
+
+      console.log('Submitting form data:', formData);
+      console.log('Course value:', formData.course);
+      
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/leads/update/${formData.leadid}`, formData, {
-          headers: { AuthToken: localStorage.getItem('token') },
-        });
+        const response = await axios.put(
+          `${process.env.NEXT_PUBLIC_API_URL}/leads/update/${formData.leadid}`,
+          formData,
+          {
+            headers: { AuthToken: localStorage.getItem('token') },
+          }
+        );
+        
+        if (formData.status === 'Closed') {
+          console.log('Lead closed, course value:', formData.course);
+          alert('Lead closed and converted to candidate successfully');
+        }
+        
         onSave();
         onRequestClose();
       } catch (error) {
         console.error('Error updating row:', error);
+        alert('Failed to update lead. Please try again.');
       }
     }
   };
@@ -100,10 +124,11 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
           <select
             id="course"
             name="course"
-            value={formData.course || 'QA'}
+            value={formData.course || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
+            <option value="">Select Course</option>
             <option value="QA">QA</option>
             <option value="UI">UI</option>
             <option value="ML">ML</option>

@@ -160,7 +160,7 @@ def get_resumes_dropdown(db: Session):
     result = db.execute(query)
     return [{"id": row[0], "name": row[1]} for row in result]
 
-def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_data: CandidateMarketingUpdateSchema):
+def update_current_marketing(db: Session, candidate_marketing_id: int, update_data: CurrentMarketingUpdateSchema):
     """
     Update a candidate marketing record by ID with the provided data.
     """
@@ -171,6 +171,11 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
     # Get the current status before updating
     previous_status = candidate_marketing.status
     
+    # Always sync technology with course from candidate table
+    candidate = db.query(Candidate).filter(Candidate.candidateid == candidate_marketing.candidateid).first()
+    if candidate:
+        update_data.technology = update_data.technology or candidate.course
+
     # Handle employee assignments
     if update_data.manager_name:
         manager = db.query(Employee).filter(Employee.name == update_data.manager_name, Employee.status == '0Active').first()
@@ -208,19 +213,17 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
             else:
                 return {"error": f"IP email {update_data.ipemail} not found"}
 
-    # Map UI status to database status if needed
-    # This conversion maps the frontend status values to database status values
-    if update_data.status:
-        status_mapping = {
-            "To Do": "1-To Do",
-            "Inprogress": "2-Inprogress",
-            "Suspended": "6-Suspended",
-            "Closed": "5-Closed"
-        }
-        
-        # Use the mapping if it exists, otherwise use the original value
-        update_data.status = status_mapping.get(update_data.status, update_data.status)
+    # Ensure proper status mapping
+    status_mapping = {
+        "To Do": "1-To Do",
+        "Inprogress": "2-Inprogress",
+        "Suspended": "6-Suspended",
+        "Closed": "5-Closed"
+    }
     
+    if update_data.status:
+        update_data.status = status_mapping.get(update_data.status, update_data.status)
+
     # Validate data for suspended status
     if update_data.status == "6-Suspended" and not update_data.suspensionreason:
         return {"error": "Suspension reason is required when status is Suspended"}

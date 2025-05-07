@@ -70,6 +70,17 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
   useEffect(() => {
     if (rowData) {
+      const statusValue = rowData?.status?.includes('-') 
+        ? rowData.status.split('-')[1] 
+        : rowData?.status || '';
+      const statusMap: Record<string, string> = {
+        'todo': 'To Do',
+        'inprogress': 'Inprogress',
+        'suspended': 'Suspended',
+        'closed': 'Closed'
+      };
+      const mappedStatus = statusMap[statusValue.toLowerCase()] || statusValue;
+
       setFormData({
         ...rowData,
         manager_name: rowData.manager_name || '',
@@ -79,8 +90,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
         mmid: rowData.mmid || 0,
         instructorid: rowData.instructorid || 0,
         submitterid: rowData.submitterid || 0,
-        status: rowData.status ? rowData.status.split('-')[1]?.charAt(0).toUpperCase() + rowData.status.split('-')[1]?.slice(1).toLowerCase() : '',
-        resumeid: rowData.resumeid || 0
+        status: mappedStatus,
+        resumeid: rowData.resumeid || 0,
+        relocation: rowData?.relocation ?
+          rowData.relocation.toString().charAt(0).toUpperCase() + 
+          rowData.relocation.toString().slice(1).toLowerCase()
+          : '',
       });
     }
   }, [rowData]);
@@ -240,10 +255,11 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               required
             >
               <option value="">None</option>
-              <option value="To Do">To Do</option>
-              <option value="Inprogress">Inprogress</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Closed">Closed</option>
+              {['To Do', 'Inprogress', 'Suspended', 'Closed'].map(status => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </select>
           </div>
 

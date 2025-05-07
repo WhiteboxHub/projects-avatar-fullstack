@@ -22,6 +22,16 @@ SALARY_OPTIONS = [
     "None", "55k", "60k", "65k", "70k", 
     "60%", "65%", "70%", "75%", "80%", "90%"
 ]
+CANDIDATE_STATUS_OPTIONS = [
+    "Active",
+    "Discontinued", 
+    "Break",
+    "Marketing",
+    "Placed",
+    "OnProject-Mkt",
+    "Completed",
+    "Defaulted"
+]
 
 @router.get("/dropdown-options")
 def get_dropdown_options(db: Session = Depends(get_db)):
@@ -62,7 +72,8 @@ def get_dropdown_options(db: Session = Depends(get_db)):
         "salary": SALARY_OPTIONS,
         "batches": batch_names,
         "portalIds": portal_options,
-        "referralIds": referral_options
+        "referralIds": referral_options,
+        "candidateStatus": CANDIDATE_STATUS_OPTIONS
     }
 
 @router.get("/search", response_model=dict)

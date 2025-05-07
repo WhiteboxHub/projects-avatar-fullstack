@@ -104,7 +104,7 @@ class LeadCreate(LeadBase):
             raise ValueError(f"Invalid datetime format: {value}. Expected format: YYYY-MM-DD HH:MM:SS")
 
 class LeadUpdate(LeadBase):
-    # ... other fields ...
+    status: Optional[str] = None
     startdate: Optional[str] = None
     closedate: Optional[str] = None
     
@@ -213,6 +213,12 @@ class CandidateBase(BaseModel):
             return None
         return value
     
+    @validator('course')
+    def validate_course(cls, v):
+        if v not in ["QA", "UI", "ML"]:
+            raise ValueError("Course must be one of: QA, UI, ML")
+        return v
+    
     @validator('ssnvalidated', 'agreement', 'driverslicense', 'workpermit', 'diceflag', pre=True)
     def validate_booleans(cls, value):
         if value == "" or value is None:
@@ -243,6 +249,22 @@ class CandidateBase(BaseModel):
             return None
         return str(value)  # Convert integer to string
     
+    @validator('status')
+    def validate_status(cls, v):
+        valid_statuses = [
+            "Active",
+            "Discontinued", 
+            "Break",
+            "Marketing",
+            "Placed",
+            "OnProject-Mkt",
+            "Completed",
+            "Defaulted"
+        ]
+        if v not in valid_statuses:
+            raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+        return v
+
     # @validator('portalid', pre=True)
     # def validate_portalid(cls, value):
     #     if value is None:

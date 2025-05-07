@@ -1,6 +1,7 @@
 import Modal from "react-modal";
 import React, { useState } from "react";
 import axios from "axios";
+import { Lead } from "@/types/index";
 
 // new-projects-avatar-fullstack/project-avatar-ui/modals/Leads/AddRowModal.tsx
 
@@ -41,11 +42,13 @@ interface FormData {
 interface AddRowModalProps {
   isOpen: boolean;
   onRequestClose: () => void;
-  onSave: () => void;
+  // onSave: (newLead?: FormData) => void;
+  onSave: (newLead: Lead) => void; // Update parameter type to Lead
+
 }
 
 const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSave }) => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<Lead>({
     name: '',
     course: 'QA',
     startdate: '',
@@ -75,6 +78,8 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
     country: '',
     zip: '',
     notes: '',
+    usstatus: '',
+    intent: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -83,20 +88,11 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onRequestClose, onSav
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Create a copy of the form data
-    const submissionData = { ...formData };
-    
-    // Convert empty callsmade to 0
-    if (submissionData.callsmade === '') {
-      submissionData.callsmade = '0';
-    }
-    
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/insert`, submissionData, {
-        headers: { AuthToken: localStorage.getItem('token') },
+      const response = await axios.post<Lead>(`${process.env.NEXT_PUBLIC_API_URL}/insert`, formData, { 
+        headers: { AuthToken: localStorage.getItem('token') }
       });
-      onSave();
+      onSave(response.data); // Pass the Lead object from response
       onRequestClose();
     } catch (error) {
       console.error('Error adding row:', error);

@@ -104,15 +104,7 @@ const Candidates = () => {
       field: "status",
       width: 70,
       cellRenderer: (params: ICellRendererParams) => {
-        const statusMap: { [key: string]: string } = {
-          A: "Active",
-          I: "Inactive",
-          D: "Delete",
-          R: "Rejected",
-          N: "Not Interested",
-          E: "Excellent",
-        };
-        return statusMap[params.value as string] || params.value;
+        return params.value || 'Active';
       }
     },
     { headerName: "Status Change Date", field: "statuschangedate", width: 70, cellRenderer: 'dateRenderer' },

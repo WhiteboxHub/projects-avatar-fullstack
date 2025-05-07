@@ -139,10 +139,15 @@ const MarketingCandidates = () => {
       });
 
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        setRowData(response.data.data);
+        // Add status normalization
+        const normalizedData = response.data.data.map((item: any) => ({
+          ...item,
+          status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+        }));
+        setRowData(normalizedData);
         setTotalRows(response.data.total);
         setTotalPages(Math.ceil(response.data.total / paginationPageSize));
-        setupColumns(response.data.data);
+        setupColumns(normalizedData);
       } else {
         console.error("Invalid data format:", response.data);
         setRowData([]);
@@ -169,10 +174,15 @@ const MarketingCandidates = () => {
         }
       }
 
-      setRowData(data);
-      setTotalRows(data.length);
-      setTotalPages(Math.ceil(data.length / paginationPageSize));
-      setupColumns(data);
+      // Add status normalization
+      const normalizedData = data.map((item: any) => ({
+        ...item,
+        status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+      }));
+      setRowData(normalizedData);
+      setTotalRows(normalizedData.length);
+      setTotalPages(Math.ceil(normalizedData.length / paginationPageSize));
+      setupColumns(normalizedData);
     } catch (error) {
       console.error("Error searching candidates:", error);
       setAlertMessage("No candidate found with that name.");

@@ -190,7 +190,24 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
     if not candidate_marketing:
         return {"error": "Candidate Marketing not found"}
 
-# featch's the employes/managers/Instructors details
+    # Get candidate's course if technology is not provided
+    candidate = db.query(Candidate).filter(Candidate.candidateid == candidate_marketing.candidateid).first()
+    if candidate:
+        # Always sync technology with course if not explicitly provided
+        update_data.technology = update_data.technology or candidate.course
+
+    # Status mapping
+    status_mapping = {
+        "To Do": "1-To Do",
+        "Inprogress": "2-Inprogress", 
+        "Suspended": "6-Suspended",
+        "Closed": "5-Closed"
+    }
+    
+    if update_data.status:
+        update_data.status = status_mapping.get(update_data.status, update_data.status)
+
+    # featch's the employes/managers/Instructors details
     if update_data.manager_name:
         manager = db.query(Employee).filter(Employee.name == update_data.manager_name, Employee.status == '0Active').first()
         if manager:

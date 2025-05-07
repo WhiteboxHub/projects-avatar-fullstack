@@ -110,8 +110,16 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
       // Find the corresponding IP email
       const ipEmail = ipEmails.find(email => email.email === rowData.ipemail)?.email || '';
       
-      // Normalize the status value
-      const normalizedStatus = normalizeStatus(rowData.status || '');
+      // Status handling
+      const statusParts = rowData.status ? rowData.status.split('-') : [];
+      const rawStatus = statusParts.length > 1 ? statusParts[1].trim() : rowData.status;
+      const statusMap: Record<string, string> = {
+        'todo': 'To Do',
+        'inprogress': 'Inprogress',
+        'suspended': 'Suspended',
+        'closed': 'Closed'
+      };
+      const normalizedStatus = statusMap[rawStatus.toLowerCase()] || rawStatus;
       
       // Status mapping for proper format
       const statusMapping: Record<string, string> = {
@@ -127,7 +135,9 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
         status: normalizedStatus,
         priority: rowData.priority || '',
         technology: rowData.technology || '',
-        relocation: rowData.relocation || '',
+        relocation: rowData.relocation ? 
+          rowData.relocation.charAt(0).toUpperCase() + rowData.relocation.slice(1).toLowerCase() 
+          : '',
         manager_name: managerName || rowData.manager_name || '',
         instructor_name: instructorName || rowData.instructor_name || '',
         submitter_name: submitterName || rowData.submitter_name || '',
@@ -318,10 +328,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
             >
               <option value="">None</option>
               {['To Do', 'Inprogress', 'Suspended', 'Closed'].map(status => (
-                <option 
-                  key={status} 
-                  value={status}
-                >
+                <option key={status} value={status}>
                   {status}
                 </option>
               ))}

@@ -146,6 +146,17 @@ const initialFormData: FormData = {
   originalresume: "",
 };
 
+const candidateStatusOptions = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Discontinued', label: 'Discontinued' },
+  { value: 'Break', label: 'Break' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Placed', label: 'Placed' },
+  { value: 'OnProject-Mkt', label: 'OnProject-Mkt' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Defaulted', label: 'Defaulted' }
+];
+
 const AddRowCandidate: React.FC<AddRowCandidateProps> = ({
   isOpen,
   refreshData,
@@ -407,11 +418,11 @@ const AddRowCandidate: React.FC<AddRowCandidateProps> = ({
               )}
               {renderField("enrolleddate", "Enrolled Date", "date", true)}
               {renderField(
-                "status",
-                "Status",
-                "select",
+                'status',
+                'Status',
+                'select',
                 true,
-                ["Active", "Inactive", "Placed", "Training", "Marketing", "Terminated", "Absconded"]
+                candidateStatusOptions
               )}
             </div>
           </div>

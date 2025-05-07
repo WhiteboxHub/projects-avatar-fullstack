@@ -135,7 +135,13 @@ const CurrentMarketing = () => {
 
       const data = response.data;
       if (Array.isArray(data)) {
-        const mappedData = mapEmployeeNamesToData(data, employeesList);
+        // Add status normalization
+        const normalizedData = data.map((item: any) => ({
+          ...item,
+          status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+        }));
+        
+        const mappedData = mapEmployeeNamesToData(normalizedData, employeesList);
         setRowData(mappedData);
         setTotalRows(mappedData.length);
         setupColumns(mappedData);
@@ -173,7 +179,13 @@ const CurrentMarketing = () => {
       }
 
       if (Array.isArray(data)) {
-        const mappedData = mapEmployeeNamesToData(data, employeesList);
+        // Add status normalization
+        const normalizedData = data.map((item: any) => ({
+          ...item,
+          status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+        }));
+        
+        const mappedData = mapEmployeeNamesToData(normalizedData, employeesList);
         setRowData(mappedData);
         setTotalRows(mappedData.length);
         setupColumns(mappedData);

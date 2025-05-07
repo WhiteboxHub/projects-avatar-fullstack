@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.db import get_db
 from app.controllers.currentMarketingController import (
     get_current_marketing_list, get_current_marketing_by_candidate_name, 
-    get_ipemails_dropdown, get_employees, update_candidate_marketing, get_resumes_dropdown
+    get_ipemails_dropdown, get_employees, get_resumes_dropdown, update_current_marketing
 )
 from app.schemas import CurrentMarketingSchema, CurrentMarketingCreateSchema, CurrentMarketingUpdateSchema
 from typing import List, Dict, Any
@@ -45,7 +45,7 @@ def update_current_marketing_entry(current_marketing_id: int, update_data: Curre
     if hasattr(update_data, 'callsmade') and (update_data.callsmade == '' or update_data.callsmade is None):
         update_data.callsmade = 0
         
-    result = update_candidate_marketing(db, current_marketing_id, update_data)
+    result =  update_current_marketing(db, current_marketing_id, update_data)
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result

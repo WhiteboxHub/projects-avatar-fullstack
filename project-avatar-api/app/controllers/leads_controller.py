@@ -39,6 +39,11 @@ def update_lead(db: Session, leadid: int, updated_lead: schemas.LeadUpdate):
     
     update_data = updated_lead.dict(exclude_unset=True)
     
+    # Add debug logging
+    print(f"Updating lead {leadid}")
+    print(f"Current course: {lead.course}")
+    print(f"New course value: {update_data.get('course')}")
+    
     # Handle empty callsmade field
     if 'callsmade' in update_data and (update_data['callsmade'] == '' or update_data['callsmade'] is None):
         update_data['callsmade'] = 0
@@ -59,12 +64,38 @@ def update_lead(db: Session, leadid: int, updated_lead: schemas.LeadUpdate):
         except ValueError:
             raise HTTPException(status_code=422, detail="Invalid closedate format")
     
+    # Check if status is being changed to "Closed"
+    status_changed_to_closed = (
+        'status' in update_data and 
+        update_data['status'] == 'Closed' and 
+        lead.status != 'Closed'
+    )
+    
+    # Update lead fields
     for key, value in update_data.items():
         setattr(lead, key, value)
+        if key == 'course':
+            print(f"Updated course to: {value}")  # Add debug logging
 
-    db.commit()
-    db.refresh(lead)
-    return lead
+    try:
+        db.commit()
+        db.refresh(lead)
+        print(f"Lead course after update: {lead.course}")  # Add debug logging
+        
+        # If status was changed to Closed, create a candidate
+        if status_changed_to_closed:
+            print(f"Creating candidate from lead with course: {lead.course}")  # Add debug logging
+            try:
+                candidate = create_candidate_from_lead(db, lead)
+                print(f"Created candidate with course: {candidate.course}")  # Add debug logging
+                db.commit()
+            except HTTPException as e:
+                print(f"Failed to create candidate from lead: {str(e)}")
+        
+        return lead
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update lead: {str(e)}")
 
 def delete_lead(db: Session, leadid: int):
     lead = db.query(models.Lead).filter(models.Lead.leadid == leadid).first()
@@ -76,30 +107,79 @@ def delete_lead(db: Session, leadid: int):
     return {"message": "Lead deleted successfully"}
 
 def create_candidate_from_lead(db: Session, lead: models.Lead):
+    """
+    Convert a lead to a candidate with proper field mapping and validation
+    """
+    # Add debug logging
+    print(f"Creating candidate from lead. Lead course: {lead.course}")
+    
     # Mandatory field validation
     if not lead.workstatus:
         raise HTTPException(status_code=400, detail="Lead workstatus must be set before conversion")
     if not lead.course:
         raise HTTPException(status_code=400, detail="Valid course must be selected before conversion")
+    if lead.course not in ["QA", "UI", "ML"]:
+        raise HTTPException(status_code=400, detail="Course must be one of: QA, UI, ML")
+    if not lead.city:
+        raise HTTPException(status_code=400, detail="City must be set before conversion")
 
+    # Map all relevant fields from lead to candidate
     candidate_data = {
-        "workstatus": lead.workstatus,  # Direct mapping
-        "course": lead.course,
+        # Basic Information
         "name": lead.name,
         "email": lead.email,
         "phone": lead.phone,
+        "course": lead.course,  # Set course from lead
+        "workstatus": lead.workstatus,
+        "workexperience": lead.workexperience,
+        
+        # Contact Information
+        "secondaryemail": lead.secondaryemail,
+        "secondaryphone": lead.secondaryphone,
         "address": lead.address,
         "city": lead.city,
         "state": lead.state,
         "country": lead.country,
         "zip": lead.zip,
-        "status": "A",
+        
+        # Status Information
+        "status": "A",  # Active status for new candidates
         "batchname": "Converted Leads",
         "processflag": "Y",
-        "statuschangedate": datetime.now().date()
+        "statuschangedate": datetime.now().date(),
+        "enrolleddate": datetime.now().date(),
+        
+        # Additional Information
+        "notes": lead.notes,
+        
+        # Required fields with proper defaults
+        "diceflag": "N",
+        "ssnvalidated": "N",
+        "bgv": "N",
+        "agreement": "N",
+        "driverslicense": "N",
+        "workpermit": "N",
+        "term": None,
+        "feepaid": None,
+        "feedue": None,
+        "salary0": None,
+        "salary6": None,
+        "salary12": None
     }
 
-    db_candidate = models.Candidate(**candidate_data)
-    db.add(db_candidate)
-    db.commit()
-    return db_candidate
+    try:
+        # Create the candidate with explicit course value
+        db_candidate = models.Candidate(**candidate_data)
+        print(f"Before adding to DB - Candidate course: {db_candidate.course}")
+        
+        # Explicitly set the course again to override any default
+        db_candidate.course = lead.course
+        
+        db.add(db_candidate)
+        db.commit()
+        db.refresh(db_candidate)
+        print(f"After commit - Created candidate with course: {db_candidate.course}")
+        return db_candidate
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create candidate: {str(e)}")

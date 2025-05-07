@@ -76,12 +76,14 @@ interface EditRowCandidateProps {
 }
 
 const candidateStatusOptions = [
-  { value: 'A', label: 'Active' },
-  { value: 'I', label: 'Inactive' },
-  { value: 'P', label: 'Placed' },
-  { value: 'M', label: 'Marketing' },
-  { value: 'T', label: 'Training' },
-  // Add other status codes as needed
+  { value: 'Active', label: 'Active' },
+  { value: 'Discontinued', label: 'Discontinued' },
+  { value: 'Break', label: 'Break' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Placed', label: 'Placed' },
+  { value: 'OnProject-Mkt', label: 'OnProject-Mkt' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Defaulted', label: 'Defaulted' }
 ];
 
 const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData, onClose, candidateData }) => {
@@ -92,14 +94,13 @@ const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData
 
   useEffect(() => {
     if (candidateData && isOpen) {
-      // Format dates properly with error handling
       const formattedData = {
         ...candidateData,
         enrolleddate: formatDateSafely(candidateData.enrolleddate),
         dob: formatDateSafely(candidateData.dob),
         wpexpirationdate: formatDateSafely(candidateData.wpexpirationdate),
         statuschangedate: formatDateSafely(candidateData.statuschangedate) || formatDateSafely(new Date()),
-        status: candidateData.status || '', // Ensure status is set
+        status: candidateData.status || 'Active', // Default to 'Active' if no status
       };
 
       setFormData(formattedData);
@@ -231,6 +232,33 @@ const EditRowCandidate: React.FC<EditRowCandidateProps> = ({ isOpen, refreshData
     const baseClassName = `w-full px-3 py-2 text-sm border ${
       errors[name] ? 'border-red-500' : 'border-gray-300'
     } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`;
+
+    if (name === 'status' && type === 'select') {
+      return (
+        <div className="modal-field">
+          <label htmlFor={name} className="block text-sm font-semibold text-gray-700 mb-1">
+            {label} {required && <span className="text-red-500">*</span>}
+          </label>
+          <select
+            id={name}
+            name={name}
+            value={formData[name] || 'Active'} // Default to 'Active' if no value
+            onChange={handleChange}
+            className={baseClassName}
+            required={required}
+          >
+            {candidateStatusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {errors[name] && (
+            <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div className="modal-field">
