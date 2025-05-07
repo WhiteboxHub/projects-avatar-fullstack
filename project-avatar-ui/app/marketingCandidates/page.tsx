@@ -140,7 +140,7 @@ const MarketingCandidates = () => {
 
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
         // Add status normalization
-        const normalizedData = response.data.data.map((item: any) => ({
+        const normalizedData = response.data.data.map((item: RowData) => ({
           ...item,
           status: item.status.includes('-') ? item.status.split('-')[1] : item.status
         }));
@@ -175,7 +175,7 @@ const MarketingCandidates = () => {
       }
 
       // Add status normalization
-      const normalizedData = data.map((item: any) => ({
+      const normalizedData = data.map((item: RowData) => ({
         ...item,
         status: item.status.includes('-') ? item.status.split('-')[1] : item.status
       }));
@@ -524,7 +524,7 @@ const MarketingCandidates = () => {
           </div>
         </div>
 
-        <EditRowModal
+        {/* <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={
@@ -559,7 +559,38 @@ const MarketingCandidates = () => {
           employees={employees}
           ipEmails={ipEmails}
           resumes={resumes}
-        />
+        /> */}
+        <EditRowModal
+  isOpen={modalState.edit}
+  onRequestClose={() => setModalState({ ...modalState, edit: false })}
+  rowData={
+    selectedRow
+      ? {
+          ...selectedRow,
+          mmid: selectedRow.mmid || 0,
+          instructorid: selectedRow.instructorid || 0,
+          submitterid: selectedRow.submitterid || 0,
+          ipemailid:
+            ipEmails.find((email) => email.email === selectedRow.ipemail)?.id || 0, // Corrected to use ID
+          resumeid: selectedRow.resumeid || 0, // Keep as number, no String conversion
+          status: selectedRow.status || "",
+          relocation: selectedRow.relocation || "",
+          manager_name:
+            employees.find((emp) => emp.id === selectedRow.mmid)?.name || "",
+          instructor_name:
+            employees.find((emp) => emp.id === selectedRow.instructorid)
+              ?.name || "",
+          submitter_name:
+            employees.find((emp) => emp.id === selectedRow.submitterid)
+              ?.name || "",
+        }
+      : null
+  }
+  onSave={fetchData}
+  employees={employees}
+  ipEmails={ipEmails}
+  resumes={resumes}
+/>
        <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}

@@ -136,7 +136,7 @@ const CurrentMarketing = () => {
       const data = response.data;
       if (Array.isArray(data)) {
         // Add status normalization
-        const normalizedData = data.map((item: any) => ({
+        const normalizedData = data.map((item: RowData) => ({
           ...item,
           status: item.status.includes('-') ? item.status.split('-')[1] : item.status
         }));
@@ -180,7 +180,7 @@ const CurrentMarketing = () => {
 
       if (Array.isArray(data)) {
         // Add status normalization
-        const normalizedData = data.map((item: any) => ({
+        const normalizedData = data.map((item: RowData) => ({
           ...item,
           status: item.status.includes('-') ? item.status.split('-')[1] : item.status
         }));
@@ -390,7 +390,7 @@ const CurrentMarketing = () => {
     }
   };
 
-  const options = [
+  const options: Option[] = [
     {
       value: "Export to PDF",
       label: "Export to PDF",
@@ -461,7 +461,7 @@ const CurrentMarketing = () => {
               <AiOutlineReload className="mr-2" />
             </button>
             <Dropdown
-              options={options as Option[]}
+              options={options}
               value={defaultOption}
               onChange={(selectedOption) => {
                 if (selectedOption.value === "Export to PDF") {
@@ -565,7 +565,7 @@ const CurrentMarketing = () => {
             priority: selectedRow.priority || '',
             technology: selectedRow.technology || '',
             status: selectedRow.status || '',
-            yearsofexperience: selectedRow.yearsofexperience || 0,
+            yearsofexperience: selectedRow.yearsofexperience || '0',
             currentlocation: selectedRow.currentlocation || '',
             locationpreference: selectedRow.locationpreference || '',
             relocation: selectedRow.relocation || '',
@@ -574,7 +574,7 @@ const CurrentMarketing = () => {
             notes: selectedRow.notes || '',
             intro: selectedRow.intro || '',
             resumeid: selectedRow.resumeid || 0
-          } as unknown as CandidateMarketing : null}
+          } as CandidateMarketing : null}
           onSave={() => fetchAllCandidates(currentPage)}
           employees={employees}
           resumes={resumes}
@@ -593,7 +593,7 @@ const CurrentMarketing = () => {
             instructorid: selectedRow.instructorid || 0,
             submitterid: selectedRow.submitterid || 0,
             resumeid: selectedRow.resumeid || 0
-          } as unknown as CandidateMarketing : null}
+          } as CandidateMarketing : null}
           resumes={resumes}
         />
       </div>
