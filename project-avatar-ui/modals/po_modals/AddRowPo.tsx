@@ -74,13 +74,13 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     try {
       const payload = {
         placementid: parseInt(selectedPlacementId),
-        begindate: formData.StartDate,
-        enddate: formData.EndDate,
+        begindate: formData.StartDate || " ",
+        enddate: formData.EndDate || " ",
         rate: formData.Rate ? parseFloat(formData.Rate) : 0,
         overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
         freqtype: formData.FreqType,
         frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
-        invoicestartdate: formData.InvoiceStartDate,
+        invoicestartdate: formData.InvoiceStartDate || ' ',
         invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
         polink: formData.POUrl,
         notes: formData.Notes,

@@ -111,10 +111,10 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (formData.relocation && !['Yes', 'No'].includes(formData.relocation)) {
-      alert("Relocation field must be 'Yes' or 'No'");
-      return;
-    }
+    // if (formData.relocation && !['Yes', 'No'].includes(formData.relocation)) {
+    //   alert("Relocation field must be 'Yes' or 'No'");
+    //   return;
+    // }
 
     try {
       await axios.put(
@@ -277,13 +277,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Priority */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority </label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+            
             >
               <option value="">None</option>
               <option value="P1">P1</option>
@@ -313,13 +313,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Resume ID */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID </label>
             <select
               name="resumeid"
               value={formData.resumeid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+           
             >
               <option value="">Select Resume</option>
               {resumes && resumes.map((resume) => (
@@ -346,13 +346,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* IP Email */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email </label>
             <select
               name="ipemailid"
               value={formData.ipemailid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+            
             >
               <option value="">Select IP Email</option>
               {ipEmails && ipEmails.map((email) => (
@@ -371,7 +371,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.relocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              // required
+  
             >
               <option value="">Select</option>
               <option value="Yes">Yes</option>

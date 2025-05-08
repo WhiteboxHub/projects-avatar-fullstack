@@ -346,7 +346,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.priority}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+     
             >
               <option value="">None</option>
               {['P1', 'P2', 'P3', 'P4', 'P5'].map(priority => (
@@ -372,7 +372,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.yearsofexperience}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+ 
             />
           </div>
 
@@ -384,7 +384,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.technology}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+         
             >
               <option value="">None</option>
               <option value="QA">QA</option>
@@ -404,7 +404,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.resumeid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+        
             >
               <option value="">Select Resume</option>
               {resumes.map((resume) => (
@@ -443,7 +443,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
                 console.log("Selected IP Email:", e.target.value);
               }}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+           
             >
               <option value="">Select IP Email</option>
               {ipEmails.map((email) => (
@@ -466,7 +466,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.currentlocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+           
             />
           </div>
 
@@ -479,7 +479,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.locationpreference}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+        
             />
           </div>
 
