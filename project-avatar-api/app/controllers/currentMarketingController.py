@@ -279,3 +279,4 @@ def update_current_marketing(db: Session, candidate_marketing_id: int, update_da
                 response["message"] = "Candidate has been removed from Current Marketing"
     
     return response
+

@@ -13,7 +13,7 @@ interface DropdownOptions {
   bgvDone: string[];
   salary: string[];
   batches: string[];
-  candidateStatus: string[]; // Added candidate status dropdown options
+  candidateStatus: string[];
   portalIds: Array<{ id: string; name: string }>;
   referralIds: Array<{ id: string; name: string }>;
 }
@@ -147,14 +147,14 @@ const initialFormData: FormData = {
 };
 
 const candidateStatusOptions = [
-  { value: 'Active', label: 'Active' },
-  { value: 'Discontinued', label: 'Discontinued' },
-  { value: 'Break', label: 'Break' },
-  { value: 'Marketing', label: 'Marketing' },
-  { value: 'Placed', label: 'Placed' },
-  { value: 'OnProject-Mkt', label: 'OnProject-Mkt' },
-  { value: 'Completed', label: 'Completed' },
-  { value: 'Defaulted', label: 'Defaulted' }
+  'Active',
+  'Discontinued',
+  'Break',
+  'Marketing',
+  'Placed',
+  'OnProject-Mkt',
+  'Completed',
+  'Defaulted'
 ];
 
 const AddRowCandidate: React.FC<AddRowCandidateProps> = ({

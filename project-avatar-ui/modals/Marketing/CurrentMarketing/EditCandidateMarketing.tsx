@@ -190,11 +190,6 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (formData.relocation && !['Yes', 'No'].includes(formData.relocation)) {
-      alert("Relocation field must be 'Yes' or 'No'");
-      return;
-    }
-    
     // If status is Suspended, ensure a reason is provided
     if (formData.status === 'Suspended' && !formData.suspensionreason) {
       alert('Please select a suspension reason for the suspended status');
@@ -340,13 +335,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Priority dropdown with default value */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             >
               <option value="">None</option>
               {['P1', 'P2', 'P3', 'P4', 'P5'].map(priority => (
@@ -365,14 +359,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Years of Experience */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
             <input
               type="number"
               name="yearsofexperience"
               value={formData.yearsofexperience}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             />
           </div>
 
@@ -398,13 +391,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Resume ID */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID</label>
             <select
               name="resumeid"
               value={formData.resumeid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             >
               <option value="">Select Resume</option>
               {resumes.map((resume) => (
@@ -434,7 +426,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* IP Email */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email</label>
             <select
               name="ipemail"
               value={formData.ipemail}
@@ -443,7 +435,6 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
                 console.log("Selected IP Email:", e.target.value);
               }}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             >
               <option value="">Select IP Email</option>
               {ipEmails.map((email) => (
@@ -459,46 +450,26 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Current Location */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current Location <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Location</label>
             <input
               type="text"
               name="currentlocation"
               value={formData.currentlocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             />
           </div>
 
           {/* Location Preference */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location Preference <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Location Preference</label>
             <input
               type="text"
               name="locationpreference"
               value={formData.locationpreference}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
             />
-          </div>
-
-          {/* Relocation */}
-          <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation</label>
-            <select
-              name="relocation"
-              value={formData.relocation}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">Select</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            {formData.relocation && (
-              <p className="text-xs text-gray-500 mt-1">Current relocation: {formData.relocation}</p>
-            )}
           </div>
 
           {/* Suspension Reason - shown only when status is Suspended */}
