@@ -1,7 +1,6 @@
 "use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/candidate_modals/AddRowCandidate";
 import EditRowModal from "@/modals/candidate_modals/EditRowCandidate";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/candidate_modals/ViewRowCandidate";

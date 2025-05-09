@@ -346,18 +346,45 @@ class POSchema(BaseModel):
     class Config:
         orm_mode = True
 
+# class POCreateSchema(BaseModel):
+#     placementid: int
+#     begindate: Optional[date]
+#     enddate: Optional[date]
+#     rate: Optional[float]
+#     overtimerate: Optional[float]
+#     freqtype: Optional[str]
+#     frequency: Optional[int]
+#     invoicestartdate: Optional[date]
+#     invoicenet: Optional[float]
+#     polink: Optional[str]
+#     notes: Optional[str]
+
+MIN_DATE = date(1000, 1, 1)
+
 class POCreateSchema(BaseModel):
     placementid: int
-    begindate: Optional[date]
-    enddate: Optional[date]
-    rate: Optional[float]
-    overtimerate: Optional[float]
-    freqtype: Optional[str]
-    frequency: Optional[int]
-    invoicestartdate: Optional[date]
-    invoicenet: Optional[float]
-    polink: Optional[str]
-    notes: Optional[str]
+    begindate: date = MIN_DATE  # Required field with default minimum date
+    enddate: Optional[date] = None  # Can be NULL as per your schema
+    rate: float
+    overtimerate: Optional[float] = None
+    freqtype: str
+    frequency: int = 0
+    invoicestartdate: date = MIN_DATE  # Required field with default minimum date
+    invoicenet: int = 0
+    polink: Optional[str] = None
+    notes: Optional[str] = None
+
+    @validator('begindate', 'invoicestartdate', pre=True)
+    def convert_empty_dates(cls, v):
+        if v in ("", "0000-00-00", None):
+            return MIN_DATE
+        return v
+    
+    @validator('enddate', pre=True)
+    def convert_empty_enddate(cls, v):
+        if v in ("", "0000-00-00"):
+            return None
+        return v
 
 class POUpdateSchema(BaseModel):
     begindate: Optional[date]

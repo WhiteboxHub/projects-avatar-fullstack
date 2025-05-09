@@ -2,10 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Dict
 from datetime import datetime
-from app.models import Candidate, Batch, AuthUser
+from app.models import Candidate, Batch, AuthUser, CandidateMarketing
 from app.schemas import CandidateResponse, CandidateCreate, CandidateUpdate
 from app.database.db import get_db
-from app.controllers.candidateMarketingController import create_candidate_marketing
 from app.middleware.admin_validation import admin_validation
 from fastapi.responses import Response, JSONResponse
 from fastapi import status
@@ -194,199 +193,6 @@ def insert_candidate(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to insert candidate: {str(e)}")
 
-# @router.put("/candidates/update/{id}")
-# def update_candidate(
-#     id: int,
-#     candidate_update: CandidateUpdate,
-#     db: Session = Depends(get_db),
-# ):
-#     candidate = db.query(Candidate).filter(Candidate.candidateid == id).first()
-
-#     if not candidate:
-#         raise HTTPException(status_code=404, detail="Candidate not found")
-
-#     update_data = candidate_update.dict(exclude_unset=True)
-
-#     # Handle special cases for date fields
-#     for date_field in ['enrolleddate', 'statuschangedate', 'wpexpirationdate', 'dob']:
-#         if date_field in update_data:
-#             if update_data[date_field] == "0000-00-00 00:00:00" or update_data[date_field] == "0000-00-00":
-#                 update_data[date_field] = None
-#             elif isinstance(update_data[date_field], str) and update_data[date_field].strip():
-#                 try:
-#                     update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d")
-#                 except ValueError:
-#                     try:
-#                         update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d %H:%M:%S")
-#                     except ValueError:
-#                         pass
-
-#     # Update lastmoddatetime
-#     update_data["lastmoddatetime"] = datetime.utcnow()
-
-#     # Update the candidate directly
-#     for key, value in update_data.items():
-#         setattr(candidate, key, value)
-    
-#     db.commit()
-#     db.refresh(candidate)
-
-#     # Return the updated candidate as a dictionary
-#     return {
-#         "candidateid": candidate.candidateid,
-#         "name": candidate.name,
-#         "email": candidate.email,
-#         "phone": candidate.phone,
-#         "course": candidate.course,
-#         "batchname": candidate.batchname,
-#         "enrolleddate": candidate.enrolleddate,
-#         "status": candidate.status,
-#         "statuschangedate": candidate.statuschangedate,
-#         "processflag": candidate.processflag,
-#         "diceflag": candidate.diceflag,
-#         "workstatus": candidate.workstatus,
-#         "education": candidate.education,
-#         "workexperience": candidate.workexperience,
-#         "ssn": candidate.ssn,
-#         "dob": candidate.dob,
-#         "portalid": candidate.portalid,
-#         "wpexpirationdate": candidate.wpexpirationdate,
-#         "ssnvalidated": candidate.ssnvalidated,
-#         "bgv": candidate.bgv,
-#         "secondaryemail": candidate.secondaryemail,
-#         "secondaryphone": candidate.secondaryphone,
-#         "address": candidate.address,
-#         "city": candidate.city,
-#         "state": candidate.state,
-#         "country": candidate.country,
-#         "zip": candidate.zip,
-#         "guarantorname": candidate.guarantorname,
-#         "guarantordesignation": candidate.guarantordesignation,
-#         "guarantorcompany": candidate.guarantorcompany,
-#         "emergcontactname": candidate.emergcontactname,
-#         "emergcontactemail": candidate.emergcontactemail,
-#         "emergcontactphone": candidate.emergcontactphone,
-#         "emergcontactaddrs": candidate.emergcontactaddrs,
-#         "term": candidate.term,
-#         "feepaid": candidate.feepaid,
-#         "feedue": candidate.feedue,
-#         "referralid": candidate.referralid,
-#         "salary0": candidate.salary0,
-#         "salary6": candidate.salary6,
-#         "salary12": candidate.salary12,
-#         "originalresume": candidate.originalresume,
-#         "contracturl": candidate.contracturl,
-#         "empagreementurl": candidate.empagreementurl,
-#         "offerletterurl": candidate.offerletterurl,
-#         "dlurl": candidate.dlurl,
-#         "workpermiturl": candidate.workpermiturl,
-#         "ssnurl": candidate.ssnurl,
-#         "notes": candidate.notes
-#     }
-
-# @router.put("/candidates/update/{id}")
-# def update_candidate(
-#     id: int,
-#     candidate_update: CandidateUpdate,
-#     db: Session = Depends(get_db),
-# ):
-#     candidate = db.query(Candidate).filter(Candidate.candidateid == id).first()
-
-#     if not candidate:
-#         raise HTTPException(status_code=404, detail="Candidate not found")
-
-#     # Store old status for comparison
-#     old_status = candidate.status
-    
-#     update_data = candidate_update.dict(exclude_unset=True)
-
-#     # Handle special cases for date fields
-#     for date_field in ['enrolleddate', 'statuschangedate', 'wpexpirationdate', 'dob']:
-#         if date_field in update_data:
-#             if update_data[date_field] == "0000-00-00 00:00:00" or update_data[date_field] == "0000-00-00":
-#                 update_data[date_field] = None
-#             elif isinstance(update_data[date_field], str) and update_data[date_field].strip():
-#                 try:
-#                     update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d")
-#                 except ValueError:
-#                     try:
-#                         update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d %H:%M:%S")
-#                     except ValueError:
-#                         pass
-
-#     # Update lastmoddatetime
-#     update_data["lastmoddatetime"] = datetime.utcnow()
-    
-#     # If status is changing to "Marketing", add statuschangedate
-#     if 'status' in update_data and update_data['status'] == 'Marketing' and old_status != 'Marketing':
-#         update_data['statuschangedate'] = datetime.utcnow().date()
-
-#     # Update the candidate directly
-#     for key, value in update_data.items():
-#         setattr(candidate, key, value)
-    
-#     db.commit()
-#     db.refresh(candidate)
-    
-#     # If status is changed to "Marketing", create a CandidateMarketing entry
-#     if 'status' in update_data and update_data['status'] == 'Marketing' and old_status != 'Marketing':
-#         from app.controllers.candidateMarketingController import create_candidate_marketing
-#         create_candidate_marketing(db, candidate.candidateid)
-    
-#     # Return the updated candidate as a dictionary
-#     return {
-#         "candidateid": candidate.candidateid,
-#         "name": candidate.name,
-#         "email": candidate.email,
-#         "phone": candidate.phone,
-#         "course": candidate.course,
-#         "batchname": candidate.batchname,
-#         "enrolleddate": candidate.enrolleddate,
-#         "status": candidate.status,
-#         "statuschangedate": candidate.statuschangedate,
-#         "processflag": candidate.processflag,
-#         "diceflag": candidate.diceflag,
-#         "workstatus": candidate.workstatus,
-#         "education": candidate.education,
-#         "workexperience": candidate.workexperience,
-#         "ssn": candidate.ssn,
-#         "dob": candidate.dob,
-#         "portalid": candidate.portalid,
-#         "wpexpirationdate": candidate.wpexpirationdate,
-#         "ssnvalidated": candidate.ssnvalidated,
-#         "bgv": candidate.bgv,
-#         "secondaryemail": candidate.secondaryemail,
-#         "secondaryphone": candidate.secondaryphone,
-#         "address": candidate.address,
-#         "city": candidate.city,
-#         "state": candidate.state,
-#         "country": candidate.country,
-#         "zip": candidate.zip,
-#         "guarantorname": candidate.guarantorname,
-#         "guarantordesignation": candidate.guarantordesignation,
-#         "guarantorcompany": candidate.guarantorcompany,
-#         "emergcontactname": candidate.emergcontactname,
-#         "emergcontactemail": candidate.emergcontactemail,
-#         "emergcontactphone": candidate.emergcontactphone,
-#         "emergcontactaddrs": candidate.emergcontactaddrs,
-#         "term": candidate.term,
-#         "feepaid": candidate.feepaid,
-#         "feedue": candidate.feedue,
-#         "referralid": candidate.referralid,
-#         "salary0": candidate.salary0,
-#         "salary6": candidate.salary6,
-#         "salary12": candidate.salary12,
-#         "originalresume": candidate.originalresume,
-#         "contracturl": candidate.contracturl,
-#         "empagreementurl": candidate.empagreementurl,
-#         "offerletterurl": candidate.offerletterurl,
-#         "dlurl": candidate.dlurl,
-#         "workpermiturl": candidate.workpermiturl,
-#         "ssnurl": candidate.ssnurl,
-#         "notes": candidate.notes
-#     }
-
-
 @router.put("/candidates/update/{id}")
 def update_candidate(
     id: int,
@@ -398,9 +204,6 @@ def update_candidate(
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
 
-    # Store old status for comparison
-    old_status = candidate.status
-    
     update_data = candidate_update.dict(exclude_unset=True)
 
     # Handle special cases for date fields
@@ -419,10 +222,6 @@ def update_candidate(
 
     # Update lastmoddatetime
     update_data["lastmoddatetime"] = datetime.utcnow()
-    
-    # If status is changing to "Marketing", add statuschangedate
-    if 'status' in update_data and update_data['status'] == 'Marketing' and old_status != 'Marketing':
-        update_data['statuschangedate'] = datetime.utcnow().date()
 
     # Update the candidate directly
     for key, value in update_data.items():
@@ -430,33 +229,75 @@ def update_candidate(
     
     db.commit()
     db.refresh(candidate)
-    
-    # If status is changed to "Marketing", create a CandidateMarketing entry
-    if 'status' in update_data and update_data['status'] == 'Marketing' and old_status != 'Marketing':
-        from app.controllers.candidateMarketingController import create_candidate_marketing
-        create_candidate_marketing(db, candidate.candidateid)
-    
+
     # Return the updated candidate as a dictionary
     return {
         "candidateid": candidate.candidateid,
         "name": candidate.name,
-        # Rest of the fields...
+        "email": candidate.email,
+        "phone": candidate.phone,
+        "course": candidate.course,
+        "batchname": candidate.batchname,
+        "enrolleddate": candidate.enrolleddate,
+        "status": candidate.status,
+        "statuschangedate": candidate.statuschangedate,
+        "processflag": candidate.processflag,
+        "diceflag": candidate.diceflag,
+        "workstatus": candidate.workstatus,
+        "education": candidate.education,
+        "workexperience": candidate.workexperience,
+        "ssn": candidate.ssn,
+        "dob": candidate.dob,
+        "portalid": candidate.portalid,
+        "wpexpirationdate": candidate.wpexpirationdate,
+        "ssnvalidated": candidate.ssnvalidated,
+        "bgv": candidate.bgv,
+        "secondaryemail": candidate.secondaryemail,
+        "secondaryphone": candidate.secondaryphone,
+        "address": candidate.address,
+        "city": candidate.city,
+        "state": candidate.state,
+        "country": candidate.country,
+        "zip": candidate.zip,
+        "guarantorname": candidate.guarantorname,
+        "guarantordesignation": candidate.guarantordesignation,
+        "guarantorcompany": candidate.guarantorcompany,
+        "emergcontactname": candidate.emergcontactname,
+        "emergcontactemail": candidate.emergcontactemail,
+        "emergcontactphone": candidate.emergcontactphone,
+        "emergcontactaddrs": candidate.emergcontactaddrs,
+        "term": candidate.term,
+        "feepaid": candidate.feepaid,
+        "feedue": candidate.feedue,
+        "referralid": candidate.referralid,
+        "salary0": candidate.salary0,
+        "salary6": candidate.salary6,
+        "salary12": candidate.salary12,
+        "originalresume": candidate.originalresume,
+        "contracturl": candidate.contracturl,
+        "empagreementurl": candidate.empagreementurl,
+        "offerletterurl": candidate.offerletterurl,
+        "dlurl": candidate.dlurl,
+        "workpermiturl": candidate.workpermiturl,
+        "ssnurl": candidate.ssnurl,
         "notes": candidate.notes
     }
 
-@router.delete("/candidates/delete/{id}", response_model=CandidateResponse)
-async def delete_candidate(
-    id: str,
-    db: Session = Depends(get_db),
-    # _: bool = Depends(admin_validation)
-):
+@router.delete("/candidates/delete/{id}")
+def delete_candidate(id: int, db: Session = Depends(get_db)):
     candidate = db.query(Candidate).filter(Candidate.candidateid == id).first()
-
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-
-    db.delete(candidate)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
+    
+    # First delete associated marketing records
+    try:
+        marketing_count = db.query(CandidateMarketing).filter(CandidateMarketing.candidateid == id).delete()
+        print(f"Deleted {marketing_count} marketing records for candidate {id}")
+        
+        # Then delete candidate
+        db.delete(candidate)
+        db.commit()
+        return {"message": f"Candidate {id} and {marketing_count} marketing records deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting candidate: {str(e)}")

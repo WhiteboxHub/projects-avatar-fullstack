@@ -75,6 +75,27 @@ interface Resume {
   link?: string;
 }
 
+// Define status mappings
+const statusMapping = {
+  "To Do": "1-To Do",
+  "Inprogress": "2-Inprogress",
+  "Suspended": "6-Suspended",
+  "Closed": "5-Closed"
+};
+
+// Function to normalize status values
+const normalizeStatus = (status) => {
+  if (status.includes('-')) {
+    const statusPart = status.split('-')[1].trim();
+    if (statusPart.toLowerCase() === 'inprogress') return 'Inprogress';
+    if (statusPart.toLowerCase() === 'todo') return 'To Do';
+    if (statusPart.toLowerCase() === 'closed') return 'Closed';
+    if (statusPart.toLowerCase() === 'suspended') return 'Suspended';
+    return statusPart;
+  }
+  return status;
+};
+
 const MarketingCandidates = () => {
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string }[]>([]);
@@ -142,7 +163,7 @@ const MarketingCandidates = () => {
         // Add status normalization
         const normalizedData = response.data.data.map((item: RowData) => ({
           ...item,
-          status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+          status: normalizeStatus(item.status)
         }));
         setRowData(normalizedData);
         setTotalRows(response.data.total);
@@ -177,7 +198,7 @@ const MarketingCandidates = () => {
       // Add status normalization
       const normalizedData = data.map((item: RowData) => ({
         ...item,
-        status: item.status.includes('-') ? item.status.split('-')[1] : item.status
+        status: normalizeStatus(item.status)
       }));
       setRowData(normalizedData);
       setTotalRows(normalizedData.length);

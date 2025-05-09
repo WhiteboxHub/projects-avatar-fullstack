@@ -227,13 +227,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Submitter */}
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Submitter <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Submitter </label>
             <select
               name="submitterid"
               value={formData.submitterid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+      
             >
               <option value="">Select Submitter</option>
               {employees && employees.map((emp) => (
@@ -296,13 +296,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Technology */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Technology <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Technology</label>
             <select
               name="technology"
               value={formData.technology}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+      
             >
               <option value="">None</option>
               <option value="QA">QA</option>
