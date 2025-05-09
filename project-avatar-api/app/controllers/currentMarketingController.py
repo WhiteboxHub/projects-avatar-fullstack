@@ -9,6 +9,7 @@ from fastapi import HTTPException
 def get_current_marketing_list(db: Session, skip: int, limit: int):
     """
     Retrieve a paginated list of current marketing records with custom SQL query.
+    Only includes candidates with active marketing statuses (not Suspended or Closed).
     """
     query = text("""
         SELECT
@@ -60,7 +61,8 @@ def get_current_marketing_list(db: Session, skip: int, limit: int):
 
 def get_current_marketing_by_candidate_name(db: Session, name: str):
     """
-    Retrieve a single current marketing record by candidate name with custom SQL query.
+    Retrieve current marketing records by candidate name with custom SQL query.
+    Only includes candidates that are not suspended or closed.
     """
     query = text("""
         SELECT

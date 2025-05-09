@@ -1,18 +1,18 @@
-"use client"; 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import "react-dropdown/style.css";
-import { AgGridReact } from "ag-grid-react";
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import "react-dropdown/style.css";
 import EditRowModal from "@/modals/access_modals/EditRowUser";
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/access_modals/ViewRowUser";
-import withAuth from "@/modals/withAuth";
-import { AiOutlineEdit, AiOutlineSearch, AiOutlineReload, AiOutlineEye } from "react-icons/ai";
-import { User } from "@/types/index";
+import axios from "axios";
 import debounce from "lodash/debounce";
-import { ICellRendererParams, ColDef, SortChangedEvent } from "ag-grid-community";
+import withAuth from "@/modals/withAuth";
+import { ColDef, ICellRendererParams, SortChangedEvent } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { User } from "@/types/index";
 
 interface CellRendererParams extends ICellRendererParams {
   value: string | null;
@@ -26,6 +26,7 @@ interface ColumnConfig extends ColDef {
   frozen?: boolean;
   hide?: boolean;
   cellRenderer?: (params: CellRendererParams) => string;
+  valueGetter?: (params: any) => any;
 }
 
 const Users = () => {
@@ -40,7 +41,7 @@ const Users = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [sortField, setSortField] = useState<string>("lastlogin");
+  const [sortField, setSortField] = useState<string>("registereddate");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const gridRef = useRef<AgGridReact<User>>(null);
 
@@ -105,6 +106,17 @@ const Users = () => {
     if (Array.isArray(data) && data.length > 0) {
       // Define specific column configurations based on the PHP code
       const columnConfigs: Record<string, ColumnConfig> = {
+        rowNumber: { 
+          headerName: "", 
+          field: "rowNumber", 
+          width: 70, 
+          editable: false, 
+          frozen: true,
+          valueGetter: (params) => {
+            const rowIndex = params.node.rowIndex;
+            return ((currentPage - 1) * paginationPageSize) + rowIndex + 1;
+          }
+        },
         id: { headerName: "ID", field: "id", width: 70, hide: true, editable: false },
         uname: { headerName: "LoginID", field: "uname", width: 200, editable: false, frozen: true },
         level: { headerName: "Level", field: "level", width: 70, editable: true },
@@ -181,6 +193,9 @@ const Users = () => {
         };
         return config;
       });
+
+      // Add row number column at the beginning
+      columns.unshift(columnConfigs.rowNumber);
 
       setColumnDefs(columns);
     } else {

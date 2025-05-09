@@ -63,6 +63,32 @@ interface CachedPageData {
   totalRows: number;
 }
 
+interface NotificationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  message: string;
+}
+
+const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-4">{message}</h3>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Leads = () => {
   const [rowData, setRowData] = useState<Lead[]>([]);
   const [columnDefs, setColumnDefs] = useState<ColumnConfig[]>([]);
@@ -79,6 +105,10 @@ const Leads = () => {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const gridRef = useRef<AgGridReact>(null);
   const cachedPages = useRef<Map<number, CachedPageData>>(new Map());
+  const [notificationModal, setNotificationModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({ isOpen: false, message: "" });
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const pageSize = 100;
@@ -137,8 +167,7 @@ const Leads = () => {
         setupColumns(response.data);
       } catch (error) {
         console.error("Error searching leads:", error);
-        setAlertMessage("Error searching leads. Please try again.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        showNotification("Error searching leads. Please try again.");
       }
     },
     [API_URL, currentPage, fetchData]
@@ -172,11 +201,25 @@ const Leads = () => {
     if (data.length > 0) {
       const keys = Object.keys(data[0]);
       
-      // Create columns without the serial number column
-      const columns = keys.map((key) => ({
-        headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        field: key,
-      }));
+      // Create a row number column first
+      const columns: ColumnConfig[] = [
+        {
+          headerName: '',
+          field: 'rowNumber',
+          width: 70,
+          cellRenderer: (params: ICellRendererParams) => {
+            // Calculate the row number based on the current page and row index
+            const rowIndex = params.node?.rowIndex || 0;
+            const rowNumber = (currentPage - 1) * pageSize + rowIndex + 1;
+            return rowNumber.toString();
+          }
+        },
+        // Then add all other columns
+        ...keys.map((key) => ({
+          headerName: key.charAt(0).toUpperCase() + key.slice(1),
+          field: key,
+        }))
+      ];
       
       setColumnDefs(columns);
     }
@@ -211,8 +254,7 @@ const Leads = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        showNotification("Please select a row to edit.");
       }
     }
   };
@@ -224,10 +266,23 @@ const Leads = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState: ModalState) => ({ ...prevState, view: true }));
       } else {
-        setAlertMessage("Please select a row to view.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        showNotification("Please select a row to view.");
       }
     }
+  };
+
+  const showNotification = (message: string) => {
+    setNotificationModal({
+      isOpen: true,
+      message: message
+    });
+  };
+
+  const closeNotificationModal = () => {
+    setNotificationModal({
+      isOpen: false,
+      message: ""
+    });
   };
 
   const handleDeleteRow = async () => {
@@ -245,13 +300,13 @@ const Leads = () => {
             await axios.delete(`${API_URL}/leads/delete/${leadId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
-            alert("Lead deleted successfully.");
+            showNotification("Lead deleted successfully.");
             // Clear cache after modification
             cachedPages.current.clear();
             fetchData(currentPage, false);
           } catch (error) {
             console.error("Error deleting lead:", error);
-            alert(
+            showNotification(
               `Failed to delete lead: ${
                 (error as Error).message || "Unknown error occurred"
               }`
@@ -259,8 +314,7 @@ const Leads = () => {
           }
         }
       } else {
-        setAlertMessage("Please select a row to delete.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        showNotification("Please select a row to delete.");
       }
     }
   };
@@ -353,7 +407,7 @@ const handleDownloadPDF = () => {
 
       doc.save("Selected_Lead_data.pdf");
     } else {
-      alert("Please select exactly one row to download.");
+      showNotification("Please select exactly one row to download.");
     }
   }
 };
@@ -368,7 +422,7 @@ const handleDownloadPDF = () => {
         XLSX.utils.book_append_sheet(wb, ws, "Selected Lead Data");
         XLSX.writeFile(wb, "Selected_Lead_data.xlsx");
       } else {
-        alert("Please select a row to export.");
+        showNotification("Please select a row to export.");
       }
     }
   };
@@ -390,8 +444,7 @@ const handleDownloadPDF = () => {
     fetchData(currentPage, false);
     
     // Show success message
-    setAlertMessage("Lead added successfully!");
-    setTimeout(() => setAlertMessage(null), 3000);
+    showNotification("Lead added successfully!");
   };
 
   return (
@@ -558,12 +611,18 @@ const handleDownloadPDF = () => {
           onSave={() => {
             cachedPages.current.clear(); 
             fetchData(currentPage, false);
+            showNotification("Lead updated successfully!");
           }}
         />
         <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
           rowData={selectedRow}
+        />
+        <NotificationModal
+          isOpen={notificationModal.isOpen}
+          onClose={closeNotificationModal}
+          message={notificationModal.message}
         />
       </div>
     </div>

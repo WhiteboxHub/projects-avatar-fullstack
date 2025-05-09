@@ -52,7 +52,6 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, row
         
         if (formData.status === 'Closed') {
           console.log('Lead closed, course value:', formData.course);
-          alert('Lead closed and converted to candidate successfully');
         }
         
         onSave();

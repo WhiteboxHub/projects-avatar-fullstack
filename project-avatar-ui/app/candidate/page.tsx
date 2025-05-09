@@ -17,6 +17,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
+import { toast } from "react-toastify";
 import { Candidate } from "@/types/index";
 
 interface DropdownOptions {
@@ -52,6 +53,32 @@ type CandidateRow = Candidate & {
   dlurl?: string;  
   ssnurl?: string;  
   diceflag?: string;
+};
+
+interface NotificationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  message: string;
+}
+
+const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-4">{message}</h3>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Candidates = () => {
@@ -104,6 +131,9 @@ const Candidates = () => {
       field: "status",
       width: 70,
       cellRenderer: (params: ICellRendererParams) => {
+        if (params.data && params.data.isGroupRow) {
+          return '';
+        }
         return params.value || 'Active';
       }
     },
@@ -164,6 +194,10 @@ const Candidates = () => {
   const gridRef = useRef<AgGridReact<CandidateRow>>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [initialDataLoaded, setInitialDataLoaded] = useState<boolean>(false);
+  const [notification, setNotification] = useState<{isOpen: boolean, message: string}>({
+    isOpen: false,
+    message: ""
+  });
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -198,6 +232,7 @@ const Candidates = () => {
       setDropdownOptions(response.data);
     } catch (error) {
       console.error("Error fetching dropdown options:", error);
+      toast.error("Failed to fetch dropdown options");
     }
   }, [API_URL]);
 
@@ -265,6 +300,7 @@ const Candidates = () => {
       setTotalPages(Math.ceil(totalRows / paginationPageSize));
     } catch (error) {
       console.error("Error loading data:", error);
+      toast.error("Failed to load candidate data");
       setRowData([]);
       if (gridRef.current?.api) {
         gridRef.current.api.showNoRowsOverlay();
@@ -323,6 +359,7 @@ const Candidates = () => {
     });
 
     doc.save("candidate_data.pdf");
+    toast.success("PDF downloaded successfully");
   };
 
   const handleRefresh = () => {
@@ -335,6 +372,7 @@ const Candidates = () => {
       gridRef.current.api.showLoadingOverlay();
       gridRef.current.api.refreshCells({ force: true });
     }
+    toast.info("Data refreshed");
   };
 
   const handleViewRow = () => {
@@ -344,7 +382,10 @@ const Candidates = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
-        alert("Please select a candidate row to view");
+        setNotification({
+          isOpen: true,
+          message: "Please select a candidate row to view"
+        });
       }
     }
   };
@@ -379,7 +420,10 @@ const Candidates = () => {
         setSelectedRow(currentCandidate);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        alert("Please select a candidate row to edit");
+        setNotification({
+          isOpen: true,
+          message: "Please select a candidate row to edit"
+        });
       }
     }
   };
@@ -395,20 +439,24 @@ const Candidates = () => {
             await axios.delete(`${API_URL}/candidates/candidates/delete/${candidateid}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
-            alert(`Candidate ${candidateid} deleted successfully.`);
+            setNotification({
+              isOpen: true,
+              message: `Candidate ${candidateid} deleted successfully`
+            });
             fetchData();
           } catch (error) {
             const axiosError = error as AxiosError;
-            alert(
-              `Failed to delete candidate: ${(axiosError.response?.data as ErrorResponse)?.message || axiosError.message
-              }`
-            );
+            setNotification({
+              isOpen: true,
+              message: `Failed to delete candidate: ${(axiosError.response?.data as ErrorResponse)?.message || axiosError.message}`
+            });
           }
-        } else {
-          alert("No valid candidate ID found for the selected row.");
         }
       } else {
-        alert("Please select a candidate row to delete");
+        setNotification({
+          isOpen: true,
+          message: "Please select a candidate row to delete"
+        });
       }
     }
   };
@@ -618,14 +666,26 @@ const Candidates = () => {
       {modalState.add && (
         <AddRowModal
           isOpen={modalState.add}
-          onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
+          onClose={() => {
+            setModalState((prev) => ({ ...prev, add: false }));
+            setNotification({
+              isOpen: true,
+              message: "Candidate added successfully"
+            });
+          }}
           refreshData={fetchData}
         />
       )}
       {modalState.edit && selectedRow && (
         <EditRowModal
           isOpen={modalState.edit}
-          onClose={() => setModalState((prev) => ({ ...prev, edit: false }))}
+          onClose={() => {
+            setModalState((prev) => ({ ...prev, edit: false }));
+            setNotification({
+              isOpen: true,
+              message: "Candidate updated successfully"
+            });
+          }}
           refreshData={fetchData}
           candidateData={selectedRow}
         />
@@ -638,6 +698,12 @@ const Candidates = () => {
           rowData={selectedRow}
         />
       )}
+
+      <NotificationModal 
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({isOpen: false, message: ""})}
+        message={notification.message}
+      />
     </div>
   );
 };
