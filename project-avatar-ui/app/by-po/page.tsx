@@ -2401,7 +2401,7 @@ const ByPo = () => {
         poGroup.pos.forEach((invoice) => {
           rows.push({
             ...invoice,
-            name: `${invoice.id} ${invoice.invoicenumber} - ${poGroup.name}`,
+            name: `${invoice.id}`,
             isGroupRow: false,
             level: 1,
           });
@@ -2521,7 +2521,7 @@ const ByPo = () => {
           if (params.data.isSummaryRow) {
             return <span className="pl-3 font-semibold">{params.value}</span>;
           }
-          return <span className="pl-3">{params.value}</span>;
+          return <span className="pl-3">{params.data.id}</span>;
         },
         minWidth: 200,
         flex: 1,

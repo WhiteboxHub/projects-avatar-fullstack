@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Dict
 from datetime import datetime
-from app.models import Candidate, Batch, AuthUser
+from app.models import Candidate, Batch, AuthUser, CandidateMarketing
 from app.schemas import CandidateResponse, CandidateCreate, CandidateUpdate
 from app.database.db import get_db
 from app.middleware.admin_validation import admin_validation
@@ -283,17 +283,21 @@ def update_candidate(
         "notes": candidate.notes
     }
 
-@router.delete("/candidates/delete/{id}", response_model=CandidateResponse)
-async def delete_candidate(
-    id: str,
-    db: Session = Depends(get_db),
-    # _: bool = Depends(admin_validation)
-):
+@router.delete("/candidates/delete/{id}")
+def delete_candidate(id: int, db: Session = Depends(get_db)):
     candidate = db.query(Candidate).filter(Candidate.candidateid == id).first()
-
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-
-    db.delete(candidate)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    
+    # First delete associated marketing records
+    try:
+        marketing_count = db.query(CandidateMarketing).filter(CandidateMarketing.candidateid == id).delete()
+        print(f"Deleted {marketing_count} marketing records for candidate {id}")
+        
+        # Then delete candidate
+        db.delete(candidate)
+        db.commit()
+        return {"message": f"Candidate {id} and {marketing_count} marketing records deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting candidate: {str(e)}")

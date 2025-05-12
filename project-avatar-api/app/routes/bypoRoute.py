@@ -49,7 +49,7 @@ def read_invoice_by_id(invoice_id: int, db: Session = Depends(get_db)):
     return invoice
 
 
-@router.post("/invoices/post/")
+@router.post("/invoices/bypo/post/")
 def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depends(get_db)):
     print(invoice_data)  
     try:
@@ -60,8 +60,12 @@ def create_invoice_entry(invoice_data: InvoiceCreateSchema, db: Session = Depend
 @router.put("/invoices/put/{invoice_id}")
 def update_invoice_entry(invoice_id: int, invoice_data: InvoiceUpdateSchema, db: Session = Depends(get_db)):
     result = update_invoice(db, invoice_id, invoice_data)
-    if "error" in result:
+
+    # Check if the result is a dictionary (error case)
+    if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
+
+    # If no error, return the invoice object
     return result
 
 @router.delete("/invoices/bypo/delete/{invoice_id}")
