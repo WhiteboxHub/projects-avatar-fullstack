@@ -990,6 +990,7 @@ interface InvoiceData {
   id: number;
   invoicenumber: string;
   startdate: string;
+  placmentid:number;
   enddate: string;
   invoicedate: string;
   invmonth: string;
@@ -1165,7 +1166,7 @@ const ByMonth = () => {
     monthGroups.forEach((monthGroup) => {
       rows.push({
         id: -1,
-        name: monthGroup.name,
+        name: monthGroup.invmonth,
         invoicenumber: "",
         startdate: "",
         enddate: "",
@@ -1222,7 +1223,7 @@ const ByMonth = () => {
         monthGroup.invoices.forEach((invoice) => {
           rows.push({
             ...invoice,
-            name: `${monthGroup.name}`,
+            name: `${invoice.candidatename} - ${invoice.companyname} - ${invoice.placementid}`,
             isGroupRow: false,
             level: 1,
           });

@@ -648,8 +648,6 @@ class CurrentMarketingBase(BaseModel):
 class CurrentMarketingCreateSchema(CurrentMarketingBase):
     pass
 
-<<<<<<< HEAD
-=======
 # class CurrentMarketingUpdateSchema(CurrentMarketingBase):
     
 #     candidateid: int
@@ -674,7 +672,6 @@ class CurrentMarketingCreateSchema(CurrentMarketingBase):
 #     notes: str
 #     suspensionreason: str
 #     yearsofexperience: str
->>>>>>> 506a2482af41b7a276257b14ad433ebab0baf16e
 class CurrentMarketingUpdateSchema(BaseModel):
     candidateid: Optional[int] = None
     mmid: Optional[int] = None

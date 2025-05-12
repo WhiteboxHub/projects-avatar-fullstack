@@ -339,7 +339,7 @@ def get_invoices_grouped_by_month(
             i.notes
         FROM invoice i
         JOIN po p ON i.poid = p.id
-        JOIN placement pl ON p.placementid = pl.id
+        JOIN placement pl ON p.placementid = pl.id 
         JOIN candidate c ON pl.candidateid = c.candidateid
         JOIN vendor v ON pl.vendorid = v.id
         JOIN recruiter r ON pl.recruiterid = r.id
