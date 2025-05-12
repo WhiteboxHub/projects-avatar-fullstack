@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Dict
 from datetime import datetime
-from app.models import Candidate, Batch, AuthUser, CandidateMarketing
+from app.models import Candidate, Batch, AuthUser
 from app.schemas import CandidateResponse, CandidateCreate, CandidateUpdate
 from app.database.db import get_db
 from app.middleware.admin_validation import admin_validation
@@ -177,6 +177,12 @@ def insert_candidate(
         # Convert candidate_create to dict for manipulation
         candidate_dict = candidate_create.dict()
 
+        # Handle empty string values for integer fields
+        integer_fields = ['portalid', 'referralid', 'feepaid', 'feedue']
+        for field in integer_fields:
+            if field in candidate_dict and candidate_dict[field] == '':
+                candidate_dict[field] = None
+
         # Add the batchid from the looked-up batch
         candidate_dict["batchid"] = batch.batchid  # Use the batch ID we found
 
@@ -283,21 +289,17 @@ def update_candidate(
         "notes": candidate.notes
     }
 
-@router.delete("/candidates/delete/{id}")
-def delete_candidate(id: int, db: Session = Depends(get_db)):
+@router.delete("/candidates/delete/{id}", response_model=CandidateResponse)
+async def delete_candidate(
+    id: str,
+    db: Session = Depends(get_db),
+    # _: bool = Depends(admin_validation)
+):
     candidate = db.query(Candidate).filter(Candidate.candidateid == id).first()
+
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    
-    # First delete associated marketing records
-    try:
-        marketing_count = db.query(CandidateMarketing).filter(CandidateMarketing.candidateid == id).delete()
-        print(f"Deleted {marketing_count} marketing records for candidate {id}")
-        
-        # Then delete candidate
-        db.delete(candidate)
-        db.commit()
-        return {"message": f"Candidate {id} and {marketing_count} marketing records deleted successfully"}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Error deleting candidate: {str(e)}")
+
+    db.delete(candidate)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

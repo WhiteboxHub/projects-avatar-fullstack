@@ -76,15 +76,15 @@ interface Resume {
 }
 
 // Define status mappings
-const statusMapping = {
-  "To Do": "1-To Do",
-  "Inprogress": "2-Inprogress",
-  "Suspended": "6-Suspended",
-  "Closed": "5-Closed"
-};
+// const statusMapping: Record<string, string> = {
+//   "To Do": "1-To Do",
+//   "Inprogress": "2-Inprogress",
+//   "Suspended": "6-Suspended",
+//   "Closed": "5-Closed"
+// };
 
 // Function to normalize status values
-const normalizeStatus = (status) => {
+const normalizeStatus = (status: string): string => {
   if (status.includes('-')) {
     const statusPart = status.split('-')[1].trim();
     if (statusPart.toLowerCase() === 'inprogress') return 'Inprogress';
