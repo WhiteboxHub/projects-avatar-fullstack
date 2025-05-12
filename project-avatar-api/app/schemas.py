@@ -345,24 +345,59 @@ class POSchema(BaseModel):
 
     class Config:
         orm_mode = True
+        
+        
+class StatusSyncSchema(BaseModel):
+    status: str
+    changed_at: Optional[datetime] = None
+    
+class LoginPermissionResponse(BaseModel):
+    can_login: bool
 
 class POCreateSchema(BaseModel):
     placementid: int
-    begindate: Optional[date]
-    enddate: Optional[date]
+    begindate: Optional[str]
+    enddate: Optional[str]
     rate: Optional[float]
     overtimerate: Optional[float]
     freqtype: Optional[str]
     frequency: Optional[int]
-    invoicestartdate: Optional[date]
+    invoicestartdate: Optional[str]
     invoicenet: Optional[float]
     polink: Optional[str]
     notes: Optional[str]
 
+# MIN_DATE = date(1000, 1, 1)
+
+# class POCreateSchema(BaseModel):
+#     placementid: int
+#     begindate: date = MIN_DATE  # Required field with default minimum date
+#     enddate: Optional[date] = None  # Can be NULL as per your schema
+#     rate: float
+#     overtimerate: Optional[float] = None
+#     freqtype: str
+#     frequency: int = 0
+#     invoicestartdate: date = MIN_DATE  # Required field with default minimum date
+#     invoicenet: int = 0
+#     polink: Optional[str] = None
+#     notes: Optional[str] = None
+
+#     @validator('begindate', 'invoicestartdate', pre=True)
+#     def convert_empty_dates(cls, v):
+#         if v in ("", "0000-00-00", None):
+#             return MIN_DATE
+#         return v
+    
+#     @validator('enddate', pre=True)
+#     def convert_empty_enddate(cls, v):
+#         if v in ("", "0000-00-00"):
+#             return None
+#         return v
+
 class POUpdateSchema(BaseModel):
     begindate: Optional[date]
     enddate: Optional[date]
-    rate: Optional[float]
+    rate: Optional[float] 
     overtimerate: Optional[float]
     freqtype: Optional[str]
     frequency: Optional[int]
@@ -482,30 +517,31 @@ class CurrentMarketingBase(BaseModel):
 class CurrentMarketingCreateSchema(CurrentMarketingBase):
     pass
 
-class CurrentMarketingUpdateSchema(CurrentMarketingBase):
-    
-    candidateid: int
-    # startdate: int
-    mmid: int
-    instructorid: int
-    status: str
-    submitterid: int
-    priority: str
-    technology: str
-    minrate: int
-    currentlocation: str
-    relocation: str
-    locationpreference: str
-    skypeid: str
-    ipemailid: int
-    resumeid: int
-    coverletter: str
-    intro: str
-    closedate: str
-    closedemail: str
-    notes: str
-    suspensionreason: str
-    yearsofexperience: str
+class CurrentMarketingUpdateSchema(BaseModel):
+    candidateid: Optional[int] = None
+    mmid: Optional[int] = None
+    instructorid: Optional[int] = None
+    status: Optional[str] = None
+    submitterid: Optional[int] = None
+    priority: Optional[str] = None
+    technology: Optional[str] = None
+    minrate: Optional[int] = None
+    currentlocation: Optional[str] = None
+    relocation: Optional[str] = None
+    locationpreference: Optional[str] = None
+    skypeid: Optional[str] = None
+    ipemailid: Optional[int] = None
+    resumeid: Optional[int] = None
+    coverletter: Optional[str] = None
+    intro: Optional[str] = None
+    closedate: Optional[str] = None
+    closedemail: Optional[str] = None
+    notes: Optional[str] = None
+    suspensionreason: Optional[str] = None
+    yearsofexperience: Optional[str] = None
+
+    class Config:
+        extra = "ignore" 
        
 class Config:
         orm_mode = True

@@ -245,6 +245,10 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
             else:
                 return {"error": f"IP email {update_data.ipemail} not found"}
 
+    # Handle invalid date format for closedate
+    if update_data.closedate and update_data.closedate in ["0000-00-00", "0000-00-00 00:00:00"]:
+        update_data.closedate = None
+
     # Update other fields
     update_fields = {
         'status': update_data.status,
@@ -255,7 +259,7 @@ def update_candidate_marketing(db: Session, candidate_marketing_id: int, update_
         'minrate': update_data.minrate,
         'currentlocation': update_data.currentlocation,
         'relocation': update_data.relocation,
-        'closedate': update_data.closedate,
+        'closedate': update_data.closedate or None,
         'suspensionreason': update_data.suspensionreason,
         'intro': update_data.intro,
         'notes': update_data.notes,

@@ -190,71 +190,49 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (formData.relocation && !['Yes', 'No'].includes(formData.relocation)) {
-      alert("Relocation field must be 'Yes' or 'No'");
-      return;
-    }
-    
-    // If status is Suspended, ensure a reason is provided
-    if (formData.status === 'Suspended' && !formData.suspensionreason) {
-      alert('Please select a suspension reason for the suspended status');
-      return;
-    }
-
-    // Validate minimum rate
-    if (formData.minrate < 45) {
-      alert('Rate must be at least 45');
-      return;
-    }
-
-    // Convert names back to IDs for submission
-    const submitterId = employees.find(emp => emp.name === formData.submitter_name)?.id || 0;
-    const ipEmailId = ipEmails.find(email => email.email === formData.ipemail)?.email || '';
-
+    // Prepare the payload with only changed fields
+    const payload = {
+      status: formData.status,
+      priority: formData.priority,
+      technology: formData.technology,
+      minrate: formData.minrate,
+      currentlocation: formData.currentlocation,
+      relocation: formData.relocation,
+      locationpreference: formData.locationpreference,
+      skypeid: formData.skypeid,
+      ipemailid: formData.ipemailid,
+      resumeid: formData.resumeid,
+      intro: formData.intro,
+      notes: formData.notes,
+      suspensionreason: formData.suspensionreason,
+      yearsofexperience: formData.yearsofexperience,
+      mmid: formData.mmid,
+      instructorid: formData.instructorid,
+      submitterid: formData.submitterid,
+      closedate: formData.closedate
+    };
+  
+    // Remove undefined/null/empty values
+    const cleanPayload = Object.fromEntries(
+      Object.entries(payload).filter(([_, v]) => v !== null && v !== undefined && v !== '')
+    );
+  
     try {
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/currentMarketing/put/${formData.id}`,
-        {
-          submitterid: submitterId,
-          status: formData.status,
-          priority: formData.priority,
-          yearsofexperience: formData.yearsofexperience,
-          technology: formData.technology,
-          resumeid: formData.resumeid,
-          minrate: formData.minrate,
-          ipemailid: ipEmailId,
-          currentlocation: formData.currentlocation,
-          locationpreference: formData.locationpreference,
-          relocation: formData.relocation,
-          closedate: formData.closedate,
-          suspensionreason: formData.suspensionreason,
-          intro: formData.intro,
-          notes: formData.notes,
-        },
+        cleanPayload,
         {
           headers: { AuthToken: localStorage.getItem('token') },
         }
       );
       
-      // Display message based on status change
-      if (previousStatus !== formData.status) {
-        if ((formData.status === 'To Do' || formData.status === 'Inprogress') && 
-            (previousStatus === 'Suspended' || previousStatus === 'Closed')) {
-          alert(`Candidate has been moved to Current Marketing with status: ${formData.status}`);
-        } else if ((formData.status === 'Suspended' || formData.status === 'Closed') && 
-                  (previousStatus === 'To Do' || previousStatus === 'Inprogress')) {
-          alert(`Candidate has been removed from Current Marketing with status: ${formData.status}`);
-        }
-      }
-      
-      onSave(); // This will refresh the parent component's data
+      onSave();
       onRequestClose();
     } catch (error) {
       console.error('Error updating candidate:', error);
       alert('Failed to update candidate. Please try again.');
     }
   };
-
   // Show conditional fields based on status
   const showSuspensionReason = formData.status === 'Suspended';
   const showCloseDate = formData.status === 'Closed';
@@ -305,7 +283,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.submitter_name}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+              
             >
               <option value="">Select Submitter</option>
               {employees.map((emp, index) => (
@@ -324,7 +302,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.status}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+            
             >
               <option value="">None</option>
               {['To Do', 'Inprogress', 'Suspended', 'Closed'].map(status => (
@@ -340,13 +318,12 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Priority dropdown with default value */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-     
             >
               <option value="">None</option>
               {['P1', 'P2', 'P3', 'P4', 'P5'].map(priority => (
@@ -365,14 +342,14 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Years of Experience */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
             <input
               type="number"
               name="yearsofexperience"
               value={formData.yearsofexperience}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
- 
+       
             />
           </div>
 
@@ -398,13 +375,13 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Resume ID */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resume ID</label>
             <select
               name="resumeid"
               value={formData.resumeid}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-        
+       
             >
               <option value="">Select Resume</option>
               {resumes.map((resume) => (
@@ -427,14 +404,14 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               value={formData.minrate}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
+        
               min="45"
             />
           </div>
 
           {/* IP Email */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">IP Email</label>
             <select
               name="ipemail"
               value={formData.ipemail}
@@ -443,7 +420,7 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
                 console.log("Selected IP Email:", e.target.value);
               }}
               className="w-full p-2 border border-gray-300 rounded-md"
-           
+      
             >
               <option value="">Select IP Email</option>
               {ipEmails.map((email) => (
@@ -459,20 +436,20 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
 
           {/* Current Location */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current Location <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Location</label>
             <input
               type="text"
               name="currentlocation"
               value={formData.currentlocation}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-           
+        
             />
           </div>
 
           {/* Location Preference */}
           <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location Preference <span className="text-red-600">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Location Preference</label>
             <input
               type="text"
               name="locationpreference"
@@ -481,24 +458,6 @@ const EditCandidateMarketingModal: React.FC<EditCandidateMarketingModalProps> = 
               className="w-full p-2 border border-gray-300 rounded-md"
         
             />
-          </div>
-
-          {/* Relocation */}
-          <div className="modal-field">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Relocation</label>
-            <select
-              name="relocation"
-              value={formData.relocation}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">Select</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            {formData.relocation && (
-              <p className="text-xs text-gray-500 mt-1">Current relocation: {formData.relocation}</p>
-            )}
           </div>
 
           {/* Suspension Reason - shown only when status is Suspended */}

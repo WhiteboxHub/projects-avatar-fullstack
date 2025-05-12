@@ -20,13 +20,13 @@ interface PlacementOption {
 const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<Po>({
     PlacementDetails: '',
-    StartDate: '',
-    EndDate: '',
+    StartDate: '0000-00-00',
+    EndDate: '0000-00-00',
     Rate: '',
     OvertimeRate: '',
     FreqType: '',
     InvoiceFrequency: '',
-    InvoiceStartDate: '',
+    InvoiceStartDate: '0000-00-00',
     InvoiceNet: '',
     POUrl: '',
     Notes: '',
@@ -74,13 +74,13 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     try {
       const payload = {
         placementid: parseInt(selectedPlacementId),
-        begindate: formData.StartDate || " ",
-        enddate: formData.EndDate || " ",
+        begindate: formData.StartDate || '0000-00-00',
+        enddate: formData.EndDate || '0000-00-00',
         rate: formData.Rate ? parseFloat(formData.Rate) : 0,
         overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
         freqtype: formData.FreqType,
         frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
-        invoicestartdate: formData.InvoiceStartDate || ' ',
+        invoicestartdate: formData.InvoiceStartDate || '0000-00-00',
         invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
         polink: formData.POUrl,
         notes: formData.Notes,
