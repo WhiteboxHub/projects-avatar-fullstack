@@ -8,7 +8,7 @@ import ViewRowModal from "@/modals/access_modals/ViewRowUser";
 import axios from "axios";
 import debounce from "lodash/debounce";
 import withAuth from "@/modals/withAuth";
-import { ColDef, ICellRendererParams, SortChangedEvent } from "ag-grid-community";
+import { ColDef, ICellRendererParams, SortChangedEvent, ValueGetterParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -26,7 +26,7 @@ interface ColumnConfig extends ColDef {
   frozen?: boolean;
   hide?: boolean;
   cellRenderer?: (params: CellRendererParams) => string;
-  valueGetter?: (params: any) => any;
+  valueGetter?: (params: ValueGetterParams) => string | number;
 }
 
 const Users = () => {
@@ -112,8 +112,8 @@ const Users = () => {
           width: 70, 
           editable: false, 
           frozen: true,
-          valueGetter: (params) => {
-            const rowIndex = params.node.rowIndex;
+          valueGetter: (params: ValueGetterParams) => {
+            const rowIndex = params.node?.rowIndex ?? 0;
             return ((currentPage - 1) * paginationPageSize) + rowIndex + 1;
           }
         },
@@ -295,17 +295,6 @@ const Users = () => {
     }
   };
 
-  // const handleSortChanged = () => {
-  //   if (gridRef.current && gridRef.current.api) {
-  //     // Get the current sort model from the grid
-  //     const sortModel = gridRef.current.api.getSortModel();
-  //     if (sortModel && sortModel.length > 0) {
-  //       setSortField(sortModel[0].colId);
-  //       setSortOrder(sortModel[0].sort);
-  //     }
-  //   }
-  // };
-
   const handleSortChanged = (event: SortChangedEvent<User>) => {
     const columnState = event.api.getColumnState();
     if (columnState.length > 0) {
@@ -317,7 +306,6 @@ const Users = () => {
     }
   };
   
-
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
