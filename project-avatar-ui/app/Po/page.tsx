@@ -391,11 +391,8 @@ const PO = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center mt-3 sm:mt-4">
-          <div className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-0">
-            Page {currentPage} of {totalPages} | Total: {totalRows}
-          </div>
           <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
-            <div className="flex space-x-1 overflow-x-auto">
+            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto">
               <button 
                 onClick={() => handlePageChange(1)} 
                 disabled={currentPage === 1}
@@ -438,6 +435,9 @@ const PO = () => {
                 <FaAngleDoubleRight className={iconSize} />
               </button>
             </div>
+          </div>
+          <div className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-0">
+            Page {currentPage} of {totalPages} | Total: {totalRows}
           </div>
         </div>
 
