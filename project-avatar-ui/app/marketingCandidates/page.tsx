@@ -15,7 +15,7 @@ import { AgGridReact } from "ag-grid-react";
 import { UserOptions } from "jspdf-autotable";
 import { debounce } from "lodash";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
-import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight, FaFileExcel, FaFilePdf } from "react-icons/fa";
 import { CandidateMarketing } from "@/types/index";
 
 interface RowData {
@@ -75,14 +75,6 @@ interface Resume {
   link?: string;
 }
 
-// Define status mappings
-// const statusMapping: Record<string, string> = {
-//   "To Do": "1-To Do",
-//   "Inprogress": "2-Inprogress",
-//   "Suspended": "6-Suspended",
-//   "Closed": "5-Closed"
-// };
-
 // Function to normalize status values
 const normalizeStatus = (status: string): string => {
   if (status.includes('-')) {
@@ -110,9 +102,20 @@ const MarketingCandidates = () => {
   const [ipEmails, setIpEmails] = useState<IPEmail[]>([]);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const gridRef = useRef<AgGridReact>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // Track window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchEmployees = useCallback(async () => {
     try {
@@ -239,13 +242,34 @@ const MarketingCandidates = () => {
   const setupColumns = (data: RowData[]) => {
     if (Array.isArray(data) && data.length > 0) {
       const keys = Object.keys(data[0]);
+      
+      // Adjust column widths based on screen size
+      const getColumnWidth = (field: string) => {
+        if (windowWidth < 640) { // Mobile
+          return 70;
+        } else if (windowWidth < 1024) { // Tablet
+          return 100;
+        } else { // Desktop
+          return 120;
+        }
+      };
+      
       const columns = keys.map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
+        width: getColumnWidth(key),
       }));
+      
       setColumnDefs(columns);
     }
   };
+
+  // Re-setup columns when window width changes
+  useEffect(() => {
+    if (rowData.length > 0) {
+      setupColumns(rowData);
+    }
+  }, [windowWidth, rowData]);
 
   const handleEditRow = () => {
     if (gridRef.current) {
@@ -374,16 +398,9 @@ const MarketingCandidates = () => {
     }
   };
 
-  const options = [
-    { value: "Export to PDF", label: "Export to PDF" },
-    { value: "Export to Excel", label: "Export to Excel" },
-  ];
-
-  const defaultOption = "Download";
-
   // Function to get page numbers to display
   const getPageNumbers = () => {
-    const maxPagesToShow = 5;
+    const maxPagesToShow = windowWidth < 640 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
     
@@ -394,77 +411,101 @@ const MarketingCandidates = () => {
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
 
+  // Get appropriate icon sizes based on screen width
+  const getIconSize = () => {
+    if (windowWidth < 640) return "text-xs"; // Mobile
+    if (windowWidth < 1024) return "text-sm"; // Tablet
+    return "text-base"; // Desktop
+  };
+
+  // Get appropriate button padding based on screen width
+  const getButtonPadding = () => {
+    if (windowWidth < 640) return "px-1 py-1"; // Mobile
+    if (windowWidth < 1024) return "px-1.5 py-1"; // Tablet
+    return "px-2 py-1.5"; // Desktop
+  };
+
+  const iconSize = getIconSize();
+  const buttonPadding = getButtonPadding();
+
   return (
     <div className="relative">
-      <div className="p-4 mt-20 mb-10 ml-20 mr-20 bg-gray-100 rounded-lg shadow-md relative">
+      <div className="p-2 sm:p-4 mt-16 sm:mt-20 mb-6 sm:mb-10 mx-2 sm:mx-4 md:mx-10 lg:mx-20 bg-gray-100 rounded-lg shadow-md relative">
         {alertMessage && (
-          <div className="fixed top-4 right-4 p-4 bg-red-500 text-white rounded-md shadow-md z-50">
+          <div className="fixed top-4 right-4 p-3 sm:p-4 bg-red-500 text-white text-xs sm:text-sm rounded-md shadow-md z-50">
             {alertMessage}
           </div>
         )}
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">Marketing Candidates</h1>
+        <div className="flex justify-between items-center mb-3 sm:mb-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Marketing Candidates</h1>
         </div>
 
-        <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
-          <div className="flex w-full md:w-auto mb-2 md:mb-0">
+        <div className="flex flex-col sm:flex-row mb-3 sm:mb-4 justify-between items-center">
+          <div className="flex w-full sm:w-auto mb-2 sm:mb-0">
             <input
               type="text"
               placeholder="Search..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 w-64"
+              className="border border-gray-300 rounded-md p-1.5 sm:p-2 w-full sm:w-64 text-xs sm:text-sm"
             />
             <button
               onClick={handleSearch}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900"
+              className={`flex items-center ${buttonPadding} bg-blue-600 text-white rounded-md ml-1 sm:ml-2 transition duration-300 hover:bg-blue-900 text-xs sm:text-sm`}
             >
-              <AiOutlineSearch className="mr-2" /> Search
+              <AiOutlineSearch className={`mr-1 ${iconSize}`} /> 
+              <span className="hidden xs:inline">Search</span>
             </button>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap justify-center sm:justify-end space-x-1 sm:space-x-2 mt-2 sm:mt-0">
             <button
               onClick={handleEditRow}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700"
+              className={`flex items-center justify-center ${buttonPadding} bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700 text-xs sm:text-sm`}
+              title="Edit"
             >
-              <AiOutlineEdit className="mr-2" />
+              <AiOutlineEdit className={iconSize} />
             </button>
             <button
               onClick={handleViewRow}
-              className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700"
+              className={`flex items-center justify-center ${buttonPadding} bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700 text-xs sm:text-sm`}
+              title="View"
             >
-              <AiOutlineEye className="mr-2" />
+              <AiOutlineEye className={iconSize} />
             </button>
             <button
               onClick={handleRefresh}
-              className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900"
+              className={`flex items-center justify-center ${buttonPadding} bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900 text-xs sm:text-sm`}
+              title="Refresh"
             >
-              <AiOutlineReload className="mr-2" />
+              <AiOutlineReload className={iconSize} />
             </button>
-            <Dropdown
-              options={options as Option[]}
-              value={defaultOption}
-              onChange={(selectedOption) => {
-                if (selectedOption.value === "Export to PDF") {
-                  handleDownloadPDF();
-                } else if (selectedOption.value === "Export to Excel") {
-                  handleExportToExcel();
-                }
-              }}
-              placeholder="Select an option"
-              className="bg-purple-600 text-black rounded-lg transition duration-300 hover:bg-purple-700"
-              controlClassName="bg-purple-600 text-black rounded-lg transition duration-300 hover:bg-purple-700 border-none px-4 py-2"
-              menuClassName="bg-purple-600 text-black rounded-lg transition duration-300"
-              arrowClassName="text-black"
-              placeholderClassName="text-black"
-            />
+            <button
+              onClick={handleDownloadPDF}
+              className={`flex items-center justify-center ${buttonPadding} bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700 text-xs sm:text-sm`}
+              title="Export to PDF"
+            >
+              <FaFilePdf className={iconSize} />
+            </button>
+            <button
+              onClick={handleExportToExcel}
+              className={`flex items-center justify-center ${buttonPadding} bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700 text-xs sm:text-sm`}
+              title="Export to Excel"
+            >
+              <FaFileExcel className={iconSize} />
+            </button>
           </div>
         </div>
 
         <div
           className="ag-theme-alpine"
-          style={{ height: "370px", width: "100%", overflowY: "visible", overflowX: 'visible' }}
+          style={{ 
+            height: windowWidth < 640 ? "300px" : windowWidth < 1024 ? "350px" : "370px", 
+            width: "100%", 
+            overflowY: "visible", 
+            overflowX: 'visible',
+            fontSize: windowWidth < 640 ? '10px' : windowWidth < 1024 ? '12px' : '14px'
+          }}
         >
           <AgGridReact
             ref={gridRef}
@@ -477,75 +518,85 @@ const MarketingCandidates = () => {
               sortable: true,
               filter: true,
               resizable: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              minWidth: 80,
-              maxWidth: 150,
+              cellStyle: { 
+                color: "#333", 
+                fontSize: windowWidth < 640 ? "0.65rem" : windowWidth < 1024 ? "0.7rem" : "0.75rem", 
+                padding: windowWidth < 640 ? "0px" : "1px" 
+              },
+              minWidth: windowWidth < 640 ? 60 : windowWidth < 1024 ? 70 : 80,
+              maxWidth: windowWidth < 640 ? 100 : windowWidth < 1024 ? 120 : 150,
             }}
-            rowHeight={30}
-            headerHeight={35}
+            rowHeight={windowWidth < 640 ? 25 : windowWidth < 1024 ? 28 : 30}
+            headerHeight={windowWidth < 640 ? 30 : windowWidth < 1024 ? 32 : 35}
           />
         </div>
 
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-md ${
-                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              <FaAngleDoubleLeft className="text-white" />
-            </button>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-md ${
-                currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              <FaChevronLeft className="text-white" />
-            </button>
-            
-            {getPageNumbers().map((page) => (
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-3 sm:mt-4">
+          <div className="flex items-center justify-center w-full sm:w-auto overflow-x-auto mb-2 sm:mb-0">
+            <div className="flex space-x-1 overflow-x-auto">
               <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-3 py-1 rounded-md ${
-                  currentPage === page
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 hover:bg-gray-300"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className={`p-1 sm:p-2 rounded-md ${
+                  currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                 }`}
+                title="First Page"
               >
-                {page}
+                <FaAngleDoubleLeft className={`${currentPage === 1 ? "text-gray-500" : "text-white"} ${iconSize}`} />
               </button>
-            ))}
-            
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-md ${
-                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              <FaChevronRight className="text-white" />
-            </button>
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-md ${
-                currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              <FaAngleDoubleRight className="text-white" />
-            </button>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-1 sm:p-2 rounded-md ${
+                  currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                title="Previous Page"
+              >
+                <FaChevronLeft className={`${currentPage === 1 ? "text-gray-500" : "text-white"} ${iconSize}`} />
+              </button>
+              
+              {getPageNumbers().map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-2 py-1 rounded-md text-xs sm:text-sm ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`p-1 sm:p-2 rounded-md ${
+                  currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                title="Next Page"
+              >
+                <FaChevronRight className={`${currentPage === totalPages ? "text-gray-500" : "text-white"} ${iconSize}`} />
+              </button>
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className={`p-1 sm:p-2 rounded-md ${
+                  currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                title="Last Page"
+              >
+                <FaAngleDoubleRight className={`${currentPage === totalPages ? "text-gray-500" : "text-white"} ${iconSize}`} />
+              </button>
+            </div>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-xs sm:text-sm text-gray-600">
             Showing {(currentPage - 1) * paginationPageSize + 1} to {Math.min(currentPage * paginationPageSize, totalRows)} of {totalRows} entries
           </div>
         </div>
 
-        {/* <EditRowModal
+        <EditRowModal
           isOpen={modalState.edit}
           onRequestClose={() => setModalState({ ...modalState, edit: false })}
           rowData={
@@ -556,13 +607,8 @@ const MarketingCandidates = () => {
                   instructorid: selectedRow.instructorid || 0,
                   submitterid: selectedRow.submitterid || 0,
                   ipemailid:
-                    selectedRow.ipemail ||
-                    ipEmails.find((email) => email.email === selectedRow.ipemail)?.id ||
-                    0,
-                  resumeid:
-                    selectedRow.resumeid !== undefined
-                      ? String(selectedRow.resumeid)
-                      : "",
+                    ipEmails.find((email) => email.email === selectedRow.ipemail)?.id || 0, // Corrected to use ID
+                  resumeid: selectedRow.resumeid || 0, // Keep as number, no String conversion
                   status: selectedRow.status || "",
                   relocation: selectedRow.relocation || "",
                   manager_name:
@@ -580,39 +626,8 @@ const MarketingCandidates = () => {
           employees={employees}
           ipEmails={ipEmails}
           resumes={resumes}
-        /> */}
-        <EditRowModal
-  isOpen={modalState.edit}
-  onRequestClose={() => setModalState({ ...modalState, edit: false })}
-  rowData={
-    selectedRow
-      ? {
-          ...selectedRow,
-          mmid: selectedRow.mmid || 0,
-          instructorid: selectedRow.instructorid || 0,
-          submitterid: selectedRow.submitterid || 0,
-          ipemailid:
-            ipEmails.find((email) => email.email === selectedRow.ipemail)?.id || 0, // Corrected to use ID
-          resumeid: selectedRow.resumeid || 0, // Keep as number, no String conversion
-          status: selectedRow.status || "",
-          relocation: selectedRow.relocation || "",
-          manager_name:
-            employees.find((emp) => emp.id === selectedRow.mmid)?.name || "",
-          instructor_name:
-            employees.find((emp) => emp.id === selectedRow.instructorid)
-              ?.name || "",
-          submitter_name:
-            employees.find((emp) => emp.id === selectedRow.submitterid)
-              ?.name || "",
-        }
-      : null
-  }
-  onSave={fetchData}
-  employees={employees}
-  ipEmails={ipEmails}
-  resumes={resumes}
-/>
-       <ViewRowModal
+        />
+        <ViewRowModal
           isOpen={modalState.view}
           onRequestClose={() => setModalState({ ...modalState, view: false })}
           rowData={selectedRow ? {

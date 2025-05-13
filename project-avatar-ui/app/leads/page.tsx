@@ -74,12 +74,12 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+      <div className="bg-white rounded-lg p-4 sm:p-6 max-w-xs sm:max-w-md w-full shadow-xl mx-2">
         <div className="text-center">
-          <h3 className="text-lg font-medium mb-4">{message}</h3>
+          <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">{message}</h3>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
           >
             OK
           </button>
@@ -109,9 +109,20 @@ const Leads = () => {
     isOpen: boolean;
     message: string;
   }>({ isOpen: false, message: "" });
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const pageSize = 100;
+
+  // Track window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchData = useCallback(
     async (page = 1, useCache = true) => {
@@ -201,12 +212,23 @@ const Leads = () => {
     if (data.length > 0) {
       const keys = Object.keys(data[0]);
       
+      // Adjust column widths based on screen size
+      const getColumnWidth = (field: string) => {
+        if (windowWidth < 640) { // Mobile
+          return field === 'rowNumber' ? 40 : 80;
+        } else if (windowWidth < 1024) { // Tablet
+          return field === 'rowNumber' ? 50 : 100;
+        } else { // Desktop
+          return field === 'rowNumber' ? 70 : 120;
+        }
+      };
+      
       // Create a row number column first
       const columns: ColumnConfig[] = [
         {
           headerName: '',
           field: 'rowNumber',
-          width: 70,
+          width: getColumnWidth('rowNumber'),
           cellRenderer: (params: ICellRendererParams) => {
             // Calculate the row number based on the current page and row index
             const rowIndex = params.node?.rowIndex || 0;
@@ -218,12 +240,20 @@ const Leads = () => {
         ...keys.map((key) => ({
           headerName: key.charAt(0).toUpperCase() + key.slice(1),
           field: key,
+          width: getColumnWidth(key),
         }))
       ];
       
       setColumnDefs(columns);
     }
   };
+  
+  // Re-setup columns when window width changes
+  useEffect(() => {
+    if (rowData.length > 0) {
+      setupColumns(rowData);
+    }
+  }, [windowWidth, rowData]);
   
   const handleSearch = () => {
     if (searchValue.trim()) {
@@ -429,7 +459,7 @@ const handleDownloadPDF = () => {
 
   const totalPages = Math.ceil(totalRows / pageSize);
   const startPage = Math.max(1, currentPage);
-  const endPage = Math.min(totalPages, currentPage + 4);
+  const endPage = Math.min(totalPages, currentPage + (windowWidth < 640 ? 2 : 4));
   const pageOptions = Array.from({ length: endPage - startPage + 1 }, (_, i) => i + startPage);
 
   // Function to handle successful lead addition
@@ -447,88 +477,116 @@ const handleDownloadPDF = () => {
     showNotification("Lead added successfully!");
   };
 
+  // Get appropriate icon sizes based on screen width
+  const getIconSize = () => {
+    if (windowWidth < 640) return "text-xs"; // Mobile
+    if (windowWidth < 1024) return "text-sm"; // Tablet
+    return "text-base"; // Desktop
+  };
+
+  // Get appropriate button padding based on screen width
+  const getButtonPadding = () => {
+    if (windowWidth < 640) return "px-1 py-1"; // Mobile
+    if (windowWidth < 1024) return "px-1.5 py-1"; // Tablet
+    return "px-2 py-1.5"; // Desktop
+  };
+
+  const iconSize = getIconSize();
+  const buttonPadding = getButtonPadding();
+
   return (
     <div className="relative">
       {alertMessage && (
-        <div className={`fixed top-4 right-4 p-4 ${alertMessage.includes("successfully") ? "bg-green-500" : "bg-red-500"} text-white rounded-md shadow-md z-50`}>
+        <div className={`fixed top-4 right-4 p-3 sm:p-4 ${alertMessage.includes("successfully") ? "bg-green-500" : "bg-red-500"} text-white text-xs sm:text-sm rounded-md shadow-md z-50`}>
           {alertMessage}
         </div>
       )}
-      <div className="p-4 mt-20 mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">Leads Management</h1>
+      <div className="p-2 sm:p-4 mt-16 sm:mt-20 mb-6 sm:mb-10 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-full sm:max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-3 sm:mb-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Leads Management</h1>
         </div>
 
-        <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
-          <div className="flex w-full md:w-auto mb-2 md:mb-0">
+        <div className="flex flex-col sm:flex-row mb-3 sm:mb-4 justify-between items-center">
+          <div className="flex w-full sm:w-auto mb-2 sm:mb-0">
             <input
               type="text"
               placeholder="Search by name..."
               value={searchValue}
               onChange={handleSearchInputChange}
-              className="border border-gray-300 rounded-md p-2 w-64"
+              className="border border-gray-300 rounded-md p-1.5 sm:p-2 w-full sm:w-64 text-xs sm:text-sm"
             />
             <button
               onClick={handleSearch}
-              className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900 text-xs md:text-base"
+              className={`flex items-center ${buttonPadding} bg-blue-600 text-white rounded-md ml-1 sm:ml-2 transition duration-300 hover:bg-blue-900 text-xs sm:text-sm`}
             >
-              <AiOutlineSearch className="mr-1" /> Search
+              <AiOutlineSearch className={`mr-1 ${iconSize}`} /> 
+              <span className="hidden xs:inline">Search</span>
             </button>
           </div>
         
-          <div className="flex flex-col md:flex-row md:items-center md:justify-end md:space-x-2 mb-4">
-            <div className="flex flex-wrap space-x-2 mb-4 md:mb-0">
-              <button
-                onClick={handleAddRow}
-                className="flex items-center px-3 py-2 bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700 text-xs md:text-base"
-              >
-                <MdAdd className="mr-2" />
-              </button>
-              <button
-                onClick={handleEditRow}
-                className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700 text-xs md:text-base"
-              >
-                <AiOutlineEdit className="mr-1" />
-              </button>
-              <button
-                onClick={handleViewRow}
-                className="flex items-center px-3 py-2 bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700 text-xs md:text-base"
-              >
-                <AiOutlineEye className="mr-1" />
-              </button>
-              <button
-                onClick={handleDeleteRow}
-                className="flex items-center px-3 py-2 bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700 text-xs md:text-base"
-              >
-                <MdDelete className="mr-1" />
-              </button>
-            </div>
-            <div className="flex flex-wrap space-x-2 mb-4 md:mb-0">
-              <button
-                onClick={handleRefresh}
-                className="flex items-center px-3 py-2 bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900 text-xs md:text-base"
-              >
-                <AiOutlineReload className="mr-1" />
-              </button>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleDownloadPDF}
-                  className="flex items-center p-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
-                >
-                  <FontAwesomeIcon icon={faFilePdf} className="text-lg" />
-                </button>
-                <button
-                  onClick={handleExportToExcel}
-                  className="flex items-center p-2 bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700"
-                >
-                  <FontAwesomeIcon icon={faFileExcel} className="text-lg" />
-                </button>
-              </div>
-            </div>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleAddRow}
+              className={`flex items-center justify-center ${buttonPadding} bg-green-600 text-white rounded-md transition duration-300 hover:bg-green-700 text-xs sm:text-sm`}
+              title="Add Lead"
+            >
+              <MdAdd className={iconSize} />
+            </button>
+            <button
+              onClick={handleEditRow}
+              className={`flex items-center justify-center ${buttonPadding} bg-blue-600 text-white rounded-md transition duration-300 hover:bg-blue-700 text-xs sm:text-sm`}
+              title="Edit Lead"
+            >
+              <AiOutlineEdit className={iconSize} />
+            </button>
+            <button
+              onClick={handleViewRow}
+              className={`flex items-center justify-center ${buttonPadding} bg-gray-400 text-white rounded-md transition duration-300 hover:bg-gray-700 text-xs sm:text-sm`}
+              title="View Lead"
+            >
+              <AiOutlineEye className={iconSize} />
+            </button>
+            <button
+              onClick={handleDeleteRow}
+              className={`flex items-center justify-center ${buttonPadding} bg-red-600 text-white rounded-md transition duration-300 hover:bg-red-700 text-xs sm:text-sm`}
+              title="Delete Lead"
+            >
+              <MdDelete className={iconSize} />
+            </button>
+            <button
+              onClick={handleRefresh}
+              className={`flex items-center justify-center ${buttonPadding} bg-gray-500 text-white rounded-md transition duration-300 hover:bg-gray-900 text-xs sm:text-sm`}
+              title="Refresh"
+            >
+              <AiOutlineReload className={iconSize} />
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              className={`flex items-center justify-center ${buttonPadding} bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700`}
+              title="Download PDF"
+            >
+              <FontAwesomeIcon icon={faFilePdf} className={iconSize} />
+            </button>
+            <button
+              onClick={handleExportToExcel}
+              className={`flex items-center justify-center ${buttonPadding} bg-purple-600 text-white rounded-md transition duration-300 hover:bg-purple-700`}
+              title="Export to Excel"
+            >
+              <FontAwesomeIcon icon={faFileExcel} className={iconSize} />
+            </button>
           </div>
         </div>
       
-        <div className="ag-theme-alpine" style={{ height: "370px", width: "100%", overflowY: "visible", overflowX: 'visible'  }}>
+        <div 
+          className="ag-theme-alpine" 
+          style={{ 
+            height: windowWidth < 640 ? "300px" : windowWidth < 1024 ? "350px" : "370px", 
+            width: "100%", 
+            overflowY: "visible", 
+            overflowX: 'visible',
+            fontSize: windowWidth < 640 ? '10px' : windowWidth < 1024 ? '12px' : '14px'
+          }}
+        >
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
@@ -540,37 +598,43 @@ const handleDownloadPDF = () => {
               sortable: true,
               filter: true,
               resizable: true,
-              cellStyle: { color: "#333", fontSize: "0.75rem", padding: "1px" },
-              minWidth: 80,
-              maxWidth: 150,
+              cellStyle: { 
+                color: "#333", 
+                fontSize: windowWidth < 640 ? "0.65rem" : windowWidth < 1024 ? "0.7rem" : "0.75rem", 
+                padding: windowWidth < 640 ? "0px" : "1px" 
+              },
+              minWidth: windowWidth < 640 ? 60 : windowWidth < 1024 ? 70 : 80,
+              maxWidth: windowWidth < 640 ? 100 : windowWidth < 1024 ? 120 : 150,
             }}
-            rowHeight={30}
-            headerHeight={35}
+            rowHeight={windowWidth < 640 ? 25 : windowWidth < 1024 ? 28 : 30}
+            headerHeight={windowWidth < 640 ? 30 : windowWidth < 1024 ? 32 : 35}
           />
         </div>
         {!isSearching && (
-          <div className="flex flex-col md:flex-row justify-between items-center mt-4">
+          <div className="flex flex-col md:flex-row justify-between items-center mt-3 sm:mt-4">
             <div className="flex items-center justify-center w-full md:w-auto overflow-x-auto">
               <div className="flex space-x-1 overflow-x-auto">
                 <button 
                   onClick={() => handlePageChange(1)} 
                   disabled={currentPage === 1}
-                  className="p-2 disabled:opacity-50"
+                  className="p-1 sm:p-2 disabled:opacity-50 text-xs sm:text-sm"
+                  title="First Page"
                 >
-                  <FaAngleDoubleLeft />
+                  <FaAngleDoubleLeft className={iconSize} />
                 </button>
                 <button 
                   onClick={() => handlePageChange(currentPage - 1)} 
                   disabled={currentPage === 1}
-                  className="p-2 disabled:opacity-50"
+                  className="p-1 sm:p-2 disabled:opacity-50 text-xs sm:text-sm"
+                  title="Previous Page"
                 >
-                  <FaChevronLeft />
+                  <FaChevronLeft className={iconSize} />
                 </button>
                 {pageOptions.map((page) => (
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`px-2 py-1 rounded-md ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-xs sm:text-sm ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
                   >
                     {page}
                   </button>
@@ -578,16 +642,18 @@ const handleDownloadPDF = () => {
                 <button 
                   onClick={() => handlePageChange(currentPage + 1)} 
                   disabled={currentPage === totalPages}
-                  className="p-2 disabled:opacity-50"
+                  className="p-1 sm:p-2 disabled:opacity-50 text-xs sm:text-sm"
+                  title="Next Page"
                 >
-                  <FaChevronRight />
+                  <FaChevronRight className={iconSize} />
                 </button>
                 <button 
                   onClick={() => handlePageChange(totalPages)} 
                   disabled={currentPage === totalPages}
-                  className="p-2 disabled:opacity-50"
+                  className="p-1 sm:p-2 disabled:opacity-50 text-xs sm:text-sm"
+                  title="Last Page"
                 >
-                  <FaAngleDoubleRight />
+                  <FaAngleDoubleRight className={iconSize} />
                 </button>
               </div>
             </div>
