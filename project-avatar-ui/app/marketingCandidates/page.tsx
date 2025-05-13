@@ -1,8 +1,8 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import "jspdf-autotable";
 import "react-dropdown/style.css";
+"use client";
 import * as XLSX from "xlsx";
 import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "@/modals/Marketing/MarketingCandidate/EditCandidateMarketing";
@@ -76,12 +76,12 @@ interface Resume {
 }
 
 // Define status mappings
-const statusMapping = {
-  "To Do": "1-To Do",
-  "Inprogress": "2-Inprogress",
-  "Suspended": "6-Suspended",
-  "Closed": "5-Closed"
-};
+// const statusMapping = {
+//   "To Do": "1-To Do",
+//   "Inprogress": "2-Inprogress",
+//   "Suspended": "6-Suspended",
+//   "Closed": "5-Closed"
+// };
 
 // Function to normalize status values
 const normalizeStatus = (status) => {
