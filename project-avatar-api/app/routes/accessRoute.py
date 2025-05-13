@@ -57,10 +57,14 @@ def create_authuser_entry(authuser_data: AuthUserCreateSchema, db: Session = Dep
     return create_authuser(db, authuser_data)
 
 @router.put("/authuser/{authuser_id}")
-def update_authuser_entry(authuser_id: int, authuser_data: AuthUserUpdateSchema, db: Session = Depends(get_db)):
+def update_authuser_entry(
+    authuser_id: int, 
+    authuser_data: AuthUserUpdateSchema, 
+    db: Session = Depends(get_db)
+):
     result = update_authuser(db, authuser_id, authuser_data)
     if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
+        raise HTTPException(status_code=400, detail=result["error"])
     return result
 
 @router.delete("/authuser/{authuser_id}")

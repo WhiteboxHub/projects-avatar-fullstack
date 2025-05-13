@@ -170,6 +170,119 @@ class UserResponse(BaseModel):
 
 
 
+# class CandidateBase(BaseModel):
+#     name: str
+#     email: EmailStr
+#     phone: str
+#     course: str
+#     batchname: str
+#     enrolleddate: date
+#     status: str
+#     diceflag: Optional[bool] = None
+#     education: Optional[str] = None
+#     workstatus: Optional[str] = None
+#     dob: Optional[date] = None
+#     portalid: Optional[str] = None
+#     agreement: Optional[bool] = None
+#     driverslicense: Optional[bool] = None
+#     workpermit: Optional[bool] = None
+#     wpexpirationdate: Optional[date] = None
+#     offerletterurl: Optional[str] = None
+#     ssnvalidated: Optional[bool] = None
+#     address: Optional[str] = None
+#     city: Optional[str] = None
+#     state: Optional[str] = None
+#     country: Optional[str] = None
+#     zip: Optional[str] = None
+#     emergcontactname: Optional[str] = None
+#     emergcontactemail: Optional[EmailStr] = None
+#     emergcontactphone: Optional[str] = None
+#     emergcontactaddrs: Optional[str] = None
+#     guidelines: Optional[str] = None
+#     term: Optional[str] = None
+#     referralid: Optional[int] = None
+#     salary0: Optional[float] = None
+#     salary6: Optional[float] = None
+#     salary12: Optional[float] = None
+#     originalresume: Optional[str] = None
+#     notes: Optional[str] = None
+
+#     @validator('dob', 'wpexpirationdate', pre=True)
+#     def validate_dates(cls, value):
+#         if value == "" or value is None:
+#             return None
+#         return value
+    
+#     @validator('course')
+#     def validate_course(cls, v):
+#         if v not in ["QA", "UI", "ML"]:
+#             raise ValueError("Course must be one of: QA, UI, ML")
+#         return v
+    
+#     @validator('ssnvalidated', 'agreement', 'driverslicense', 'workpermit', 'diceflag', pre=True)
+#     def validate_booleans(cls, value):
+#         if value == "" or value is None:
+#             return None
+#         return value
+    
+#     @validator('referralid', pre=True)
+#     def validate_integers(cls, value):
+#         if value == "" or value is None:
+#             return None
+#         return value
+    
+#     @validator('salary0', 'salary6', 'salary12', pre=True)
+#     def validate_floats(cls, value):
+#         if value == "" or value is None:
+#             return None
+#         return value
+        
+#     @validator('emergcontactemail', pre=True)
+#     def validate_email(cls, value):
+#         if value == "" or value is None:
+#             return None
+#         return value
+    
+#     @validator('portalid', pre=True)
+#     def validate_portalid(cls, value):
+#         if value is None:
+#             return None
+#         return str(value)  # Convert integer to string
+    
+#     @validator('status')
+#     def validate_status(cls, v):
+#         valid_statuses = [
+#             "Active",
+#             "Discontinued", 
+#             "Break",
+#             "Marketing",
+#             "Placed",
+#             "OnProject-Mkt",
+#             "Completed",
+#             "Defaulted"
+#         ]
+#         if v not in valid_statuses:
+#             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+#         return v
+
+#     # @validator('portalid', pre=True)
+#     # def validate_portalid(cls, value):
+#     #     if value is None:
+#     #       return None
+#     #   return str(value)  # Convert to string if it's an integer
+
+# class CandidateCreate(CandidateBase):
+#     pass
+
+# class CandidateUpdate(CandidateBase):
+#     pass
+
+# class CandidateResponse(CandidateBase):
+#     candidateid: int
+#     pass
+#     class Config:
+#         orm_mode = True
+
 class CandidateBase(BaseModel):
     name: str
     email: EmailStr
@@ -283,7 +396,6 @@ class CandidateResponse(CandidateBase):
     class Config:
         orm_mode = True
 
-
 class BatchCreate(BaseModel):
     batchname: constr(max_length=100)
     current: constr(min_length=1, max_length=1)
@@ -386,10 +498,37 @@ class POCreateSchema(BaseModel):
             return None
         return v
 
+# MIN_DATE = date(1000, 1, 1)
+
+# class POCreateSchema(BaseModel):
+#     placementid: int
+#     begindate: date = MIN_DATE  # Required field with default minimum date
+#     enddate: Optional[date] = None  # Can be NULL as per your schema
+#     rate: float
+#     overtimerate: Optional[float] = None
+#     freqtype: str
+#     frequency: int = 0
+#     invoicestartdate: date = MIN_DATE  # Required field with default minimum date
+#     invoicenet: int = 0
+#     polink: Optional[str] = None
+#     notes: Optional[str] = None
+
+#     @validator('begindate', 'invoicestartdate', pre=True)
+#     def convert_empty_dates(cls, v):
+#         if v in ("", "0000-00-00", None):
+#             return MIN_DATE
+#         return v
+    
+#     @validator('enddate', pre=True)
+#     def convert_empty_enddate(cls, v):
+#         if v in ("", "0000-00-00"):
+#             return None
+#         return v
+
 class POUpdateSchema(BaseModel):
     begindate: Optional[date]
     enddate: Optional[date]
-    rate: Optional[float]
+    rate: Optional[float] 
     overtimerate: Optional[float]
     freqtype: Optional[str]
     frequency: Optional[int]
@@ -509,30 +648,55 @@ class CurrentMarketingBase(BaseModel):
 class CurrentMarketingCreateSchema(CurrentMarketingBase):
     pass
 
-class CurrentMarketingUpdateSchema(CurrentMarketingBase):
+# class CurrentMarketingUpdateSchema(CurrentMarketingBase):
     
-    candidateid: int
-    # startdate: int
-    mmid: int
-    instructorid: int
-    status: str
-    submitterid: int
-    priority: str
-    technology: str
-    minrate: int
-    currentlocation: str
-    relocation: str
-    locationpreference: str
-    skypeid: str
-    ipemailid: int
-    resumeid: int
-    coverletter: str
-    intro: str
-    closedate: str
-    closedemail: str
-    notes: str
-    suspensionreason: str
-    yearsofexperience: str
+#     candidateid: int
+#     # startdate: int
+#     mmid: int
+#     instructorid: int
+#     status: str
+#     submitterid: int
+#     priority: str
+#     technology: str
+#     minrate: int
+#     currentlocation: str
+#     relocation: str
+#     locationpreference: str
+#     skypeid: str
+#     ipemailid: int
+#     resumeid: int
+#     coverletter: str
+#     intro: str
+#     closedate: str
+#     closedemail: str
+#     notes: str
+#     suspensionreason: str
+#     yearsofexperience: str
+class CurrentMarketingUpdateSchema(BaseModel):
+    candidateid: Optional[int] = None
+    mmid: Optional[int] = None
+    instructorid: Optional[int] = None
+    status: Optional[str] = None
+    submitterid: Optional[int] = None
+    priority: Optional[str] = None
+    technology: Optional[str] = None
+    minrate: Optional[int] = None
+    currentlocation: Optional[str] = None
+    relocation: Optional[str] = None
+    locationpreference: Optional[str] = None
+    skypeid: Optional[str] = None
+    ipemailid: Optional[int] = None
+    resumeid: Optional[int] = None
+    coverletter: Optional[str] = None
+    intro: Optional[str] = None
+    closedate: Optional[str] = None
+    closedemail: Optional[str] = None
+    notes: Optional[str] = None
+    suspensionreason: Optional[str] = None
+    yearsofexperience: Optional[str] = None
+
+    class Config:
+        extra = "ignore" 
        
 class Config:
         orm_mode = True
@@ -560,10 +724,10 @@ class OverdueUpdateSchema(BaseModel):
 class InvoiceBase(BaseModel):
     invoicenumber: str
     startdate: date
-    enddate: date
-    invoicedate: date
-    quantity: float
-    otquantity: float = 0.0
+    enddate: Optional[date] = None
+    invoicedate: Optional[date] = None
+    quantity: Optional[float] = None
+    otquantity: Optional[float] = None
     status: Optional[str] = None
     amountreceived: Optional[float] = None
     releaseddate: Optional[date] = None
@@ -575,7 +739,7 @@ class InvoiceBase(BaseModel):
     remindertype: str = 'Open'
     emppaiddate: Optional[date] = None
     candpaymentstatus: str = 'Open'
-    poid: int
+    poid: Optional[int] = None
     notes: Optional[str] = None
 
 class InvoiceCreateSchema(InvoiceBase):

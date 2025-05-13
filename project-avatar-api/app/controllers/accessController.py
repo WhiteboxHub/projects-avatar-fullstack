@@ -169,58 +169,94 @@ def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
     db.refresh(authuser)
     return authuser
 
+ALLOW_LOGIN_STATUSES = {"Active", "Marketing", "Placed", "OnProject-Mkt"}
+
+def get_linked_candidate(db: Session, authuser_id: int):
+    """Find candidate by either portalid OR email=authuser.id"""
+    return db.execute(
+        text("""
+            SELECT * FROM candidate 
+            WHERE portalid = :id 
+               OR email = (SELECT id::text FROM authuser WHERE id = :id)
+            LIMIT 1
+        """), 
+        {"id": authuser_id}
+    ).first()
+
 def update_authuser(db: Session, authuser_id: int, authuser_data: AuthUserUpdateSchema):
-    """
-    Update an existing auth user.
-    Handles special date formatting for compatibility with the UI.
-    """
     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
     if not authuser:
         return {"error": "AuthUser not found"}
 
     update_data = authuser_data.dict(exclude_unset=True)
-    
-    # Handle special date cases
+    candidate = get_linked_candidate(db, authuser_id)
+
+    # Status synchronization and validation
+    if 'status' in update_data:
+        # Validate candidate status if linked
+        if candidate and candidate.status not in ALLOW_LOGIN_STATUSES:
+            return {
+                "error": f"Cannot update - candidate status '{candidate.status}' "
+                        "doesn't allow modifications"
+            }
+        
+        # Sync status to candidate table
+        sync_status(db, authuser_id, update_data['status'], 'authuser')
+        
+        # Update login permission
+        update_data['override'] = update_data['status'] in ALLOW_LOGIN_STATUSES
+
+    # Date handling
     for date_field in ['lastlogin', 'registereddate', 'level3date']:
         if date_field in update_data:
-            if update_data[date_field] == "0000-00-00 00:00:00" or update_data[date_field] == "0000-00-00":
+            if update_data[date_field] in ["0000-00-00 00:00:00", "0000-00-00"]:
                 update_data[date_field] = None
-            elif isinstance(update_data[date_field], str) and update_data[date_field].strip():
+            elif isinstance(update_data[date_field], str):
                 try:
-                    # Try to parse the date string
-                    update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d")
+                    update_data[date_field] = datetime.strptime(
+                        update_data[date_field], 
+                        "%Y-%m-%d %H:%M:%S" if " " in update_data[date_field] else "%Y-%m-%d"
+                    )
                 except ValueError:
-                    try:
-                        # Try alternative format
-                        update_data[date_field] = datetime.strptime(update_data[date_field], "%Y-%m-%d %H:%M:%S")
-                    except ValueError:
-                        # If parsing fails, keep the original value
-                        pass
+                    pass
 
-    # Update lastmoddatetime
+    # Always update modification timestamp
     update_data["lastmoddatetime"] = datetime.now()
     
-    set_parts = []
-    params = {}
-    for key, value in update_data.items():
-        set_parts.append(f"{key} = :{key}")
-        params[key] = value
+    # Build and execute update query
+    set_parts = [f"{key} = :{key}" for key in update_data]
+    params = {**update_data, "id": authuser_id}
     
-    if not set_parts:
-        return {"message": "No fields to update"}
-
-    params["id"] = authuser_id
-    query = text(f"""
-        UPDATE authuser 
-        SET {', '.join(set_parts)}
-        WHERE id = :id
-    """)
-    db.execute(query, params)
+    db.execute(
+        text(f"UPDATE authuser SET {', '.join(set_parts)} WHERE id = :id"),
+        params
+    )
     db.commit()
-    
-    # Refresh the authuser object
-    updated_user = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
-    return {"message": "AuthUser updated successfully", "user": updated_user}
+
+    return {
+        "message": "AuthUser updated successfully",
+        "user": db.query(AuthUser).filter(AuthUser.id == authuser_id).first(),
+        "candidate_status": candidate.status if candidate else None
+    }
+
+def sync_status(db: Session, authuser_id: int, new_status: str, source: str):
+    """Bidirectional status synchronization"""
+    try:
+        # Update candidate if source is authuser
+        if source == 'authuser':
+            db.execute(text("""
+                UPDATE candidate 
+                SET status = :status, 
+                    statuschangedate = CURRENT_TIMESTAMP 
+                WHERE portalid = :authuser_id
+                   OR email = (SELECT id::text FROM authuser WHERE id = :authuser_id)
+            """), {"status": new_status, "authuser_id": authuser_id})
+        
+        db.commit()
+        return {"message": "Status synchronized successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"Status sync failed: {str(e)}"}
 
 def delete_authuser(db: Session, authuser_id: int):
     """Delete an auth user"""

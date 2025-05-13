@@ -99,7 +99,7 @@ const Leads = () => {
     edit: boolean;
     view: boolean;
   }>({ add: false, edit: false, view: false });
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertMessage,] = useState<string | null>(null);
   const [selectedRow, setSelectedRow] = useState<Lead | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);

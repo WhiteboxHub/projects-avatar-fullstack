@@ -46,11 +46,21 @@ def get_po_by_name(db: Session, name_fragment: str):
 
 
 def create_po(db: Session, po: POCreateSchema):
-    new_po = PO(**po.dict())
+    po_data = po.dict()
+    # Set default dates if not provided
+    if 'begindate' not in po_data or not po_data['begindate']:
+        po_data['begindate'] = '0000-00-00'
+    if 'enddate' not in po_data or not po_data['enddate']:
+        po_data['enddate'] = '0000-00-00'
+    if 'invoicestartdate' not in po_data or not po_data['invoicestartdate']:
+        po_data['invoicestartdate'] = '0000-00-00'
+    
+    new_po = PO(**po_data)
     db.add(new_po)
     db.commit()
     db.refresh(new_po)
     return new_po
+
 
 def update_po(db: Session, po_id: int, po_data: POUpdateSchema):
     existing_po = db.query(PO).filter(PO.id == po_id).first()
