@@ -1115,6 +1115,7 @@ const ByMonth = () => {
         isGroupRow: true,
         level: 0,
         expanded: expandedMonthGroups[monthGroup.invmonth],
+        placementid: 0
       });
 
       if (expandedMonthGroups[monthGroup.invmonth]) {
@@ -1181,6 +1182,7 @@ const ByMonth = () => {
           isGroupRow: false,
           isSummaryRow: true,
           level: 1,
+          placementid: 0
         });
       }
     });
@@ -1408,21 +1410,21 @@ const ByMonth = () => {
     const tableData = rowData
       .filter((row) => !row.isGroupRow && !row.isSummaryRow && row.id !== -1 && row.id !== -2)
       .map((row) => [
-        row.companyname,
-        row.name,
-        row.invoicenumber,
-        row.startdate,
-        row.enddate,
-        row.invoicedate,
-        row.quantity,
-        row.otquantity,
-        row.rate,
-        row.overtimerate,
-        row.status,
-        `$${row.amountexpected?.toFixed(2) || '0.00'}`,
-        row.expecteddate,
-        `$${row.amountreceived?.toFixed(2) || '0.00'}`,
-        row.receiveddate,
+        row.companyname || '',
+        row.name || '',
+        row.invoicenumber || '',
+        row.startdate || '',
+        row.enddate || '',
+        row.invoicedate || '',
+        row.quantity || 0,
+        row.otquantity || 0,
+        row.rate || 0,
+        row.overtimerate || 0,
+        row.status || '',
+        `$${row.amountexpected ? row.amountexpected.toFixed(2) : '0.00'}`,
+        row.expecteddate || '',
+        `$${row.amountreceived ? row.amountreceived.toFixed(2) : '0.00'}`,
+        row.receiveddate || '',
       ]);
 
     autoTable(doc, {
@@ -1639,7 +1641,7 @@ const ByMonth = () => {
             params.api.sizeColumnsToFit();
           }}
           enableRangeSelection={true}
-          enableClipboard={true}
+          // enableClipboard={true}
         />
       </div>
 

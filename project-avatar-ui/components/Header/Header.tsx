@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import logo from "../../public/images/ip_logo1.jpg";
 import { useRouter } from "next/navigation";
