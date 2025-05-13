@@ -1,3 +1,18 @@
+"use client";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import AddRowModal from "@/modals/bymonth_modals/AddRowByMonth";
+import EditRowModal from "@/modals/bymonth_modals/EditRowByMonth";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ViewRowModal from "@/modals/bymonth_modals/ViewRowByMonth";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { CellClassParams, ColDef, ICellRendererParams } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import { jsPDF } from "jspdf";
+import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
+import { MdAdd, MdDelete } from "react-icons/md";
+
 // "use client";
 // import "ag-grid-community/styles/ag-grid.css";
 // import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -962,19 +977,6 @@
 
 
 
-"use client";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
-import AddRowModal from "@/modals/bymonth_modals/AddRowByMonth";
-import EditRowModal from "@/modals/bymonth_modals/EditRowByMonth";
-import ViewRowModal from "@/modals/bymonth_modals/ViewRowByMonth";
-import autoTable from "jspdf-autotable";
-import axios from "axios";
-import { AgGridReact } from "ag-grid-react";
-import { jsPDF } from "jspdf";
-import { AiOutlineEdit, AiOutlineEye, AiOutlineSearch } from "react-icons/ai";
-import { MdAdd, MdDelete } from "react-icons/md";
-import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -982,7 +984,6 @@ import {
   FaAngleDoubleRight,
   FaDownload,
 } from "react-icons/fa";
-import { ICellRendererParams, ColDef, CellClassParams } from "ag-grid-community";
 
 jsPDF.prototype.autoTable = autoTable;
 
