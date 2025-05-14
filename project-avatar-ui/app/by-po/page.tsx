@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ViewRowModal from "@/modals/bypo_modals/ViewRowByPO";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
-import debounce from "lodash/debounce";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CellClassParams, ColDef, ICellRendererParams } from "ag-grid-community";
@@ -16,6 +15,8 @@ import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
 import { MdAdd, MdDelete } from "react-icons/md";
+
+// import debounce from "lodash/debounce";
 
 import {
   FaChevronLeft,
@@ -169,7 +170,7 @@ const ByPo = () => {
     message: string;
   }>({ isOpen: false, message: "" });
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  // const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const pageSize = 100;
 
   // Track window resize for responsive design

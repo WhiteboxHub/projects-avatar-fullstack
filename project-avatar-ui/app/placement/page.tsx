@@ -783,7 +783,7 @@ interface Placement {
     feedbackid?: number;
     projectdocs: string;
     notes: string;
-    masteragreementid?: number;
+    masteragreementid: number;
     otheragreementsids?: string;
 }
 

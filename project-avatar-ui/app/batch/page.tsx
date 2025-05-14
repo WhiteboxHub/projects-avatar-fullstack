@@ -567,7 +567,7 @@ const Batches = () => {
   const setupColumns = useCallback((data: Batch[]) => {
     if (data.length > 0) {
       // Calculate column width based on screen size
-      const getColumnWidth = (field: string) => {
+      const getColumnWidth = () => {
         if (windowWidth < 640) return 80; // Mobile
         if (windowWidth < 1024) return 100; // Tablet
         return 120; // Desktop
@@ -579,7 +579,7 @@ const Batches = () => {
         columns.push({ 
           headerName: "Name", 
           field: "batchname",
-          width: getColumnWidth('batchname')
+          width: getColumnWidth()
         });
       }
       
@@ -587,7 +587,7 @@ const Batches = () => {
         columns.push({ 
           headerName: "Current", 
           field: "current",
-          width: getColumnWidth('current')
+          width: getColumnWidth()
         });
       }
       
@@ -596,7 +596,7 @@ const Batches = () => {
           columns.push({
             headerName: key.charAt(0).toUpperCase() + key.slice(1),
             field: key,
-            width: getColumnWidth(key)
+            width: getColumnWidth()
           });
         }
       });

@@ -39,18 +39,17 @@ const Users = () => {
   const [modalState, setModalState] = useState<{ add: boolean; edit: boolean; view: boolean }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<User | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [sortField, setSortField] = useState<string>("registereddate");
   const [sortOrder, setSortOrder] = useState<string>("desc");
-  const [notificationModal, setNotificationModal] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: "" });
+  const [, setNotificationModal] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: "" });
   const gridRef = useRef<AgGridReact<User>>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const closeNotificationModal = () => {
-    setNotificationModal({ isOpen: false, message: "" });
-  };
+  // const closeNotificationModal = () => {
+  //   setNotificationModal({ isOpen: false, message: "" });
+  // };
 
   const fetchData = useCallback(async (searchQuery = "", page = 1) => {
     try {

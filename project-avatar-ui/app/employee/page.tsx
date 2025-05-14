@@ -5,7 +5,6 @@ import "jspdf-autotable";
 import "react-dropdown/style.css";
 import * as XLSX from "xlsx";
 import AddRowModal from "@/modals/employee_modals/AddEmployee";
-import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "@/modals/employee_modals/EditEmployee";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/employee_modals/ViewEmployee";
@@ -22,10 +21,12 @@ import { MdDelete } from "react-icons/md";
 import { MdAdd } from "react-icons/md";
 import { Employee } from "@/types/index";
 
-interface OptionType {
-  value: string;
-  label: JSX.Element | string;
-}
+// import Dropdown, { Option } from "react-dropdown";
+
+// interface OptionType {
+//   value: string;
+//   label: JSX.Element | string;
+// }
 
 const Employees = () => {
   const [rowData, setRowData] = useState<Employee[]>([]);

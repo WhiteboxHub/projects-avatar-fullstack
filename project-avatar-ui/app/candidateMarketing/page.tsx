@@ -4,7 +4,6 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import "jspdf-autotable";
 import "react-dropdown/style.css";
 import * as XLSX from "xlsx";
-import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "@/modals/Marketing/CurrentMarketing/EditCandidateMarketing";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/Marketing/CurrentMarketing/ViewCandidateMarketing";
@@ -18,6 +17,8 @@ import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "r
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { FaFileExcel, FaFilePdf } from "react-icons/fa";
 import { CandidateMarketing } from "@/types";
+
+// import Dropdown, { Option } from "react-dropdown";
 
 // "use client";
 // import "ag-grid-community/styles/ag-grid.css";
@@ -835,7 +836,7 @@ const CurrentMarketing = () => {
   const setupColumns = (data: RowData[]) => {
     if (Array.isArray(data) && data.length > 0) {
       // Calculate column width based on screen size
-      const getColumnWidth = (field: string) => {
+      const getColumnWidth = () => {
         if (windowWidth < 640) return 80; // Mobile
         if (windowWidth < 1024) return 100; // Tablet
         return 120; // Desktop
@@ -845,7 +846,7 @@ const CurrentMarketing = () => {
       const columns = keys.map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
-        width: getColumnWidth(key)
+        width: getColumnWidth()
       }));
       setColumnDefs(columns);
     } else {
@@ -994,18 +995,18 @@ const CurrentMarketing = () => {
     }
   };
 
-  const options: Option[] = [
-    {
-      value: "Export to PDF",
-      label: "Export to PDF",
-    },
-    {
-      value: "Export to Excel",
-      label: "Export to Excel",
-    },
-  ];
+  // const options = [
+  //   {
+  //     value: "Export to PDF",
+  //     label: "Export to PDF",
+  //   },
+  //   {
+  //     value: "Export to Excel",
+  //     label: "Export to Excel",
+  //   },
+  // ];
 
-  const defaultOption = "Download";
+  // const defaultOption = "Download";
 
   const totalPages = Math.ceil(totalRows / paginationPageSize);
   const startPage = Math.max(1, currentPage - (windowWidth < 640 ? 1 : 2));

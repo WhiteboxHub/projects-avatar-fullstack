@@ -298,7 +298,7 @@ const OverdueComponent = () => {
   const buttonPadding = getButtonPadding();
 
   // Handle row selection
-  const onRowSelected = (event: any) => {
+  const onRowSelected = (event: { api: { getSelectedRows: () => Overdue[] } }) => {
     if (event.api.getSelectedRows().length > 0) {
       setSelectedRow(event.api.getSelectedRows()[0]);
     } else {

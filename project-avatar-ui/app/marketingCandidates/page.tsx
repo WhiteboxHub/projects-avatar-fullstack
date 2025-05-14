@@ -4,7 +4,6 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import "jspdf-autotable";
 import "react-dropdown/style.css";
 import * as XLSX from "xlsx";
-import Dropdown, { Option } from "react-dropdown";
 import EditRowModal from "@/modals/Marketing/MarketingCandidate/EditCandidateMarketing";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "@/modals/Marketing/MarketingCandidate/ViewCandidateMarketing";
@@ -17,6 +16,8 @@ import { debounce } from "lodash";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight, FaFileExcel, FaFilePdf } from "react-icons/fa";
 import { CandidateMarketing } from "@/types/index";
+
+// import Dropdown, { Option } from "react-dropdown";
 
 interface RowData {
   id: number;
@@ -244,7 +245,7 @@ const MarketingCandidates = () => {
       const keys = Object.keys(data[0]);
       
       // Adjust column widths based on screen size
-      const getColumnWidth = (field: string) => {
+      const getColumnWidth = () => {
         if (windowWidth < 640) { // Mobile
           return 70;
         } else if (windowWidth < 1024) { // Tablet
@@ -257,7 +258,7 @@ const MarketingCandidates = () => {
       const columns = keys.map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
-        width: getColumnWidth(key),
+        width: getColumnWidth(),
       }));
       
       setColumnDefs(columns);

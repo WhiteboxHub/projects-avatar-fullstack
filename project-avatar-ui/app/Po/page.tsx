@@ -29,7 +29,7 @@ const PO = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   const [modalState, setModalState] = useState<{ add: boolean; edit: boolean; view: boolean }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<Po | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -145,7 +145,7 @@ const PO = () => {
       const columns = keys.map((key) => ({
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
-        width: getColumnWidth(key),
+        width: getColumnWidth(),
         minWidth: windowWidth < 640 ? 60 : 80,
         maxWidth: windowWidth < 640 ? 120 : 150
       }));
@@ -153,7 +153,7 @@ const PO = () => {
     }
   };
 
-  const getColumnWidth = (field: string) => {
+  const getColumnWidth = () => {
     if (windowWidth < 640) { // Mobile
       return 100;
     } else if (windowWidth < 1024) { // Tablet
