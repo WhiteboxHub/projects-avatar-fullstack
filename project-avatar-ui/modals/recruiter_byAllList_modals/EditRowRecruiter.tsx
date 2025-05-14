@@ -120,7 +120,9 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Name <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -128,11 +130,14 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Email <span className="text-red-500">*</span>
+          </label>
           <input
             type="email"
             name="email"
@@ -140,6 +145,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
 
@@ -151,17 +157,20 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter phone"
+            placeholder="Enter phone (optional)"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Status <span className="text-red-500">*</span>
+          </label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
             <option value="A">Active</option>
             <option value="I">Inactive</option>
@@ -173,7 +182,9 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Designation <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="designation"
@@ -181,6 +192,7 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter designation"
+            required
           />
         </div>
 
@@ -283,12 +295,15 @@ const EditRowRecruiter: React.FC<EditRowRecruiterProps> = ({ isOpen, onClose, in
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Client ID <span className="text-red-500">*</span>
+          </label>
           <select
             name="clientid"
             value={formData.clientid}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
             <option value="">Select Client</option>
             {clients.map((client) => (

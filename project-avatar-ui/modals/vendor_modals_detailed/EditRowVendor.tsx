@@ -34,9 +34,16 @@ interface EditRowVendorProps {
   onClose: () => void;
   initialData: Recruiter;
   onSubmit: () => void;
+  vendors?: Vendor[]; // Make it optional for backward compatibility
 }
 
-const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialData, onSubmit }) => {
+const EditRowVendor: React.FC<EditRowVendorProps> = ({ 
+  isOpen, 
+  onClose, 
+  initialData, 
+  onSubmit,
+  vendors: propVendors = [] // Default to empty array if not provided
+}) => {
   const [formData, setFormData] = useState<Recruiter>(initialData);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -57,14 +64,33 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialD
 
   useEffect(() => {
     setFormData(initialData);
-    fetchVendors();
-  }, [initialData]);
+    // Add debug logging
+    console.log("EditRowVendor received vendors:", propVendors);
+    
+    // Only fetch vendors if not provided as props
+    if (propVendors.length === 0) {
+      console.log("No vendors provided as props, fetching them directly");
+      fetchVendors();
+    } else {
+      console.log("Using vendors from props:", propVendors);
+      setVendors(propVendors);
+    }
+  }, [initialData, propVendors]);
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendorList/vendors`, {
-        headers: { AuthToken: localStorage.getItem("token") },
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No auth token found in localStorage");
+        return;
+      }
+      
+      console.log("Fetching vendors...");
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/vendors`, {
+        headers: { AuthToken: token },
       });
+      
+      console.log("Vendor API response:", response.data);
       
       // Transform vendor data to match AG-Grid's "comp" field
       const vendorOptions = response.data.map((vendor: any) => ({
@@ -72,9 +98,17 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialD
         companyname: vendor.companyname || vendor.comp || vendor.name || `Vendor ${vendor.id}`
       }));
       
+      console.log("Transformed vendors:", vendorOptions);
       setVendors(vendorOptions);
     } catch (error) {
       console.error("Error fetching vendors:", error);
+      // If we get an error, at least create a fallback option for the current vendor
+      if (formData && formData.vendorid && formData.comp) {
+        setVendors([{
+          id: formData.vendorid,
+          companyname: formData.comp
+        }]);
+      }
     }
   };
 
@@ -254,12 +288,19 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({ isOpen, onClose, initialD
               }`}
             >
               <option value="">Select Vendor Company</option>
-              {vendors.map(vendor => (
-                <option key={vendor.id} value={vendor.id}>
-                  {vendor.companyname}
-                </option>
-              ))}
+              {vendors.length > 0 ? (
+                vendors.map(vendor => (
+                  <option key={vendor.id} value={vendor.id}>
+                    {vendor.companyname} (ID: {vendor.id})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>Loading vendors...</option>
+              )}
             </select>
+            {vendors.length === 0 && (
+              <p className="text-xs text-orange-500 mt-1">No vendors available. Please refresh the page.</p>
+            )}
             {errors.vendorid && <p className="text-red-500 text-xs mt-1">{errors.vendorid}</p>}
           </div>
 
