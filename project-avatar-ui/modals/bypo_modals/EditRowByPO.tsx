@@ -533,24 +533,37 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
 
   useEffect(() => {
     if (rowData) {
+      console.log("Row data received in edit modal:", rowData);
+      // Format date strings to YYYY-MM-DD for HTML date inputs
+      const formatDate = (dateStr: string | null | undefined) => {
+        if (!dateStr) return '';
+        try {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return ''; // Invalid date
+          return date.toISOString().split('T')[0];
+        } catch (e) {
+          return '';
+        }
+      };
+
       setFormData({
         invoicenumber: rowData.invoicenumber || '',
-        startdate: rowData.startdate || '',
-        enddate: rowData.enddate || '',
-        invoicedate: rowData.invoicedate || '',
+        startdate: formatDate(rowData.startdate),
+        enddate: formatDate(rowData.enddate),
+        invoicedate: formatDate(rowData.invoicedate),
         quantity: rowData.quantity || 0,
         otquantity: rowData.otquantity || 0,
         rate: rowData.rate || 0,
         overtimerate: rowData.overtimerate || 0,
         status: rowData.status || '',
-        emppaiddate: rowData.emppaiddate || '',
+        emppaiddate: formatDate(rowData.emppaiddate),
         candpaymentstatus: rowData.candpaymentstatus || '',
         reminders: rowData.reminders || '',
         amountexpected: rowData.amountexpected || 0,
-        expecteddate: rowData.expecteddate || '',
+        expecteddate: formatDate(rowData.expecteddate),
         amountreceived: rowData.amountreceived || 0,
-        receiveddate: rowData.receiveddate || '',
-        releaseddate: rowData.releaseddate || '',
+        receiveddate: formatDate(rowData.receiveddate),
+        releaseddate: formatDate(rowData.releaseddate),
         checknumber: rowData.checknumber || '',
         invoiceurl: rowData.invoiceurl || '',
         checkurl: rowData.checkurl || '',

@@ -34,52 +34,48 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
 
   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
   const [loadingPlacements, setLoadingPlacements] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
-    console.log("Row data received in modal:", rowData);
+    // Clear debugging
+    // console.log('===== MODAL DEBUGGING START =====');
+    // console.log('rowData received:', rowData);
+    // console.log('rowData type:', typeof rowData);
+    // console.log('Is rowData null?', rowData === null);
     
     if (rowData) {
-      // Format dates properly for input fields
-      const formatDate = (dateString: string | undefined) => {
-        if (!dateString) return '';
-        try {
-          // Handle different date formats
-          const date = new Date(dateString);
-          if (isNaN(date.getTime())) {
-            return '';
-          }
-          return date.toISOString().split('T')[0];
-        } catch (e) {
-          console.error("Date formatting error:", e);
-          return '';
-        }
-      };
-
-      // Convert any values to string as needed
-      const toString = (value: any) => {
-        if (value === null || value === undefined) return '';
-        return String(value);
-      };
-
-      // Map API response fields to the form fields, checking for various property naming conventions
+      console.log('rowData keys:', Object.keys(rowData));
+      
+      // Dump all properties and values for debugging
+      Object.keys(rowData).forEach(key => {
+        console.log(`${key}: ${rowData[key as keyof Po]}`);
+      });
+      
+      // Use direct property access with fallbacks
       const updatedFormData = {
-        // Try to access the field using both camelCase and PascalCase naming conventions
-        POID: toString(rowData.POID || ''),
-        PlacementDetails: toString(rowData.PlacementDetails || ''),
-        StartDate: formatDate(rowData.StartDate || ''),
-        EndDate: formatDate(rowData.EndDate || ''),
-        Rate: toString(rowData.Rate || ''),
-        OvertimeRate: toString(rowData.OvertimeRate || ''),
-        FreqType: toString(rowData.FreqType || ''),
-        InvoiceFrequency: toString(rowData.InvoiceFrequency || ''),
-        InvoiceStartDate: formatDate(rowData.InvoiceStartDate || ''),
-        InvoiceNet: toString(rowData.InvoiceNet || ''),
-        POUrl: toString(rowData.POUrl ||  ''),
-        Notes: toString(rowData.Notes || ''),
+        POID: rowData.POID ||  '',
+        PlacementDetails: rowData.PlacementDetails || '',
+        StartDate: rowData.StartDate ||  '',
+        EndDate: rowData.EndDate || '',
+        Rate: rowData.Rate ||  '',
+        OvertimeRate: rowData.OvertimeRate ||  '',
+        FreqType: rowData.FreqType ||  '',
+        InvoiceFrequency: rowData.InvoiceFrequency ||  '',
+        InvoiceStartDate: rowData.InvoiceStartDate ||  '',
+        InvoiceNet: rowData.InvoiceNet ||  '',
+        POUrl: rowData.POUrl ||  '',
+        Notes: rowData.Notes ||  '',
       };
       
-      console.log("Setting form data to:", updatedFormData);
-      setFormData(updatedFormData);
+      console.log('Populated form data:', updatedFormData);
+      
+      // Force formData update
+      setFormData({...updatedFormData});
+      
+      // Force a re-render after setting form data
+      setTimeout(() => setForceUpdate(prev => prev + 1), 100);
+      
+      console.log('===== MODAL DEBUGGING END =====');
     }
   }, [rowData]);
 
@@ -177,6 +173,13 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
         </div>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit PO Details</h2>
 
+        <div className="bg-gray-100 p-2 mb-4 text-xs overflow-auto max-h-20">
+          <div><strong>Debug:</strong> Form has data: {Object.keys(formData).length > 0 ? 'Yes' : 'No'}</div>
+          <div>POID: {formData.POID || 'empty'}</div>
+          <div>PlacementDetails: {formData.PlacementDetails || 'empty'}</div>
+          <div>StartDate: {formData.StartDate || 'empty'}</div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700">Placement</label>
@@ -200,10 +203,13 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <input
               type="date"
               name="StartDate"
-              value={formData.StartDate}
+              value={formData.StartDate || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
+            <div className="text-xs text-gray-500">
+              Raw value: {formData.StartDate || 'empty'}
+            </div>
           </div>
 
           <div>

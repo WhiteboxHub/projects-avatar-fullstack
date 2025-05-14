@@ -1,4 +1,3 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "../../modals/po_modals/AddRowPo";
@@ -14,7 +13,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAdd } from "react-icons/md";
 import { Po } from "@/types/index";
-
+"use client";
 import {
   AiOutlineEdit,
   AiOutlineEye,
@@ -180,9 +179,17 @@ const PO = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
-        console.log('Selected row for editing:', selectedRows[0]);
-        setSelectedRow(selectedRows[0]);
-        setModalState((prevState) => ({ ...prevState, edit: true }));
+        // Extensive debugging
+        console.log('SELECTED ROW DATA:', JSON.stringify(selectedRows[0], null, 2));
+        
+        // Ensure we have a proper data object before setting it
+        if (typeof selectedRows[0] === 'object' && selectedRows[0] !== null) {
+          setSelectedRow(selectedRows[0]);
+          setModalState((prevState) => ({ ...prevState, edit: true }));
+        } else {
+          console.error('Selected row is not a valid object:', selectedRows[0]);
+          setAlertMessage("Error: Invalid row data selected.");
+        }
       } else {
         setAlertMessage("Please select a row to edit.");
         setTimeout(() => setAlertMessage(null), 3000);
