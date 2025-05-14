@@ -50,8 +50,8 @@ def create_po(db: Session, po: POCreateSchema):
     # Set default dates if not provided
     if 'begindate' not in po_data or not po_data['begindate']:
         po_data['begindate'] = '0000-00-00'
-    if 'enddate' not in po_data or not po_data['enddate']:
-        po_data['enddate'] = '0000-00-00'
+    # if 'enddate' not in po_data or not po_data['enddate']:
+    #     po_data['enddate'] = '0000-00-00'
     if 'invoicestartdate' not in po_data or not po_data['invoicestartdate']:
         po_data['invoicestartdate'] = '0000-00-00'
     

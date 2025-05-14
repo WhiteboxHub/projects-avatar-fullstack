@@ -1095,9 +1095,9 @@ const ByMonth = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState<{ id: number; pname: string }[]>([]);
+  const [clients, ] = useState<{ id: number; pname: string }[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [sortState, setSortState] = useState<SortState>({
+  const [sortState, ] = useState<SortState>({
     field: "invoicedate",
     order: "desc",
   });
@@ -1154,12 +1154,12 @@ const ByMonth = () => {
     }));
   };
 
-  const handleSortChange = (field: string) => {
-    setSortState((prev) => ({
-      field,
-      order: prev.field === field ? (prev.order === "asc" ? "desc" : "asc") : "desc",
-    }));
-  };
+  // const handleSortChange = (field: string) => {
+  //   setSortState((prev) => ({
+  //     field,
+  //     order: prev.field === field ? (prev.order === "asc" ? "desc" : "asc") : "desc",
+  //   }));
+  // };
 
   const rowData = useMemo(() => {
     const rows: RowData[] = [];

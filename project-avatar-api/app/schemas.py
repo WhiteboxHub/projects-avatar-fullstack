@@ -1588,3 +1588,8 @@ class PlacementSelectOptions(BaseModel):
     feedbacks: List[SelectOption]
     class Config:
          from_attributes = True 
+
+
+
+
+

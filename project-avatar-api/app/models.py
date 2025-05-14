@@ -769,3 +769,56 @@ class UCUserPermissionMatch(Base):
     permission_id = Column(Integer)
     
     user = relationship("UCUser")
+    
+    
+    
+    
+    
+    
+from sqlalchemy import Column, Integer, String, Text
+# from app.database import Base
+
+class Login(Base):
+    __tablename__ = "login"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    username = Column(String(200), unique=True, nullable=False)
+    password = Column(String(200), nullable=False)
+    site = Column(String(400))
+    status = Column(String(70))
+    type = Column(String(70))
+    recoveryemail = Column(String(150))
+    altemail = Column(String(150))
+    phone = Column(String(200))
+    permissionid1 = Column(String(70))
+    permissionid2 = Column(String(70))
+    permissionid3 = Column(String(70))
+    permissionid4 = Column(String(70))
+    permissionid5 = Column(String(70))
+    permissionid6 = Column(String(70))
+    permissionid7 = Column(String(70))
+    permissionid8 = Column(String(70))
+    notes = Column(Text)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "username": self.username,
+            "site": self.site,
+            "status": self.status,
+            "type": self.type,
+            "recoveryemail": self.recoveryemail,
+            "altemail": self.altemail,
+            "phone": self.phone,
+            "permissionid1": self.permissionid1,
+            "permissionid2": self.permissionid2,
+            "permissionid3": self.permissionid3,
+            "permissionid4": self.permissionid4,
+            "permissionid5": self.permissionid5,
+            "permissionid6": self.permissionid6,
+            "permissionid7": self.permissionid7,
+            "permissionid8": self.permissionid8,
+            "notes": self.notes
+        }
