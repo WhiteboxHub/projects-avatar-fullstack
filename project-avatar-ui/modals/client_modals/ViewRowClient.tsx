@@ -58,12 +58,12 @@ const ViewRowClient: React.FC<ViewRowClientProps> = ({ isOpen, onClose, client }
               </div>
             </div>
 
-            <div className="modal-field">
+            {/* <div className="modal-field">
               <label htmlFor="Tier">Tier</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
                 {client.tier}
               </div>
-            </div>
+            </div> */}
 
             <div className="modal-field">
               <label htmlFor="Status">Status</label>

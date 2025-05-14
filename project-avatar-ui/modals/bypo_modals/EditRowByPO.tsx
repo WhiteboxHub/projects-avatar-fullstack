@@ -1,3 +1,7 @@
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 // // new-projects-avatar-fullstack/project-avatar-ui/modals/bypo_modals/EditRowByPO.tsx
 
 // import React, { useState, useEffect } from 'react';
@@ -451,9 +455,6 @@
 // export default EditRowModal;
 
 
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
 
 interface InvoiceOption {
   id: number;
@@ -488,14 +489,14 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
     rate: 0,
     overtimerate: 0,
     status: '',
-    emppaiddate: null,
+    emppaiddate: '',
     candpaymentstatus: '',
     reminders: '',
     amountexpected: 0,
     expecteddate: '',
     amountreceived: 0,
-    receiveddate: null,
-    releaseddate: null,
+    receiveddate: '',
+    releaseddate: '',
     checknumber: '',
     invoiceurl: '',
     checkurl: '',
@@ -542,14 +543,14 @@ const EditRowModal: React.FC<EditRowModalProps> = ({
         rate: rowData.rate || 0,
         overtimerate: rowData.overtimerate || 0,
         status: rowData.status || '',
-        emppaiddate: rowData.emppaiddate || null,
+        emppaiddate: rowData.emppaiddate || '',
         candpaymentstatus: rowData.candpaymentstatus || '',
         reminders: rowData.reminders || '',
         amountexpected: rowData.amountexpected || 0,
         expecteddate: rowData.expecteddate || '',
         amountreceived: rowData.amountreceived || 0,
-        receiveddate: rowData.receiveddate || null,
-        releaseddate: rowData.releaseddate || null,
+        receiveddate: rowData.receiveddate || '',
+        releaseddate: rowData.releaseddate || '',
         checknumber: rowData.checknumber || '',
         invoiceurl: rowData.invoiceurl || '',
         checkurl: rowData.checkurl || '',

@@ -39,13 +39,17 @@ const Users = () => {
   const [modalState, setModalState] = useState<{ add: boolean; edit: boolean; view: boolean }>({ add: false, edit: false, view: false });
   const [selectedRow, setSelectedRow] = useState<User | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [sortField, setSortField] = useState<string>("registereddate");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const [, setNotificationModal] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: "" });
   const gridRef = useRef<AgGridReact<User>>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // const closeNotificationModal = () => {
+  //   setNotificationModal({ isOpen: false, message: "" });
+  // };
 
   const fetchData = useCallback(async (searchQuery = "", page = 1) => {
     try {
@@ -93,8 +97,10 @@ const Users = () => {
       }
     } catch (error) {
       console.error("Error loading data:", error);
-      setAlertMessage("Error loading data. Please try again.");
-      setTimeout(() => setAlertMessage(null), 3000);
+      setNotificationModal({
+        isOpen: true,
+        message: "Error loading data. Please try again."
+      });
     }
   }, [paginationPageSize, API_URL, sortField, sortOrder]);
 
@@ -210,8 +216,10 @@ const Users = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
-        setAlertMessage("Please select a row to edit.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        setNotificationModal({
+          isOpen: true,
+          message: "Please select a row to edit."
+        });
       }
     }
   };
@@ -223,8 +231,10 @@ const Users = () => {
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, view: true }));
       } else {
-        setAlertMessage("Please select a row to view.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        setNotificationModal({
+          isOpen: true,
+          message: "Please select a row to view."
+        });
       }
     }
   };
@@ -259,8 +269,10 @@ const Users = () => {
         fetchData(query, 1);
       } catch (error) {
         console.error("Error searching users:", error);
-        setAlertMessage("Error searching users. Please try again.");
-        setTimeout(() => setAlertMessage(null), 3000);
+        setNotificationModal({
+          isOpen: true,
+          message: "Error searching users. Please try again."
+        });
       }
     },
     [currentPage, fetchData, setIsSearching]
@@ -354,15 +366,9 @@ const Users = () => {
 
   return (
     <div className="relative">
-      {alertMessage && (
-        <div className="fixed top-4 right-4 bg-red-500 text-white p-2 rounded-md shadow-md z-50">
-          {alertMessage}
-        </div>
-      )}
-      
-      <div className="p-4 mt-10 mb-4 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-7xl">
+      <div className="p-4 mt-10 mb-4 mx-auto bg-gray-100 rounded-lg shadow-md relative max-w-full lg:max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800" style={{ marginTop: '3.5rem' }}>Access Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800" style={{ marginTop: '3.5rem' }}>Access Management</h1>
         </div>
 
         <div className="flex flex-col md:flex-row mb-4 justify-between items-center">
@@ -379,7 +385,7 @@ const Users = () => {
                 onClick={handleSearch}
                 className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-md ml-2 transition duration-300 hover:bg-blue-900 text-xs md:text-sm"
               >
-                <AiOutlineSearch className="mr-1" /> Search
+                <AiOutlineSearch className="mr-1" /> 
               </button>
             </div>
             <button
@@ -407,8 +413,8 @@ const Users = () => {
         </div>
 
         <div
-          className="ag-theme-alpine bg-white shadow-lg rounded-lg"
-          style={{ height: "400px", width: "100%" }}
+          className="ag-theme-alpine bg-white shadow-lg rounded-lg w-full overflow-hidden"
+          style={{ height: "calc(100vh - 300px)", minHeight: "400px" }}
         >
           <AgGridReact
             ref={gridRef}
@@ -451,7 +457,14 @@ const Users = () => {
               >
                 <FaChevronLeft />
               </button>
-              {renderPageNumbers()}
+              <div className="hidden sm:flex">
+                {renderPageNumbers()}
+              </div>
+              <div className="sm:hidden">
+                <span className="px-3 py-1 bg-blue-600 text-white rounded-md">
+                  {currentPage} / {totalPages}
+                </span>
+              </div>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
@@ -471,10 +484,12 @@ const Users = () => {
             </div>
           </div>
           
-          <div className="flex items-center">
-            <span className="text-sm mr-2">Rows per page:</span>
-            {renderPageSizeSelector()}
-            <span className="text-sm ml-4">
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+            <div className="flex items-center mb-2 sm:mb-0">
+              <span className="text-xs sm:text-sm mr-2">Rows per page:</span>
+              {renderPageSizeSelector()}
+            </div>
+            <span className="text-xs sm:text-sm ml-0 sm:ml-4">
               Showing {Math.min((currentPage - 1) * paginationPageSize + 1, totalRows)} - {Math.min(currentPage * paginationPageSize, totalRows)} of {totalRows} entries
             </span>
           </div>

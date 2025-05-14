@@ -82,7 +82,7 @@ export interface RecruiterData {
   review: string;
   notes: string;
   companyname?: string;
-  clientid?: string;
+  // clientid?: number;
   employeeid?: number;
   lastmoddatetime?: string;
   isGroupRow?: boolean;

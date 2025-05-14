@@ -15,7 +15,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
   const [formData, setFormData] = useState<ClientUpdate>({
     id: String(clientData.id),
     companyname: clientData.companyname,
-    tier: clientData.tier,
+    // tier: clientData.tier,
     status: clientData.status,
     email: clientData.email,
     phone: clientData.phone,
@@ -47,7 +47,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
       id: String(clientData.id)
     });
   }, [clientData]);
-
+  const statusOptions = ["Current", "blacklist", "rejectedus", "duplicate"];
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -60,7 +60,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
     e.preventDefault();
     try {
       const updatedData: ClientUpdate = { ...formData, id: String(clientData.id) };
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${clientData.id}`, updatedData);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/client/edit/${clientData.id}`, updatedData);
       await onSave();
       onClose();
     } catch (error) {
@@ -106,7 +106,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Company Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name *</label>
           <input
             type="text"
             name="companyname"
@@ -118,9 +118,9 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           />
         </div>
 
-        {/* Tier */}
+        {/* Tier
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Tier</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Tier *</label>
           <input
             type="text"
             name="tier"
@@ -130,11 +130,11 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
             placeholder="Enter tier"
             required
           />
-        </div>
+        </div> */}
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
           <input
             type="email"
             name="email"
@@ -148,7 +148,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone *</label>
           <input
             type="text"
             name="phone"
@@ -160,19 +160,20 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           />
         </div>
 
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
-            required
-          />
-        </div>
+      {/* Status */}
+      <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            >
+              {statusOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
 
         {/* Address */}
         <div>

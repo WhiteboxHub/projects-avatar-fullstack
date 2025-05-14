@@ -354,7 +354,7 @@ const RecruiterByVendor = () => {
               width: 60,
               valueGetter: (params) => {
                 if (params.node && params.node.rowIndex !== null) {
-                  return params.node.rowIndex + 1;
+                  return (params.node.rowIndex + 1) + ((currentPage - 1) * 1000);
                 }
                 return null;
               },
@@ -448,7 +448,7 @@ const RecruiterByVendor = () => {
             <FaAngleDoubleRight />
           </button>
           <span className="ml-4 text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+            Page {currentPage} of {totalPages} (Showing 1000 records per page)
           </span>
         </div>
       </div>

@@ -7,6 +7,7 @@ import Modal from "react-modal";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
+import { SortChangedEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { debounce } from "lodash";
@@ -26,7 +27,6 @@ import {
   AiOutlineEye,
   AiOutlineSearch
 } from "react-icons/ai";
-import { SortChangedEvent } from "ag-grid-community";
 
 interface ViewRowRecruiterComponentProps {
   isOpen: boolean;
@@ -368,7 +368,8 @@ const RecruiterByClient = () => {
               width: 60,
               valueGetter: (params) => {
                 if (params.node && params.node.rowIndex !== null) {
-                  return params.node.rowIndex + 1;
+                  // Calculate row number based on current page and page size
+                  return (currentPage - 1) * pageSize + params.node.rowIndex + 1;
                 }
                 return null;
               },

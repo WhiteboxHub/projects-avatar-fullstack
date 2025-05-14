@@ -1,3 +1,7 @@
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 // import React, { useState, useEffect } from 'react';
 // import Modal from 'react-modal';
 // import axios from 'axios';
@@ -441,9 +445,6 @@
 
 
 
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
 
 interface AddRowModalProps {
   isOpen: boolean;
@@ -459,8 +460,31 @@ interface InvoiceOption {
   // Add other fields if needed
 }
 
+interface FormDataType {
+  invoicenumber: string;
+  startdate: string;
+  enddate: string;
+  invoicedate: string;
+  quantity: string;
+  otquantity: string;
+  status: string;
+  amountreceived: number;
+  releaseddate: string;
+  receiveddate: string;
+  checknumber: string;
+  reminders: string;
+  remindertype: string;
+  emppaiddate: string;
+  candpaymentstatus: string;
+  poid: string;
+  notes: string;
+  lastmoddatetime: string;
+  invoiceurl?: string;
+  checkurl?: string;
+}
+
 const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData, onSubmit, clients }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
     invoicenumber: '',
     startdate: '',
     enddate: '',
@@ -469,18 +493,18 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData,
     otquantity: '0.0', // Default value
     status: 'Open',
     amountreceived: 0.0000,
-    releaseddate: null,
-    receiveddate: null,
+    releaseddate: '',
+    receiveddate: '',
     checknumber: '',
-    invoiceurl: '',
-    checkurl: '',
     reminders: 'Y', // Default value
     remindertype: 'Open', // Default value
-    emppaiddate: null,
+    emppaiddate: '',
     candpaymentstatus: 'Open', // Default value
     poid: '',
     notes: '',
     lastmoddatetime: '',
+    invoiceurl: '',
+    checkurl: '',
   });
 
   const [invoiceOptions, setInvoiceOptions] = useState<InvoiceOption[]>([]);
