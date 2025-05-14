@@ -167,7 +167,7 @@ const ByPo = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [clients, setClients] = useState<{ id: number; pname: string }[]>([]);
   const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
-  const [sortState, setSortState] = useState<SortState>({
+  const [sortState] = useState<SortState>({
     field: "invoicedate",
     order: "desc",
   });
@@ -176,7 +176,7 @@ const ByPo = () => {
     message: string;
   }>({ isOpen: false, message: "" });
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  // const [, setSelectedRowId] = useState<number | null>(null);
   const pageSize = 100;
 
   // Track window resize for responsive design
@@ -289,12 +289,12 @@ const ByPo = () => {
     setSelectedPoId(prev => prev === poId ? null : poId);
   }, []);
 
-  const handleSortChange = (field: string) => {
-    setSortState((prev) => ({
-      field,
-      order: prev.field === field ? (prev.order === "asc" ? "desc" : "asc") : "desc",
-    }));
-  };
+  // const handleSortChange = (field: string) => {
+  //   setSortState((prev) => ({
+  //     field,
+  //     order: prev.field === field ? (prev.order === "asc" ? "desc" : "asc") : "desc",
+  //   }));
+  // };
 
   const rowData = useMemo(() => {
     const rows: RowData[] = [];
@@ -439,11 +439,11 @@ const ByPo = () => {
   };
 
   // Handle row selection
-  const onRowSelected = useCallback((event: any) => {
-    if (event.node.isSelected() && event.data && !event.data.isGroupRow && !event.data.isSummaryRow) {
-      setSelectedRowId(event.data.id);
-    }
-  }, []);
+  // const onRowSelected = useCallback((event: any) => {
+  //   if (event.node.isSelected() && event.data && !event.data.isGroupRow && !event.data.isSummaryRow) {
+  //     setSelectedRowId(event.data.id);
+  //   }
+  // }, []);
 
   // Custom cell renderer for the Name column to handle group toggling
   const nameColumnRenderer = useCallback((params: ICellRendererParams<RowData>) => {

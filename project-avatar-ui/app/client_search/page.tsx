@@ -151,9 +151,9 @@ const ClientSearch: React.FC = () => {
                         <p className="font-medium">
                           <strong>Status:</strong> {client.status}
                         </p>
-                        <p className="font-medium">
+                        {/* <p className="font-medium">
                           <strong>Tier:</strong> {client.tier}
-                        </p>
+                        </p> */}
                       </Dropdown>
 
                       <Dropdown

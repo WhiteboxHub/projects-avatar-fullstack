@@ -1,6 +1,6 @@
+"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-"use client";
 import AddRowModal from "@/modals/vendor_byVendor_modals/AddRowVendor";
 import EditRowModal from "@/modals/vendor_byVendor_modals/EditRowVendor";
 import ViewRowModal from "@/modals/vendor_byVendor_modals/ViewRowVendor";
