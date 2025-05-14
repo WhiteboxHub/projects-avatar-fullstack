@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ViewRowModal from "@/modals/bymonth_modals/ViewRowByMonth";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
-import { CellClassParams, ColDef, ICellRendererParams } from "ag-grid-community";
+import { CellClassParams, ColDef, ICellRendererParams, RowSelectedEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
@@ -2711,7 +2711,7 @@ const ByMonth = () => {
     order: "desc",
   });
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  const [, setSelectedRowId] = useState<number | null>(null);
   const pageSize = 100;
 
   useEffect(() => {
@@ -3263,7 +3263,7 @@ const ByMonth = () => {
   const buttonPadding = getButtonPadding();
 
   // Handle row selection
-  const onRowSelected = useCallback((event: any) => {
+  const onRowSelected = useCallback((event: RowSelectedEvent<RowData>) => {
     if (event.node.isSelected() && event.data && !event.data.isGroupRow && !event.data.isSummaryRow) {
       setSelectedRowId(event.data.id);
     }
