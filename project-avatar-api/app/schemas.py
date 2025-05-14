@@ -767,7 +767,7 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    tier: Optional[str] = None
+    # tier: Optional[str] = None
     status: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -1588,3 +1588,68 @@ class PlacementSelectOptions(BaseModel):
     feedbacks: List[SelectOption]
     class Config:
          from_attributes = True 
+
+
+
+
+
+
+
+from pydantic import BaseModel, field_validator, ConfigDict
+from typing import Optional, Union
+from datetime import datetime
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)  # Replaces orm_mode=True
+    
+    id: int
+    name: str
+    username: str
+    site: Optional[str] = None
+    status: str
+    type: str
+    recoveryemail: Optional[str] = None
+    altemail: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    permissionid1: Optional[str] = None
+    permissionid2: Optional[str] = None
+    permissionid3: Optional[str] = None
+    permissionid4: Optional[str] = None
+    permissionid5: Optional[str] = None
+    permissionid6: Optional[str] = None
+    permissionid7: Optional[str] = None
+    permissionid8: Optional[str] = None
+
+    @field_validator(
+        'permissionid1', 'permissionid2', 'permissionid3', 'permissionid4',
+        'permissionid5', 'permissionid6', 'permissionid7', 'permissionid8',
+        mode='before'
+    )
+    @classmethod
+    def convert_permission_ids(cls, v):
+        if v in [None, '0', 0]:
+            return None
+        return str(v)
+
+class TokenData(BaseModel):
+    sub: str
+    username: str
+    name: str
+    status: str
+    type: str
+    iat: datetime
+    exp: datetime
+    jti: str
+    permissions: dict
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    message: str
+    user_details: UserResponse

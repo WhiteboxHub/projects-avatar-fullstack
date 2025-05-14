@@ -234,7 +234,7 @@ const Clients = () => {
           if (!confirmation) return;
 
           try {
-            await axios.delete(`${API_URL}/client/delete/${clientId}`, {
+            await axios.delete(`${API_URL}/client/client/delete/${clientId}`, {
               headers: { AuthToken: localStorage.getItem("token") },
             });
             alert("Client deleted successfully.");

@@ -14,7 +14,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
   const [formData, setFormData] = useState<ClientCreate>({
     name: '',
     companyname: '',
-    tier: '',
     status: '',
     email: '',
     phone: '',
@@ -39,7 +38,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
     hrPhone: '',
     notes: '',
   });
-
+  const statusOptions = ["Current", "blacklist", "rejectedus", "duplicate"];
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -110,7 +109,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
         
         {/* Company Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name *</label>
           <input
             type="text"
             name="companyname"
@@ -118,12 +117,13 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter company name"
+            required
           />
         </div>
 
-        {/* Tier */}
+        {/* Tier
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Tier</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Tier *</label>
           <input
             type="text"
             name="tier"
@@ -131,12 +131,13 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter tier"
+            required
           />
-        </div>
+        </div> */}
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
           <input
             type="email"
             name="email"
@@ -144,12 +145,13 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone *</label>
           <input
             type="text"
             name="phone"
@@ -157,21 +159,24 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, refreshData 
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
+            required
           />
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-          <input
-            type="text"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter status"
-          />
-        </div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            >
+              {statusOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
 
         {/* Address */}
         <div>

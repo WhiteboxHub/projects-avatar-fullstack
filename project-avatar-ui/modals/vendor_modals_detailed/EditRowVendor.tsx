@@ -145,7 +145,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
       };
 
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendor/update/${formData.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/recruiters/byVendorDetailed/update/${formData.id}`,
         payload,
         { headers: { AuthToken: localStorage.getItem("token") } }
       );

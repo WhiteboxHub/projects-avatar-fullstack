@@ -1,7 +1,6 @@
 export interface Client {
     id: number; // Change this to number if it's currently a string
     name: string; 
-    tier: string;
     companyname: string; // Editable, frozen, width: 250, uppercase
     email: string; // Editable, width: 200, lowercase, required
     phone: string; // Editable, width: 150

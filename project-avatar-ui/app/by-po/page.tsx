@@ -176,6 +176,7 @@ const ByPo = () => {
     message: string;
   }>({ isOpen: false, message: "" });
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const pageSize = 100;
 
   // Track window resize for responsive design
@@ -277,22 +278,15 @@ const ByPo = () => {
     fetchClients();
   }, [fetchData, fetchClients]);
 
-  const toggleGroup = useCallback((poId: number) => {
-    // Update expanded state
-    setExpandedGroups(prev => {
-      const newState = { ...prev };
-      newState[poId] = !prev[poId];
-      return newState;
-    });
+  const toggleGroup = useCallback((poId: number, event: React.MouseEvent) => {
+    // Stop event propagation to prevent row selection
+    event.stopPropagation();
     
-    // Update selected PO ID - but don't clear it when collapsing
-    setSelectedPoId(prev => {
-      if (prev !== poId) {
-        return poId; // Set to new PO ID when expanding a different group
-      }
-      // Keep the current selection even when collapsing
-      return poId;
-    });
+    setExpandedGroups(prev => ({
+      ...prev,
+      [poId]: !prev[poId]
+    }));
+    setSelectedPoId(prev => prev === poId ? null : poId);
   }, []);
 
   const handleSortChange = (field: string) => {
@@ -444,69 +438,81 @@ const ByPo = () => {
     }
   };
 
+  // Handle row selection
+  const onRowSelected = useCallback((event: any) => {
+    if (event.node.isSelected() && event.data && !event.data.isGroupRow && !event.data.isSummaryRow) {
+      setSelectedRowId(event.data.id);
+    }
+  }, []);
+
+  // Custom cell renderer for the Name column to handle group toggling
+  const nameColumnRenderer = useCallback((params: ICellRendererParams<RowData>) => {
+    if (!params.data) return null;
+    
+    if (params.data.isGroupRow) {
+      const expanded = expandedGroups[params.data.poid];
+      return (
+        <div className="flex items-center">
+          <span
+            className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
+            onClick={(e) => params.data && toggleGroup(params.data.poid, e)}
+          >
+            <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
+              {expanded ? (
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 12H4"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              )}
+            </span>
+            <span className="font-medium">{params.value}</span>
+          </span>
+        </div>
+      );
+    }
+    if (params.data.isSummaryRow) {
+      return <span className="pl-3 font-semibold">{params.value}</span>;
+    }
+    return <span className="pl-3">{params.data.id}</span>;
+  }, [expandedGroups, toggleGroup]);
+
   const columnDefs = useMemo<ColDef<RowData>[]>(
     () => [
       {
         headerName: "Name",
         field: "name",
-        cellRenderer: (params: ICellRendererParams<RowData>) => {
-          if (!params.data) return null;
-          
-          if (params.data.isGroupRow) {
-            const expanded = expandedGroups[params.data.poid] || false;
-            return (
-              <div className="flex items-center">
-                <span
-                  className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent row selection when clicking the toggle
-                    if (params.data) toggleGroup(params.data.poid);
-                  }}
-                >
-                  <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
-                    {expanded ? (
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M20 12H4"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="font-medium">{params.value}</span>
-                </span>
-              </div>
-            );
-          }
-          if (params.data.isSummaryRow) {
-            return <span className="pl-3 font-semibold">{params.value}</span>;
-          }
-          return <span className="pl-3">{params.data.id}</span>;
-        },
+        cellRenderer: nameColumnRenderer,
         minWidth: getColumnWidth('name'),
         flex: 1,
         suppressSizeToFit: windowWidth < 1024,
+        cellClass: (params) => {
+          if (params.data?.isGroupRow) return 'group-row';
+          if (params.data?.isSummaryRow) return 'summary-row';
+          return '';
+        }
       },
       {
         headerName: "Invoice Number",
@@ -522,7 +528,6 @@ const ByPo = () => {
         minWidth: getColumnWidth('startdate'),
         sortable: true,
         headerClass: "cursor-pointer",
-        onCellClicked: () => handleSortChange("startdate"),
         valueFormatter: (params) => params.value || '',
       },
       {
@@ -532,7 +537,6 @@ const ByPo = () => {
         minWidth: getColumnWidth('enddate'),
         sortable: true,
         headerClass: "cursor-pointer",
-        onCellClicked: () => handleSortChange("enddate"),
         valueFormatter: (params) => params.value || '',
       },
       {
@@ -541,7 +545,6 @@ const ByPo = () => {
         minWidth: getColumnWidth('invoicedate'),
         sortable: true,
         headerClass: "cursor-pointer",
-        onCellClicked: () => handleSortChange("invoicedate"),
         valueFormatter: (params) => params.value || '',
       },
       {
@@ -679,7 +682,6 @@ const ByPo = () => {
         minWidth: getColumnWidth('companyname'),
         sortable: true,
         headerClass: "cursor-pointer",
-        onCellClicked: () => handleSortChange("companyname"),
         valueFormatter: (params) => params.value || '',
       },
       {
@@ -779,7 +781,6 @@ const ByPo = () => {
         minWidth: getColumnWidth('candidatename'),
         sortable: true,
         headerClass: "cursor-pointer",
-        onCellClicked: () => handleSortChange("candidatename"),
         valueFormatter: (params) => params.value || '',
       },
       {
@@ -839,7 +840,7 @@ const ByPo = () => {
         valueFormatter: (params) => params.value || '',
       },
     ],
-    [expandedGroups, toggleGroup, windowWidth]
+    [expandedGroups, nameColumnRenderer, windowWidth]
   );
 
   const handlePageChange = (newPage: number) => {
@@ -1225,6 +1226,7 @@ const ByPo = () => {
             defaultColDef={{
               sortable: true,
               filter: true,
+              editable:true,
               resizable: true,
               cellStyle: { 
                 color: "#333", 
@@ -1234,18 +1236,11 @@ const ByPo = () => {
               minWidth: windowWidth < 640 ? 60 : windowWidth < 1024 ? 70 : 80,
               maxWidth: windowWidth < 640 ? 100 : windowWidth < 1024 ? 120 : 150,
             }}
-            suppressRowClickSelection={false}
-            rowSelection="single"
-            getRowId={(params) => {
-              // Return a stable ID to maintain selection across refreshes
-              if (params.data.isGroupRow) {
-                return `group-${params.data.poid}`;
-              }
-              if (params.data.isSummaryRow) {
-                return `summary-${params.data.poid}`;
-              }
-              return `row-${params.data.id}`;
-            }}
+            suppressRowClickSelection={true} // Changed from false to true
+            enableCellTextSelection={true}   // Allows text selection in cells
+             ensureDomOrder={true}           // Helps with accessibility and selection
+  rowSelection="single"           // Keep this for row selection
+  suppressRowDeselection={false}
             rowHeight={windowWidth < 640 ? 25 : windowWidth < 1024 ? 28 : 30}
             headerHeight={windowWidth < 640 ? 30 : windowWidth < 1024 ? 32 : 35}
             overlayLoadingTemplate={

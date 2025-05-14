@@ -173,9 +173,9 @@ const RecruiterByVendor = () => {
         vendor.recruiters.forEach((recruiter) => {
           rows.push({
             ...recruiter,
-            name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname || ''}`,
-            companyname: vendor.companyname || '',
-            clientid: recruiter.clientid || '',
+            name: `${recruiter.id} `,
+          companyname: vendor.companyname || '',
+          clientid: recruiter.clientid || '',
             isGroupRow: false,
             level: 1,
           });

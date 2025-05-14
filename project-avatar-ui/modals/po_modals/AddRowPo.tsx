@@ -21,7 +21,7 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
   const [formData, setFormData] = useState<Po>({
     PlacementDetails: '',
     StartDate: '0000-00-00',
-    EndDate: '0000-00-00',
+    EndDate: '',
     Rate: '',
     OvertimeRate: '',
     FreqType: '',
@@ -75,7 +75,7 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
       const payload = {
         placementid: parseInt(selectedPlacementId),
         begindate: formData.StartDate || '0000-00-00',
-        enddate: formData.EndDate || '0000-00-00',
+        enddate: formData.EndDate || null,
         rate: formData.Rate ? parseFloat(formData.Rate) : 0,
         overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
         freqtype: formData.FreqType,

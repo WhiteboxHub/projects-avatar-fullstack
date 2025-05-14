@@ -25,7 +25,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     designation: '',
     vendorid: '',
     status: '',
-    dob: '',
+    dob: '0000-00-00',
     personalemail: '',
     skypeid: '',
     linkedin: '',
