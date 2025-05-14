@@ -1,6 +1,6 @@
-"use client";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+"use client";
 import AddRowModal from "@/modals/vendor_byVendor_modals/AddRowVendor";
 import EditRowModal from "@/modals/vendor_byVendor_modals/EditRowVendor";
 import ViewRowModal from "@/modals/vendor_byVendor_modals/ViewRowVendor";
@@ -165,7 +165,7 @@ const RecruiterByVendor = () => {
         notes: "",
         vendorid: vendor.vendorid,
         companyname: vendor.companyname || '',
-        clientid: "",
+        // clientid: "",
         isGroupRow: true,
         level: 0,
         expanded: expandedVendors[vendor.vendorid],
@@ -177,7 +177,7 @@ const RecruiterByVendor = () => {
             ...recruiter,
             name: `${recruiter.id} ${recruiter.name} - ${vendor.companyname || ''}`,
             companyname: vendor.companyname || '',
-            clientid: recruiter.clientid || '',
+            // clientid: recruiter.clientid || '',
             isGroupRow: false,
             level: 1,
           });
@@ -199,7 +199,7 @@ const RecruiterByVendor = () => {
           notes: "",
           vendorid: -1,
           companyname: "",
-          clientid: "",
+          // clientid: "",
           isGroupRow: false,
           level: 1,
         });
