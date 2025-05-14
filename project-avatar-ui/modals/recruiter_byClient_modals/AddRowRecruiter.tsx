@@ -31,6 +31,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
     review: '',
     notes: '',
   });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [clients, setClients] = useState<Client[]>([]);
   const reviewOptions = [
     { value: 'Y', label: 'Yes' },
@@ -55,9 +56,25 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
       ...prevData,
       [name]: value,
     }));
+    setErrors(prev => ({ ...prev, [name]: '' }));
   };
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!formData.name?.trim()) newErrors.name = "Name is required";
+    if (!formData.email?.trim()) newErrors.email = "Email is required";
+    if (!formData.designation?.trim()) newErrors.designation = "Designation is required";
+    if (!formData.status) newErrors.status = "Status is required";
+    if (!formData.clientid) newErrors.clientid = "Client is required";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
     try {
         // Create a copy of formData to send to the API
         const dataToSubmit = {...formData};
@@ -113,26 +130,28 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Recruiter</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            className={`w-full px-3 py-2 text-sm border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
             placeholder="Enter name"
           />
+          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            className={`w-full px-3 py-2 text-sm border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
             placeholder="Enter email"
           />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
@@ -146,38 +165,41 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="designation"
             value={formData.designation}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            className={`w-full px-3 py-2 text-sm border ${errors.designation ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
             placeholder="Enter designation"
           />
+          {errors.designation && <p className="text-red-500 text-xs mt-1">{errors.designation}</p>}
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Client ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Client <span className="text-red-500">*</span></label>
           <select
             name="clientid"
             value={formData.clientid}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            className={`w-full px-3 py-2 text-sm border ${errors.clientid ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
           >
             <option value="">Select Client</option>
             {clients.map(client => (
               <option key={client.id} value={client.id}>{client.name}</option>
             ))}
           </select>
+          {errors.clientid && <p className="text-red-500 text-xs mt-1">{errors.clientid}</p>}
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            className={`w-full px-3 py-2 text-sm border ${errors.status ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200`}
           >
+            <option value="">Select Status</option>
             <option value="A">Active</option>
             <option value="I">Inactive</option>
             <option value="D">Delete</option>
@@ -185,6 +207,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             <option value="N">Not Interested</option>
             <option value="E">Excellent</option>
           </select>
+          {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth (Optional)</label>
@@ -259,6 +282,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
+            <option value="">Select Review</option>
             {reviewOptions.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}

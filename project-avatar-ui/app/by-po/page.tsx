@@ -154,7 +154,13 @@ const ByPo = () => {
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
   const [poGroups, setPoGroups] = useState<PoGroup[]>([]);
-  const [expandedGroups, setExpandedGroups] = useState<{[key: number]: boolean}>({});
+  const [expandedGroups, setExpandedGroups] = useState<{[key: number]: boolean}>(() => {
+    // Try to retrieve any previously saved expanded states from local storage
+    const savedState = typeof window !== 'undefined' ? 
+      localStorage.getItem('po-expanded-groups') : null;
+    
+    return savedState ? JSON.parse(savedState) : {};
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -170,7 +176,6 @@ const ByPo = () => {
     message: string;
   }>({ isOpen: false, message: "" });
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  // const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const pageSize = 100;
 
   // Track window resize for responsive design
@@ -228,11 +233,22 @@ const ByPo = () => {
         }
       );
       
-      // Preserve expanded state when data refreshes
-      const newPoGroups = response.data.data.map((group: PoGroup) => ({
-        ...group,
-        isCollapsed: expandedGroups[group.poid] === undefined ? false : !expandedGroups[group.poid]
-      }));
+      // Store the current expanded states to reapply after data update
+      const currentExpandedState = { ...expandedGroups };
+      
+      // For new groups not in the current state, default to collapsed
+      const newPoGroups = response.data.data.map((group: PoGroup) => {
+        // Preserve the expanded state if it exists, otherwise default to false (collapsed)
+        const isExpanded = currentExpandedState[group.poid] !== undefined 
+          ? currentExpandedState[group.poid] 
+          : false;
+          
+        return {
+          ...group,
+          // isCollapsed is the opposite of expanded
+          isCollapsed: !isExpanded
+        };
+      });
       
       setPoGroups(newPoGroups);
       setTotalPages(response.data.pages);
@@ -262,11 +278,21 @@ const ByPo = () => {
   }, [fetchData, fetchClients]);
 
   const toggleGroup = useCallback((poId: number) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [poId]: !prev[poId]
-    }));
-    setSelectedPoId(prev => prev === poId ? null : poId);
+    // Update expanded state
+    setExpandedGroups(prev => {
+      const newState = { ...prev };
+      newState[poId] = !prev[poId];
+      return newState;
+    });
+    
+    // Update selected PO ID - but don't clear it when collapsing
+    setSelectedPoId(prev => {
+      if (prev !== poId) {
+        return poId; // Set to new PO ID when expanding a different group
+      }
+      // Keep the current selection even when collapsing
+      return poId;
+    });
   }, []);
 
   const handleSortChange = (field: string) => {
@@ -278,7 +304,9 @@ const ByPo = () => {
 
   const rowData = useMemo(() => {
     const rows: RowData[] = [];
+    
     poGroups.forEach((poGroup) => {
+      // Add the group row
       rows.push({
         id: poGroup.poid,
         name: poGroup.name,
@@ -330,10 +358,12 @@ const ByPo = () => {
         notes: "",
         isGroupRow: true,
         level: 0,
-        expanded: expandedGroups[poGroup.poid],
+        expanded: expandedGroups[poGroup.poid] || false,
       });
 
+      // Only add child rows if the group is expanded
       if (expandedGroups[poGroup.poid]) {
+        // Add the PO items
         poGroup.pos.forEach((invoice) => {
           rows.push({
             ...invoice,
@@ -345,7 +375,7 @@ const ByPo = () => {
 
         // Add summary row
         rows.push({
-          id: -1,
+          id: -poGroup.poid, // Use negative PO ID to ensure uniqueness
           name: "Summary",
           invoicenumber: "",
           startdate: "",
@@ -399,6 +429,7 @@ const ByPo = () => {
         });
       }
     });
+    
     return rows;
   }, [poGroups, expandedGroups]);
 
@@ -422,12 +453,15 @@ const ByPo = () => {
           if (!params.data) return null;
           
           if (params.data.isGroupRow) {
-            const expanded = expandedGroups[params.data.poid];
+            const expanded = expandedGroups[params.data.poid] || false;
             return (
               <div className="flex items-center">
                 <span
                   className="cursor-pointer pl-1 flex items-center hover:bg-gray-100 rounded-md py-1 px-2 transition-colors duration-200"
-                  onClick={() => params.data && toggleGroup(params.data.poid)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent row selection when clicking the toggle
+                    if (params.data) toggleGroup(params.data.poid);
+                  }}
                 >
                   <span className="mr-2 text-gray-600 flex items-center justify-center w-4 h-4 bg-white border border-gray-300 rounded">
                     {expanded ? (
@@ -1038,6 +1072,14 @@ const ByPo = () => {
   const iconSize = getIconSize();
   const buttonPadding = getButtonPadding();
 
+  // Add effect to save expanded state to localStorage
+  useEffect(() => {
+    // Save expanded state to localStorage whenever it changes
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('po-expanded-groups', JSON.stringify(expandedGroups));
+    }
+  }, [expandedGroups]);
+
   return (
     <div className="relative">
       {alertMessage && (
@@ -1194,6 +1236,16 @@ const ByPo = () => {
             }}
             suppressRowClickSelection={false}
             rowSelection="single"
+            getRowId={(params) => {
+              // Return a stable ID to maintain selection across refreshes
+              if (params.data.isGroupRow) {
+                return `group-${params.data.poid}`;
+              }
+              if (params.data.isSummaryRow) {
+                return `summary-${params.data.poid}`;
+              }
+              return `row-${params.data.id}`;
+            }}
             rowHeight={windowWidth < 640 ? 25 : windowWidth < 1024 ? 28 : 30}
             headerHeight={windowWidth < 640 ? 30 : windowWidth < 1024 ? 32 : 35}
             overlayLoadingTemplate={
