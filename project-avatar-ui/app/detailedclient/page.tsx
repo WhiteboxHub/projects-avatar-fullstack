@@ -7,6 +7,7 @@ import Modal from "react-modal";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
+import { SortChangedEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { debounce } from "lodash";
@@ -26,7 +27,6 @@ import {
   AiOutlineEye,
   AiOutlineSearch
 } from "react-icons/ai";
-import { SortChangedEvent } from "ag-grid-community";
 
 interface ViewRowRecruiterComponentProps {
   isOpen: boolean;

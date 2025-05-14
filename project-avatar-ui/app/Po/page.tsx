@@ -180,6 +180,7 @@ const PO = () => {
     if (gridRef.current) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       if (selectedRows.length > 0) {
+        console.log('Selected row for editing:', selectedRows[0]);
         setSelectedRow(selectedRows[0]);
         setModalState((prevState) => ({ ...prevState, edit: true }));
       } else {
