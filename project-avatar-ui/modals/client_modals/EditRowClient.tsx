@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
-import { Client, ClientUpdate } from '@/types/client';
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { Client, ClientUpdate } from "@/types/client";
 
 interface EditRowModalProps {
   isOpen: boolean;
@@ -60,7 +60,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
     e.preventDefault();
     try {
       const updatedData: ClientUpdate = { ...formData, id: String(clientData.id) };
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${clientData.id}`, updatedData);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/client/edit/${clientData.id}`, updatedData);
       await onSave();
       onClose();
     } catch (error) {

@@ -111,7 +111,9 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Recruiter</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Name <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -119,10 +121,13 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter name"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Email <span className="text-red-500">*</span>
+          </label>
           <input
             type="email"
             name="email"
@@ -130,6 +135,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter email"
+            required
           />
         </div>
         <div>
@@ -140,11 +146,13 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.phone}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter phone"
+            placeholder="Enter phone (optional)"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Designation <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             name="designation"
@@ -152,15 +160,19 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter designation"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor ID</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Vendor <span className="text-red-500">*</span>
+          </label>
           <select
             name="vendorid"
             value={formData.vendorid}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
             <option value="">Select Vendor</option>
             {vendors.map(vendor => (
@@ -169,13 +181,17 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Status <span className="text-red-500">*</span>
+          </label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
+            <option value="">Select Status</option>
             <option value="A">Active</option>
             <option value="I">Inactive</option>
             <option value="D">Delete</option>
@@ -202,7 +218,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.personalemail}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter personal email"
+            placeholder="Enter personal email (optional)"
           />
         </div>
         <div>
@@ -213,7 +229,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.skypeid}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter Skype ID"
+            placeholder="Enter Skype ID (optional)"
           />
         </div>
         <div>
@@ -224,7 +240,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.linkedin}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter LinkedIn URL"
+            placeholder="Enter LinkedIn URL (optional)"
           />
         </div>
         <div>
@@ -235,7 +251,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.twitter}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter Twitter handle"
+            placeholder="Enter Twitter handle (optional)"
           />
         </div>
         <div>
@@ -246,7 +262,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.facebook}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter Facebook URL"
+            placeholder="Enter Facebook URL (optional)"
           />
         </div>
         <div>
@@ -257,6 +273,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
+            <option value="">Select Review (optional)</option>
             {reviewOptions.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
@@ -269,7 +286,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSu
             value={formData.notes}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter notes"
+            placeholder="Enter notes (optional)"
           />
         </div>
         <div className="flex justify-end space-x-4">
