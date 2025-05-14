@@ -1,4 +1,4 @@
-import "ag-grid-community/styles/ag-grid.css";
+"use client";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import AddRowModal from "../../modals/po_modals/AddRowPo";
 import EditRowModal from "../../modals/po_modals/EditRowPo";
@@ -13,7 +13,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAdd } from "react-icons/md";
 import { Po } from "@/types/index";
-"use client";
+
 import {
   AiOutlineEdit,
   AiOutlineEye,
