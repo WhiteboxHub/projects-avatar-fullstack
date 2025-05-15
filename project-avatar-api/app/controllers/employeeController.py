@@ -13,6 +13,17 @@ def sanitize_employee_data(employee_data: dict) -> dict:
     for date_field in ['dob', 'enddate', 'startdate']:
         if date_field in employee_data and employee_data[date_field] in ('', '0000-00-00', 'NULL'):
             employee_data[date_field] = None
+            
+    # Handle status prefixing
+    if 'status' in employee_data:
+        if employee_data['status'] == 'Active':
+            employee_data['status'] = '0Active'
+        elif employee_data['status'] == 'Fired':
+            employee_data['status'] = '1Fired'
+        elif employee_data['status'] == 'Discontinued':
+            employee_data['status'] = '2Discontinued'
+        elif employee_data['status'] == 'Break':
+            employee_data['status'] = '4Break'
 
     return employee_data
 
