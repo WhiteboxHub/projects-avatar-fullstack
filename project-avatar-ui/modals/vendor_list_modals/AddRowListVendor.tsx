@@ -22,7 +22,7 @@ const AddRowVendor: React.FC<AddRowRecruiterProps> = ({ isOpen, onClose, onSubmi
     phone: '',
     status: 'A', // Default to Active
     designation: '',
-    dob: '',
+    dob: '0000-00-00',
     personalemail: '',
     skypeid: '',
     linkedin: '',

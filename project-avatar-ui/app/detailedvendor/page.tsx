@@ -332,13 +332,137 @@ const RecruiterByVendor = () => {
     }
   };
 
+  // const columnDefs = useMemo<ColDef[]>(() => [
+  //   {
+  //     headerName: "#",
+  //     width: windowWidth < 640 ? 40 : 60,
+  //     valueGetter: (params: ValueGetterParams) => {
+  //       if (params.node && params.node.rowIndex !== null) {
+  //         return params.node.rowIndex + 1;
+  //       }
+  //       return null;
+  //     },
+  //     pinned: windowWidth < 640 ? undefined : 'left',
+  //     cellStyle: {
+  //       borderRight: '2px solid #ccc'
+  //     }
+  //   },
+  //   { 
+  //     headerName: "ID", 
+  //     field: "id", 
+  //     width: windowWidth < 640 ? 50 : 70,
+  //     hide: windowWidth < 768 
+  //   },
+  //   { 
+  //     headerName: "Name", 
+  //     field: "name", 
+  //     width: windowWidth < 640 ? 120 : 150, 
+  //     pinned: windowWidth < 640 ? undefined : 'left'
+  //   },
+  //   { 
+  //     headerName: "Email", 
+  //     field: "email", 
+  //     width: windowWidth < 640 ? 150 : 180,
+  //     hide: windowWidth < 1024
+  //   },
+  //   { 
+  //     headerName: "Phone", 
+  //     field: "phone", 
+  //     width: windowWidth < 640 ? 100 : 120 
+  //   },
+  //   { 
+  //     headerName: "Designation", 
+  //     field: "designation", 
+  //     width: windowWidth < 640 ? 120 : 150,
+  //     hide: windowWidth < 768 
+  //   },
+  //   { 
+  //     headerName: "Vendor ID", 
+  //     field: "vendorid", 
+  //     width: windowWidth < 640 ? 80 : 100,
+  //     hide: windowWidth < 640
+  //   },
+  //   { 
+  //     headerName: "Company", 
+  //     field: "comp", 
+  //     width: windowWidth < 640 ? 120 : 150,
+  //     hide: windowWidth < 1024
+  //   },
+  //   {
+  //     headerName: "Status",
+  //     field: "status",
+  //     width: windowWidth < 640 ? 80 : 100,
+  //     cellRenderer: (params: { value: string }) => {
+  //       const statusMap: {[key: string]: string} = {
+  //         'A': 'Active',
+  //         'I': 'Inactive',
+  //         'D': 'Delete',
+  //         'R': 'Rejected',
+  //         'N': 'Not Interested',
+  //         'E': 'Excellent'
+  //       };
+  //       return statusMap[params.value] || params.value;
+  //     }
+  //   },
+  //   { 
+  //     headerName: "DOB", 
+  //     field: "dob", 
+  //     width: windowWidth < 640 ? 80 : 110,
+  //     hide: true
+  //   },
+  //   { 
+  //     headerName: "Personal Email", 
+  //     field: "personalemail", 
+  //     width: windowWidth < 640 ? 150 : 180,
+  //     hide: true
+  //   },
+  //   { 
+  //     headerName: "Skype ID", 
+  //     field: "skypeid", 
+  //     width: windowWidth < 640 ? 100 : 120,
+  //     hide: true
+  //   },
+  //   { 
+  //     headerName: "LinkedIn", 
+  //     field: "linkedin", 
+  //     width: windowWidth < 640 ? 100 : 120,
+  //     hide: true
+  //   },
+  //   { 
+  //     headerName: "Twitter", 
+  //     field: "twitter", 
+  //     width: windowWidth < 640 ? 100 : 120,
+  //     hide: true
+  //   },
+  //   { 
+  //     headerName: "Facebook", 
+  //     field: "facebook", 
+  //     width: windowWidth < 640 ? 100 : 120,
+  //     hide: true
+  //   },
+  //   {
+  //     headerName: "Review",
+  //     field: "review",
+  //     width: windowWidth < 640 ? 80 : 100,
+  //     hide: windowWidth < 1024,
+  //     cellRenderer: (params: { value: string }) => {
+  //       return params.value === 'Y' ? 'Yes' : params.value === 'N' ? 'No' : params.value;
+  //     }
+  //   },
+  //   { 
+  //     headerName: "Notes", 
+  //     field: "notes", 
+  //     width: windowWidth < 640 ? 150 : 200,
+  //     hide: windowWidth < 1024
+  //   },
+  // ], [windowWidth]);
   const columnDefs = useMemo<ColDef[]>(() => [
     {
       headerName: "#",
       width: windowWidth < 640 ? 40 : 60,
       valueGetter: (params: ValueGetterParams) => {
         if (params.node && params.node.rowIndex !== null) {
-          return params.node.rowIndex + 1;
+          return (currentPage - 1) * pageSize + params.node.rowIndex + 1;
         }
         return null;
       },
@@ -455,8 +579,7 @@ const RecruiterByVendor = () => {
       width: windowWidth < 640 ? 150 : 200,
       hide: windowWidth < 1024
     },
-  ], [windowWidth]);
-
+  ], [windowWidth, currentPage, pageSize]); ;
   return (
     <div className="relative">
       {alertMessage && (

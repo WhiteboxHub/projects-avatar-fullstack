@@ -33,7 +33,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
     vendorid: defaultVendorId ? String(defaultVendorId) : '',
     comp: '',
     status: 'A',
-    dob: '',
+    dob: '0000-00-00',
     personalemail: '',
     skypeid: '',
     linkedin: '',
