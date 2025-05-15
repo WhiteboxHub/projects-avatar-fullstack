@@ -24,7 +24,7 @@ import {
 
 const PO = () => {
   const [rowData, setRowData] = useState<Po[]>([]);
-  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string; width?: number; cellRenderer?: any; valueFormatter?: any }[]>([]);
+  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string; width?: number; cellRenderer?: unknown; valueFormatter?: unknown }[]>([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -136,30 +136,30 @@ const PO = () => {
     }
   }, [currentPage, fetchData, searchValue]);
 
-  const formatCurrency = (params: any) => {
+  const formatCurrency = (params: { value: number | null | undefined }) => {
     if (params.value === null || params.value === undefined) return '';
     return '$' + params.value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
   };
 
-  const formatDate = (params: any) => {
+  const formatDate = (params: { value: string | null | undefined }) => {
     if (!params.value) return '';
     const date = new Date(params.value);
     if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
   };
 
-  const urlRenderer = (params: any) => {
+  const urlRenderer = (params: { value: string | null | undefined }) => {
     if (!params.value) return '';
     return `<a href="${params.value}" target="_blank">${params.value}</a>`;
   };
 
-  const freqTypeFormatter = (params: any) => {
+  const freqTypeFormatter = (params: { value: string | null | undefined }) => {
     const types: {[key: string]: string} = {
       'M': 'MONTHLY',
       'W': 'WEEKLY',
       'D': 'DAYS'
     };
-    return types[params.value] || params.value;
+    return types[params.value || ''] || params.value;
   };
 
   const setupColumns = (data: Po[]) => {
@@ -183,15 +183,15 @@ const PO = () => {
     }
   };
 
-  const getColumnWidth = () => {
-    if (windowWidth < 640) { // Mobile
-      return 100;
-    } else if (windowWidth < 1024) { // Tablet
-      return 120;
-    } else { // Desktop
-      return 150;
-    }
-  };
+  // const getColumnWidth = () => {
+  //   if (windowWidth < 640) { // Mobile
+  //     return 100;
+  //   } else if (windowWidth < 1024) { // Tablet
+  //     return 120;
+  //   } else { // Desktop
+  //     return 150;
+  //   }
+  // };
 
   const handleSearch = () => {
     if (searchValue) {
