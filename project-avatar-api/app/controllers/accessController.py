@@ -171,17 +171,31 @@ def create_authuser(db: Session, authuser_data: AuthUserCreateSchema):
 
 ALLOW_LOGIN_STATUSES = {"Active", "Marketing", "Placed", "OnProject-Mkt"}
 
+# def get_linked_candidate(db: Session, authuser_id: int):
+#     """Find candidate by either portalid OR email=authuser.id"""
+#     return db.execute(
+#         text("""
+#             SELECT * FROM candidate 
+#             WHERE portalid = :id 
+#                OR email = (SELECT id::text FROM authuser WHERE id = :id)
+#             LIMIT 1
+#         """), 
+#         {"id": authuser_id}
+#     ).first() 
+
+
 def get_linked_candidate(db: Session, authuser_id: int):
     """Find candidate by either portalid OR email=authuser.id"""
     return db.execute(
         text("""
             SELECT * FROM candidate 
             WHERE portalid = :id 
-               OR email = (SELECT id::text FROM authuser WHERE id = :id)
+               OR email = (SELECT CAST(id AS CHAR) FROM authuser WHERE id = :id)
             LIMIT 1
         """), 
         {"id": authuser_id}
     ).first()
+
 
 def update_authuser(db: Session, authuser_id: int, authuser_data: AuthUserUpdateSchema):
     authuser = db.query(AuthUser).filter(AuthUser.id == authuser_id).first()
