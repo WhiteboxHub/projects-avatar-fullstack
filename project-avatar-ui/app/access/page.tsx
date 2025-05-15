@@ -155,11 +155,11 @@ const Users = () => {
             if (!params.value) return '';
             try {
               const date = new Date(params.value);
-              if (isNaN(date.getTime())) return 'Invalid date';
+              if (isNaN(date.getTime())) return '';
               return date.toISOString().split('T')[0];
             } catch (error) {
               console.error("Error formatting date:", error);
-              return 'Invalid date';
+              return '';
             }
           }
         },
@@ -515,5 +515,3 @@ const Users = () => {
 };
 
 export default withAuth(Users);
-
-
