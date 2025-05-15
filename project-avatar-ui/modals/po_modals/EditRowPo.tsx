@@ -18,18 +18,18 @@ interface PlacementOption {
 
 const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
   const [formData, setFormData] = useState<Po>({
-    POID: '',
+    POID: undefined,
     PlacementDetails: '',
     StartDate: '',
-    EndDate: '',
-    Rate: '',
-    OvertimeRate: '',
+    EndDate: null,
+    Rate: 0,
+    OvertimeRate: null,
     FreqType: '',
-    InvoiceFrequency: '',
+    InvoiceFrequency: 0,
     InvoiceStartDate: '',
-    InvoiceNet: '',
-    POUrl: '',
-    Notes: '',
+    InvoiceNet: 0,
+    POUrl: null,
+    Notes: null,
   });
 
   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
@@ -40,7 +40,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
     
     if (rowData) {
       // Format dates properly for input fields
-      const formatDate = (dateString: string | undefined) => {
+      const formatDate = (dateString: string | Date | undefined) => {
         if (!dateString) return '';
         try {
           // Handle different date formats
@@ -62,20 +62,20 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
       };
 
       // Map API response fields to the form fields, checking for various property naming conventions
-      const updatedFormData = {
+      const updatedFormData: Po = {
         // Try to access the field using both camelCase and PascalCase naming conventions
-        POID: toString(rowData.POID || ''),
-        PlacementDetails: toString(rowData.PlacementDetails || ''),
-        StartDate: formatDate(rowData.StartDate || ''),
-        EndDate: formatDate(rowData.EndDate || ''),
-        Rate: toString(rowData.Rate || ''),
-        OvertimeRate: toString(rowData.OvertimeRate || ''),
-        FreqType: toString(rowData.FreqType || ''),
-        InvoiceFrequency: toString(rowData.InvoiceFrequency || ''),
-        InvoiceStartDate: formatDate(rowData.InvoiceStartDate || ''),
-        InvoiceNet: toString(rowData.InvoiceNet || ''),
-        POUrl: toString(rowData.POUrl ||  ''),
-        Notes: toString(rowData.Notes || ''),
+        POID: rowData.POID || rowData.id,
+        PlacementDetails: toString(rowData.PlacementDetails || rowData.placement_details || ''),
+        StartDate: formatDate(rowData.StartDate || rowData.begindate),
+        EndDate: rowData.EndDate || rowData.enddate,
+        Rate: rowData.Rate || rowData.rate || 0,
+        OvertimeRate: rowData.OvertimeRate || rowData.overtimerate,
+        FreqType: toString(rowData.FreqType || rowData.freqtype || ''),
+        InvoiceFrequency: rowData.InvoiceFrequency || rowData.frequency || 0,
+        InvoiceStartDate: formatDate(rowData.InvoiceStartDate || rowData.invoicestartdate),
+        InvoiceNet: rowData.InvoiceNet || rowData.invoicenet || 0,
+        POUrl: rowData.POUrl || rowData.polink,
+        Notes: rowData.Notes || rowData.notes,
       };
       
       console.log("Setting form data to:", updatedFormData);
@@ -108,7 +108,17 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    
+    // Handle numeric fields
+    if (name === 'Rate' || name === 'InvoiceNet') {
+      setFormData(prevData => ({ ...prevData, [name]: value === '' ? 0 : parseFloat(value) }));
+    } else if (name === 'OvertimeRate') {
+      setFormData(prevData => ({ ...prevData, [name]: value === '' ? null : parseFloat(value) }));
+    } else if (name === 'InvoiceFrequency') {
+      setFormData(prevData => ({ ...prevData, [name]: value === '' ? 0 : parseInt(value) }));
+    } else {
+      setFormData(prevData => ({ ...prevData, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -116,20 +126,19 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
     if (formData.POID) {
       try {
         const payload = {
-          POID: formData.POID,
           begindate: formData.StartDate,
-          enddate: formData.EndDate,
+          enddate: formData.EndDate || null,
           rate: formData.Rate,
           overtimerate: formData.OvertimeRate,
           freqtype: formData.FreqType,
-          frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
+          frequency: formData.InvoiceFrequency,
           invoicestartdate: formData.InvoiceStartDate,
-          invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
+          invoicenet: formData.InvoiceNet,
           polink: formData.POUrl,
           notes: formData.Notes,
         };
 
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/${formData.POID}`, payload, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/update/${formData.POID}`, payload, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();
@@ -179,12 +188,15 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700">Placement</label>
+            <label className="block text-gray-700">
+              Placement <span className="text-red-600">*</span>
+            </label>
             <select
               name="PlacementDetails"
-              value={formData.PlacementDetails}
+              value={formData.PlacementDetails as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
             >
               <option value="">Select Placement</option>
               {placementOptions.map((option) => (
@@ -196,13 +208,16 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
           </div>
 
           <div>
-            <label className="block text-gray-700">Start Date</label>
+            <label className="block text-gray-700">
+              Start Date <span className="text-red-600">*</span>
+            </label>
             <input
               type="date"
               name="StartDate"
-              value={formData.StartDate}
+              value={formData.StartDate as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
             />
           </div>
 
@@ -211,21 +226,24 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <input
               type="date"
               name="EndDate"
-              value={formData.EndDate}
+              value={formData.EndDate as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
 
           <div>
-            <label className="block text-gray-700">Rate</label>
+            <label className="block text-gray-700">
+              Rate <span className="text-red-600">*</span>
+            </label>
             <input
               type="text"
               name="Rate"
-              value={formData.Rate}
+              value={formData.Rate as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter rate"
+              required
             />
           </div>
 
@@ -234,7 +252,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <input
               type="text"
               name="OvertimeRate"
-              value={formData.OvertimeRate}
+              value={formData.OvertimeRate as unknown as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter overtime rate"
@@ -242,52 +260,64 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
           </div>
 
           <div>
-            <label className="block text-gray-700">Frequency Type</label>
+            <label className="block text-gray-700">
+              Frequency Type <span className="text-red-600">*</span>
+            </label>
             <select
               name="FreqType"
-              value={formData.FreqType}
+              value={formData.FreqType as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
             >
               <option value="">Select frequency type</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Weekly">Weekly</option>
-              <option value="Daily">Daily</option>
+              <option value="M">Monthly</option>
+              <option value="W">Weekly</option>
+              <option value="D">Daily</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-gray-700">Invoice Frequency</label>
+            <label className="block text-gray-700">
+              Invoice Frequency 
+            </label>
             <input
               type="text"
               name="InvoiceFrequency"
-              value={formData.InvoiceFrequency}
+              value={formData.InvoiceFrequency as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter invoice frequency"
+              // required
             />
           </div>
 
           <div>
-            <label className="block text-gray-700">Invoice Start Date</label>
+            <label className="block text-gray-700">
+              Invoice Start Date <span className="text-red-600">*</span>
+            </label>
             <input
               type="date"
               name="InvoiceStartDate"
-              value={formData.InvoiceStartDate}
+              value={formData.InvoiceStartDate as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
             />
           </div>
 
           <div>
-            <label className="block text-gray-700">Invoice Net</label>
+            <label className="block text-gray-700">
+              Invoice Net <span className="text-red-600">*</span>
+            </label>
             <input
               type="text"
               name="InvoiceNet"
-              value={formData.InvoiceNet}
+              value={formData.InvoiceNet as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter invoice net"
+              required
             />
           </div>
 
@@ -296,7 +326,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <input
               type="text"
               name="POUrl"
-              value={formData.POUrl}
+              value={formData.POUrl as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter PO URL"
@@ -308,7 +338,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <input
               type="text"
               name="Notes"
-              value={formData.Notes}
+              value={formData.Notes as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter notes"
@@ -318,16 +348,22 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
           <div className="flex space-x-4">
             <button
               type="submit"
-              className="mt-4 flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+              className="mt-4 flex-1 bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition duration-300 font-semibold shadow-md hover:shadow-lg flex items-center justify-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
               Save PO
             </button>
 
             <button
               type="button"
               onClick={onRequestClose}
-              className="mt-4 flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200"
+              className="mt-4 flex-1 bg-red-500 text-white py-2.5 px-4 rounded-lg hover:bg-red-600 transition duration-300 font-semibold shadow-md hover:shadow-lg flex items-center justify-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
               Cancel
             </button>
           </div>

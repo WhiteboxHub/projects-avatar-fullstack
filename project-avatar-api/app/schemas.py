@@ -458,19 +458,6 @@ class POSchema(BaseModel):
     class Config:
         orm_mode = True
 
-# class POCreateSchema(BaseModel):
-#     placementid: int
-#     begindate: Optional[date]
-#     enddate: Optional[date]
-#     rate: Optional[float]
-#     overtimerate: Optional[float]
-#     freqtype: Optional[str]
-#     frequency: Optional[int]
-#     invoicestartdate: Optional[date]
-#     invoicenet: Optional[float]
-#     polink: Optional[str]
-#     notes: Optional[str]
-
 MIN_DATE = date(1000, 1, 1)
 
 class POCreateSchema(BaseModel):
@@ -479,10 +466,10 @@ class POCreateSchema(BaseModel):
     enddate: Optional[date] = None  # Can be NULL as per your schema
     rate: float
     overtimerate: Optional[float] = None
-    freqtype: str
+    freqtype: str  # M for MONTHLY, W for WEEKLY, D for DAYS
     frequency: int = 0
     invoicestartdate: date = MIN_DATE  # Required field with default minimum date
-    invoicenet: int = 0
+    invoicenet: float = 0  # Changed from int to float to match currency format
     polink: Optional[str] = None
     notes: Optional[str] = None
 
@@ -497,33 +484,21 @@ class POCreateSchema(BaseModel):
         if v in ("", "0000-00-00"):
             return None
         return v
-
-# MIN_DATE = date(1000, 1, 1)
-
-# class POCreateSchema(BaseModel):
-#     placementid: int
-#     begindate: date = MIN_DATE  # Required field with default minimum date
-#     enddate: Optional[date] = None  # Can be NULL as per your schema
-#     rate: float
-#     overtimerate: Optional[float] = None
-#     freqtype: str
-#     frequency: int = 0
-#     invoicestartdate: date = MIN_DATE  # Required field with default minimum date
-#     invoicenet: int = 0
-#     polink: Optional[str] = None
-#     notes: Optional[str] = None
-
-#     @validator('begindate', 'invoicestartdate', pre=True)
-#     def convert_empty_dates(cls, v):
-#         if v in ("", "0000-00-00", None):
-#             return MIN_DATE
-#         return v
     
-#     @validator('enddate', pre=True)
-#     def convert_empty_enddate(cls, v):
-#         if v in ("", "0000-00-00"):
-#             return None
-#         return v
+    @validator('freqtype')
+    def validate_freqtype(cls, v):
+        if v not in ["M", "W", "D"]:
+            raise ValueError("Frequency type must be one of: M (MONTHLY), W (WEEKLY), D (DAYS)")
+        return v
+    
+    @validator('polink')
+    def validate_url(cls, v):
+        if v is not None and v != "":
+            # Simple URL validation
+            if not v.startswith(('http://', 'https://')):
+                raise ValueError("PO link must be a valid URL starting with http:// or https://")
+        return v
+
 
 class POUpdateSchema(BaseModel):
     begindate: Optional[date]
@@ -537,6 +512,19 @@ class POUpdateSchema(BaseModel):
     polink: Optional[str]
     notes: Optional[str]
     
+    @validator('freqtype')
+    def validate_freqtype(cls, v):
+        if v is not None and v not in ["M", "W", "D"]:
+            raise ValueError("Frequency type must be one of: M (MONTHLY), W (WEEKLY), D (DAYS)")
+        return v
+    
+    @validator('polink')
+    def validate_url(cls, v):
+        if v is not None and v != "":
+            # Simple URL validation
+            if not v.startswith(('http://', 'https://')):
+                raise ValueError("PO link must be a valid URL starting with http:// or https://")
+        return v
     
     
     

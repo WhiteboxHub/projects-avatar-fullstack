@@ -468,12 +468,12 @@ class PO(Base):
     enddate = Column(Date, nullable=True)
     rate = Column(Float, nullable=True)
     overtimerate = Column(Float, nullable=True)
-    freqtype = Column(String, nullable=True)
+    freqtype = Column(String(1), nullable=True)  # M for MONTHLY, W for WEEKLY, D for DAYS
     frequency = Column(Integer, nullable=True)
     invoicestartdate = Column(Date, nullable=True)
     invoicenet = Column(Float, nullable=True)
-    polink = Column(String, nullable=True)
-    notes = Column(String, nullable=True)
+    polink = Column(String(200), nullable=True)
+    notes = Column(Text, nullable=True)  # Changed to Text for larger content
 
     placement = relationship("Placement", back_populates="po_entries")
 

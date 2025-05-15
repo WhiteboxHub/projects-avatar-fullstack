@@ -1,10 +1,7 @@
-// new-projects-avatar-fullstack/project-avatar-ui/modals/po_modals/AddRowPo.tsx
-
-import React, { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-// import { AiOutlineClose } from 'react-icons/ai';
-import { Po } from '../../types/index';
+import Modal from "react-modal";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Po } from "../../types/index";
 
 interface AddRowPOProps {
   isOpen: boolean;
@@ -20,14 +17,14 @@ interface PlacementOption {
 const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<Po>({
     PlacementDetails: '',
-    StartDate: '0000-00-00',
+    StartDate: '',
     EndDate: '',
-    Rate: '',
-    OvertimeRate: '',
-    FreqType: '',
-    InvoiceFrequency: '',
-    InvoiceStartDate: '0000-00-00',
-    InvoiceNet: '',
+    Rate: 0,
+    OvertimeRate: null,
+    FreqType: 'M',
+    InvoiceFrequency: 0,
+    InvoiceStartDate: '',
+    InvoiceNet: 0,
     POUrl: '',
     Notes: '',
   });
@@ -56,9 +53,19 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    
+    // Handle numeric fields
+    if (name === 'Rate' || name === 'InvoiceNet') {
+      setFormData({ ...formData, [name]: value === '' ? 0 : parseFloat(value) });
+    } else if (name === 'OvertimeRate') {
+      setFormData({ ...formData, [name]: value === '' ? null : parseFloat(value) });
+    } else if (name === 'InvoiceFrequency') {
+      setFormData({ ...formData, [name]: value === '' ? 0 : parseInt(value) });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
 
     // If PlacementDetails is changed, update selectedPlacementId
     if (name === 'PlacementDetails') {
@@ -74,14 +81,14 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     try {
       const payload = {
         placementid: parseInt(selectedPlacementId),
-        begindate: formData.StartDate || '0000-00-00',
+        begindate: formData.StartDate || null,
         enddate: formData.EndDate || null,
-        rate: formData.Rate ? parseFloat(formData.Rate) : 0,
-        overtimerate: formData.OvertimeRate ? parseFloat(formData.OvertimeRate) : 0,
+        rate: formData.Rate,
+        overtimerate: formData.OvertimeRate,
         freqtype: formData.FreqType,
-        frequency: formData.InvoiceFrequency ? parseInt(formData.InvoiceFrequency) : 0,
-        invoicestartdate: formData.InvoiceStartDate || '0000-00-00',
-        invoicenet: formData.InvoiceNet ? parseFloat(formData.InvoiceNet) : 0.0,
+        frequency: formData.InvoiceFrequency,
+        invoicestartdate: formData.InvoiceStartDate || null,
+        invoicenet: formData.InvoiceNet,
         polink: formData.POUrl,
         notes: formData.Notes,
       };
@@ -133,12 +140,15 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Placement Details</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Placement Details <span className="text-red-500">*</span>
+          </label>
           <select
             name="PlacementDetails"
-            value={formData.PlacementDetails}
+            value={formData.PlacementDetails || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
             <option value="">Select Placement</option>
             {placementOptions.map((option) => (
@@ -149,13 +159,16 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           </select>
         </div>
          <div>
-         <label className="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
+         <label className="block text-sm font-semibold text-gray-700 mb-1">
+           Start Date <span className="text-red-500">*</span>
+         </label>
          <input
             type="date"
             name="StartDate"
-            value={formData.StartDate}
+            value={typeof formData.StartDate === 'string' ? formData.StartDate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           />
         </div>
 
@@ -164,30 +177,35 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <input
             type="date"
             name="EndDate"
-            value={formData.EndDate}
+            value={typeof formData.EndDate === 'string' ? formData.EndDate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Rate</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Rate <span className="text-red-500">*</span>
+          </label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
             name="Rate"
-            value={formData.Rate}
+            value={formData.Rate || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter rate"
+            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Overtime Rate</label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
             name="OvertimeRate"
-            value={formData.OvertimeRate}
+            value={formData.OvertimeRate === null ? '' : formData.OvertimeRate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter overtime rate"
@@ -195,75 +213,90 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
         </div>
 
         <div>
-          <label className="block text-gray-700">Frequency Type</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Frequency Type <span className="text-red-500">*</span>
+          </label>
           <select
             name="FreqType"
-            value={formData.FreqType}
+            value={formData.FreqType || 'M'}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
-            <option value="Monthly">Monthly</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Daily">Daily</option>
+            <option value="M">MONTHLY</option>
+            <option value="W">WEEKLY</option>
+            <option value="D">DAYS</option>
           </select>
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Frequency</label>
           <input
-            type="text"
+            type="number"
             name="InvoiceFrequency"
-            value={formData.InvoiceFrequency}
+            value={formData.InvoiceFrequency || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter invoice frequency"
+            min="0"
+            max="60"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Start Date</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Invoice Start Date <span className="text-red-500">*</span>
+          </label>
           <input
             type="date"
             name="InvoiceStartDate"
-            value={formData.InvoiceStartDate}
+            value={typeof formData.InvoiceStartDate === 'string' ? formData.InvoiceStartDate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Net</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
+            Invoice Net <span className="text-red-500">*</span>
+          </label>
           <input
-            type="text"
+            type="number"
+            step="0.01"
             name="InvoiceNet"
-            value={formData.InvoiceNet}
+            value={formData.InvoiceNet || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter invoice net"
+            min="0"
+            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">PO URL</label>
           <input
-            type="text"
+            type="url"
             name="POUrl"
-            value={formData.POUrl}
+            value={formData.POUrl || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-            placeholder="Enter PO URL"
+            placeholder="https://example.com"
+            pattern="https?://.+"
+            title="URL must start with http:// or https://"
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-          <input
-            type="text"
+          <textarea
             name="Notes"
-            value={formData.Notes}
+            value={formData.Notes || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter notes"
+            rows={4}
           />
         </div>
 

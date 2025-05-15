@@ -310,34 +310,34 @@ export interface ErrorResponse {
 
   // types.ts
   export interface Po {
-    // Existing properties
-    POID?: string;
+    id?: number;
+    placementid?: number;
+    begindate?: string | Date;
+    enddate?: string | Date | null;
+    rate?: number;
+    overtimerate?: number | null;
+    freqtype?: string; // "M" for MONTHLY, "W" for WEEKLY, "D" for DAYS
+    frequency?: number;
+    invoicestartdate?: string | Date;
+    invoicenet?: number;
+    polink?: string | null;
+    notes?: string | null;
+    placement_details?: string; // Concatenated string of candidate name, vendor, and client
+    
+    // For backward compatibility with existing code
+    POID?: number;
     PlacementDetails?: string;
-    StartDate?: string;
-    EndDate?: string;
-    Rate?: string;
-    OvertimeRate?: string;
+    StartDate?: string | Date;
+    EndDate?: string | Date | null;
+    Rate?: number;
+    OvertimeRate?: number | null;
     FreqType?: string;
-    InvoiceFrequency?: string;
-    InvoiceStartDate?: string;
-    InvoiceNet?: string;
-    POUrl?: string;
-    Notes?: string;
-
-    // // Additional properties with alternative names
-    // PlacementID?: string;
-    // placementDetails?: string; // Including both PlacementDetails variants if needed
-    // startDate?: string;
-    // endDate?: string;
-    // rate?: string;
-    // overtimeRate?: string;
-    // freqType?: string;
-    // invoiceFrequency?: string;
-    // invoiceStartDate?: string;
-    // invoiceNet?: string;
-    // poUrl?: string;
-    // notes?: string;
-}
+    InvoiceFrequency?: number;
+    InvoiceStartDate?: string | Date;
+    InvoiceNet?: number;
+    POUrl?: string | null;
+    Notes?: string | null;
+  }
 
 
   

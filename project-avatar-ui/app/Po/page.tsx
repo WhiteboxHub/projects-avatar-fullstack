@@ -24,7 +24,7 @@ import {
 
 const PO = () => {
   const [rowData, setRowData] = useState<Po[]>([]);
-  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string }[]>([]);
+  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string; width?: number; cellRenderer?: any; valueFormatter?: any }[]>([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -56,8 +56,7 @@ const PO = () => {
       const response = await axios.get(`${API_URL}/po`, {
         params: {
           page: page,
-          pageSize: paginationPageSize,
-          name_fragment: searchQuery,
+          page_size: paginationPageSize,
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
@@ -87,13 +86,11 @@ const PO = () => {
       const response = await axios.get(`${API_URL}/po/name`, {
         params: {
           name_fragment: searchQuery,
-          page: currentPage,
-          pageSize: paginationPageSize,
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      let data = response.data.data || response.data;
+      let data = response.data || [];
       if (!Array.isArray(data)) {
         data = [data];
       }
@@ -106,7 +103,7 @@ const PO = () => {
       setAlertMessage("No PO with that name.");
       setTimeout(() => setAlertMessage(null), 3000);
     }
-  }, [API_URL, currentPage, paginationPageSize]);
+  }, [API_URL]);
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
@@ -139,16 +136,49 @@ const PO = () => {
     }
   }, [currentPage, fetchData, searchValue]);
 
+  const formatCurrency = (params: any) => {
+    if (params.value === null || params.value === undefined) return '';
+    return '$' + params.value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+  };
+
+  const formatDate = (params: any) => {
+    if (!params.value) return '';
+    const date = new Date(params.value);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+  };
+
+  const urlRenderer = (params: any) => {
+    if (!params.value) return '';
+    return `<a href="${params.value}" target="_blank">${params.value}</a>`;
+  };
+
+  const freqTypeFormatter = (params: any) => {
+    const types: {[key: string]: string} = {
+      'M': 'MONTHLY',
+      'W': 'WEEKLY',
+      'D': 'DAYS'
+    };
+    return types[params.value] || params.value;
+  };
+
   const setupColumns = (data: Po[]) => {
     if (data && data.length > 0) {
-      const keys = Object.keys(data[0]);
-      const columns = keys.map((key) => ({
-        headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        field: key,
-        width: getColumnWidth(),
-        minWidth: windowWidth < 640 ? 60 : 80,
-        maxWidth: windowWidth < 640 ? 120 : 150
-      }));
+      const columns = [
+        { headerName: 'ID', field: 'id', width: 70 },
+        { headerName: 'Placement ID', field: 'placementid', width: 100 },
+        { headerName: 'Placement Details', field: 'placement_details', width: 350 },
+        { headerName: 'Begin Date', field: 'begindate', width: 120, valueFormatter: formatDate },
+        { headerName: 'End Date', field: 'enddate', width: 120, valueFormatter: formatDate },
+        { headerName: 'Rate', field: 'rate', width: 100, valueFormatter: formatCurrency },
+        { headerName: 'Overtime Rate', field: 'overtimerate', width: 120, valueFormatter: formatCurrency },
+        { headerName: 'Freq Type', field: 'freqtype', width: 100, valueFormatter: freqTypeFormatter },
+        { headerName: 'Frequency', field: 'frequency', width: 100 },
+        { headerName: 'Invoice Start Date', field: 'invoicestartdate', width: 150, valueFormatter: formatDate },
+        { headerName: 'Invoice Net', field: 'invoicenet', width: 120, valueFormatter: formatCurrency },
+        { headerName: 'PO Link', field: 'polink', width: 200, cellRenderer: urlRenderer },
+        { headerName: 'Notes', field: 'notes', width: 400 }
+      ];
       setColumnDefs(columns);
     }
   };
@@ -287,7 +317,7 @@ const PO = () => {
           <div className="flex w-full sm:w-auto mb-2 sm:mb-0">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by candidate name..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="border border-gray-300 rounded-md p-1.5 sm:p-2 w-full sm:w-64 text-xs sm:text-sm"
@@ -378,7 +408,6 @@ const PO = () => {
                 padding: windowWidth < 640 ? "0px" : "1px" 
               },
               minWidth: windowWidth < 640 ? 60 : 80,
-              maxWidth: windowWidth < 640 ? 120 : 150,
             }}
             rowHeight={windowWidth < 640 ? 25 : windowWidth < 1024 ? 28 : 30}
             headerHeight={windowWidth < 640 ? 30 : windowWidth < 1024 ? 32 : 35}
