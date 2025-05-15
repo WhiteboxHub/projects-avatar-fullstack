@@ -148,7 +148,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Recruiter</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="name"
@@ -160,7 +160,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
           <input
             type="email"
             name="email"
@@ -172,7 +172,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="phone"
@@ -180,10 +180,11 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter phone"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Designation <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="designation"
@@ -191,10 +192,11 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter designation"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor <span className="text-red-500">*</span></label>
           <select
             name="vendorid"
             value={formData.vendorid}
@@ -209,7 +211,7 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Company <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="comp"
@@ -217,15 +219,17 @@ const AddRowRecruiter: React.FC<AddRowRecruiterProps> = ({
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter company"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            required
           >
             {statusOptions.map(option => (
               <option key={option.value} value={option.value}>{option.label}</option>

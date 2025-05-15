@@ -195,7 +195,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Name*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
             <input
               type="text"
               name="name"
@@ -211,7 +211,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
             <input
               type="email"
               name="email"
@@ -227,7 +227,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Phone*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Phone <span className="text-red-500">*</span></label>
             <input
               type="text"
               name="phone"
@@ -243,7 +243,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
 
           {/* Designation */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Designation*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Designation <span className="text-red-500">*</span></label>
             <input
               type="text"
               name="designation"
@@ -259,7 +259,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Status*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
             <select
               name="status"
               value={formData.status || ''}
@@ -278,7 +278,7 @@ const EditRowVendor: React.FC<EditRowVendorProps> = ({
 
           {/* Vendor Company Dropdown - Matches AG-Grid's "comp" */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor Company*</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Vendor Company <span className="text-red-500">*</span></label>
             <select
               name="vendorid"
               value={formData.vendorid || ''}
