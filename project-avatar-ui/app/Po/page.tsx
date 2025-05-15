@@ -14,6 +14,7 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAdd } from "react-icons/md";
 import { Po } from "@/types/index";
+import { ColDef, ValueFormatterParams, ICellRendererParams } from "ag-grid-community";
 
 import {
   AiOutlineEdit,
@@ -24,7 +25,7 @@ import {
 
 const PO = () => {
   const [rowData, setRowData] = useState<Po[]>([]);
-  const [columnDefs, setColumnDefs] = useState<{ headerName: string; field: string; width?: number; cellRenderer?: unknown; valueFormatter?: unknown }[]>([]);
+  const [columnDefs, setColumnDefs] = useState<ColDef<Po>[]>([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -136,35 +137,35 @@ const PO = () => {
     }
   }, [currentPage, fetchData, searchValue]);
 
-  const formatCurrency = (params: { value: number | null | undefined }) => {
+  const formatCurrency = (params: ValueFormatterParams<Po, number>) => {
     if (params.value === null || params.value === undefined) return '';
     return '$' + params.value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
   };
 
-  const formatDate = (params: { value: string | null | undefined }) => {
+  const formatDate = (params: ValueFormatterParams<Po, string>) => {
     if (!params.value) return '';
     const date = new Date(params.value);
     if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
   };
 
-  const urlRenderer = (params: { value: string | null | undefined }) => {
+  const urlRenderer = (params: ICellRendererParams<Po, string>) => {
     if (!params.value) return '';
     return `<a href="${params.value}" target="_blank">${params.value}</a>`;
   };
 
-  const freqTypeFormatter = (params: { value: string | null | undefined }) => {
+  const freqTypeFormatter = (params: ValueFormatterParams<Po, string>) => {
     const types: {[key: string]: string} = {
       'M': 'MONTHLY',
       'W': 'WEEKLY',
       'D': 'DAYS'
     };
-    return types[params.value || ''] || params.value;
+    return types[params.value || ''] || params.value || '';
   };
 
   const setupColumns = (data: Po[]) => {
     if (data && data.length > 0) {
-      const columns = [
+      const columns: ColDef<Po>[] = [
         { headerName: 'ID', field: 'id', width: 70 },
         { headerName: 'Placement ID', field: 'placementid', width: 100 },
         { headerName: 'Placement Details', field: 'placement_details', width: 350 },
@@ -240,8 +241,18 @@ const PO = () => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text("PO Data", 20, 10);
-    const pdfData = rowData.map((row) => Object.values(row));
-    const headers = columnDefs.map((col) => col.headerName);
+    
+    // Create a safe version of the data for PDF export
+    const pdfData = rowData.map((row) => {
+      const rowValues = Object.values(row).map(value => 
+        value !== null && value !== undefined ? String(value) : ''
+      );
+      return rowValues;
+    });
+    
+    // Get headers safely
+    const headers = columnDefs.map((col) => col.headerName || '');
+    
     autoTable(doc, {
       head: [headers],
       body: pdfData,
