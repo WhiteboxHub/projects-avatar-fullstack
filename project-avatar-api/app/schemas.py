@@ -755,7 +755,6 @@ def sanitize_input(value: str) -> str:
 
 class ClientBase(BaseModel):
     companyname: str
-    # tier: Optional[str] = None
     status: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -773,7 +772,7 @@ class ClientBase(BaseModel):
     manager1email: Optional[EmailStr] = None
     manager1phone: Optional[str] = None
     hmname: Optional[str] = None
-    hmemail: Optional[EmailStr] = None  
+    hmemail: Optional[EmailStr] = None
     hmphone: Optional[str] = None
     hrname: Optional[str] = None
     hremail: Optional[EmailStr] = None
@@ -819,6 +818,32 @@ class ClientResponse(BaseModel):
     page: int
     page_size: int
     pages: int
+
+class ClientSearchBase(BaseModel):
+    companyname: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    status: Optional[str] = None
+    url: Optional[str] = None
+    fax: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip: Optional[str] = None
+    twitter: Optional[str] = None
+    facebook: Optional[str] = None
+    linkedin: Optional[str] = None
+    manager1name: Optional[str] = None
+    manager1email: Optional[EmailStr] = None
+    manager1phone: Optional[str] = None
+    hmname: Optional[str] = None
+    hmemail: Optional[EmailStr] = None
+    hmphone: Optional[str] = None
+    hrname: Optional[str] = None
+    hremail: Optional[EmailStr] = None
+    hrphone: Optional[str] = None
+    notes: Optional[str] = None
 
 class ClientDeleteResponse(BaseModel):
     message: str

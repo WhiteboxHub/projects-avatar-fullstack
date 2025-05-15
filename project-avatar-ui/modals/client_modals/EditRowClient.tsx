@@ -15,29 +15,28 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
   const [formData, setFormData] = useState<ClientUpdate>({
     id: String(clientData.id),
     companyname: clientData.companyname,
-    // tier: clientData.tier,
     status: clientData.status,
     email: clientData.email,
     phone: clientData.phone,
     fax: clientData.fax || '',
-    address: clientData.address,
-    city: clientData.city,
-    state: clientData.state,
-    country: clientData.country,
-    zip: clientData.zip,
-    url: clientData.url,
+    address: clientData.address || '',
+    city: clientData.city || '',
+    state: clientData.state || '',
+    country: clientData.country || '',
+    zip: clientData.zip || '',
+    url: clientData.url || '',
     twitter: clientData.twitter || '',
     facebook: clientData.facebook || '',
-    linkedIn: clientData.linkedIn || '',
-    manager1Name: clientData.manager1Name,
-    manager1Email: clientData.manager1Email,
-    manager1Phone: clientData.manager1Phone,
-    hmName: clientData.hmName || '',
-    hmEmail: clientData.hmEmail || '',
-    hmPhone: clientData.hmPhone || '',
-    hrName: clientData.hrName || '',
-    hrEmail: clientData.hrEmail || '',
-    hrPhone: clientData.hrPhone || '',
+    linkedin: clientData.linkedin || '',
+    manager1name: clientData.manager1name || '',
+    manager1email: clientData.manager1email || '',
+    manager1phone: clientData.manager1phone || '',
+    hmname: clientData.hmname || '',
+    hmemail: clientData.hmemail || '',
+    hmphone: clientData.hmphone || '',
+    hrname: clientData.hrname || '',
+    hremail: clientData.hremail || '',
+    hrphone: clientData.hrphone || '',
     notes: clientData.notes || '',
   });
 
@@ -106,7 +105,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Company Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name *</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="companyname"
@@ -134,7 +133,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
           <input
             type="email"
             name="email"
@@ -148,7 +147,7 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone *</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Phone <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="phone"
@@ -162,12 +161,13 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
 
       {/* Status */}
       <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              required
             >
               {statusOptions.map(option => (
                 <option key={option} value={option}>{option}</option>
@@ -284,8 +284,8 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           <label className="block text-sm font-semibold text-gray-700 mb-1">LinkedIn</label>
           <input
             type="text"
-            name="linkedIn"
-            value={formData.linkedIn}
+            name="linkedin"
+            value={formData.linkedin}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter LinkedIn link"
@@ -297,8 +297,8 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           <label className="block text-sm font-semibold text-gray-700 mb-1">Manager 1 Name</label>
           <input
             type="text"
-            name="manager1Name"
-            value={formData.manager1Name}
+            name="manager1name"
+            value={formData.manager1name}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter manager's name"
@@ -310,8 +310,8 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           <label className="block text-sm font-semibold text-gray-700 mb-1">Manager 1 Email</label>
           <input
             type="email"
-            name="manager1Email"
-            value={formData.manager1Email}
+            name="manager1email"
+            value={formData.manager1email}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter manager's email"
@@ -323,8 +323,8 @@ const EditRowModal: React.FC<EditRowModalProps> = ({ isOpen, onClose, clientData
           <label className="block text-sm font-semibold text-gray-700 mb-1">Manager 1 Phone</label>
           <input
             type="text"
-            name="manager1Phone"
-            value={formData.manager1Phone}
+            name="manager1phone"
+            value={formData.manager1phone}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter manager's phone"

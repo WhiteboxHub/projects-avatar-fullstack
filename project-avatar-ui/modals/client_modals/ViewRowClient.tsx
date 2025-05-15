@@ -1,7 +1,7 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { Client } from '@/types/client';
-import { AiOutlineClose } from 'react-icons/ai';
+import Modal from "react-modal";
+import React from "react";
+import { AiOutlineClose } from "react-icons/ai";
+import { Client } from "@/types/client";
 
 interface ViewRowClientProps {
   isOpen: boolean;
@@ -117,70 +117,70 @@ const ViewRowClient: React.FC<ViewRowClientProps> = ({ isOpen, onClose, client }
             <div className="modal-field">
               <label htmlFor="LinkedIn">LinkedIn</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.linkedIn}
+                {client.linkedin}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="Manager 1 Name">Manager 1 Name</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.manager1Name}
+                {client.manager1name}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="Manager 1 Email">Manager 1 Email</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.manager1Email}
+                {client.manager1email}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="Manager 1 Phone">Manager 1 Phone</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.manager1Phone}
+                {client.manager1phone}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HM Name">HM Name</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hmName}
+                {client.hmname}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HM Email">HM Email</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hmEmail}
+                {client.hmemail}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HM Phone">HM Phone</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hmPhone}
+                {client.hmphone}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HR Name">HR Name</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hrName}
+                {client.hrname}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HR Email">HR Email</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hrEmail}
+                {client.hremail}
               </div>
             </div>
 
             <div className="modal-field">
               <label htmlFor="HR Phone">HR Phone</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.hrPhone}
+                {client.hrphone}
               </div>
             </div>
 
@@ -194,7 +194,7 @@ const ViewRowClient: React.FC<ViewRowClientProps> = ({ isOpen, onClose, client }
             <div className="modal-field">
               <label htmlFor="Last Modified Date Time">Last Modified Date Time</label>
               <div className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline">
-                {client.lastModDateTime}
+                {client.lastmoddatetime}
               </div>
             </div>
 

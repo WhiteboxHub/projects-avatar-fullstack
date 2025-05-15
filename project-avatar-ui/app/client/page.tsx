@@ -34,7 +34,7 @@ const Clients = () => {
   const [rowData, setRowData] = useState<Client[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [columnDefs, setColumnDefs] = useState<
-    { headerName: string; field: string; editable?: boolean; width?: number; editoptions?: Record<string, unknown>; formatter?: string; label?: string; }[]
+    { headerName: string; field: string; editable?: boolean; width?: number; editoptions?: Record<string, unknown>; formatter?: string; label?: string; edittype?: string; }[]
   >([]);
   const [paginationPageSize] = useState<number>(100);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -86,7 +86,8 @@ const Clients = () => {
       const response = await axios.get(`${API_URL}/client/client/get`, {
         params: {
           page: page,
-          pageSize: paginationPageSize,
+          page_size: paginationPageSize,
+          search: searchValue || undefined,
         },
         headers: { AuthToken: localStorage.getItem("token") },
       });
@@ -102,43 +103,30 @@ const Clients = () => {
       setLoading(false);
     }
   };
-
-  const fetchClients = async (searchQuery = "") => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/client/client/search`, {
-        params: {
-          page: currentPage,
-          pageSize: paginationPageSize,
-          search: searchQuery,
-        },
-        headers: { AuthToken: localStorage.getItem("token") },
-      });
-
-      const { data, total } = response.data;
-      setRowData(data);
-      setTotalRows(total);
-      setupColumns(data);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // debouncing for search
-  useEffect(() => {
-    const delaySearch = setTimeout(() => {
-      if (searchValue) {
-        fetchClients(searchValue);
-      }
-    }, 500);
-    return () => clearTimeout(delaySearch);
-  }, [searchValue]);
 
   const handleSearch = () => {
-    fetchClients(searchValue);
+    setCurrentPage(1); // Reset to first page when searching
+    fetchData(1);
   };
+
+  // Clear search debounce timer on component unmount
+  useEffect(() => {
+    let searchTimer: NodeJS.Timeout;
+    
+    if (searchValue) {
+      searchTimer = setTimeout(() => {
+        handleSearch();
+      }, 500);
+    } else if (searchValue === "") {
+      // When search is cleared, reset to original data
+      setCurrentPage(1);
+      fetchData(1);
+    }
+    
+    return () => {
+      if (searchTimer) clearTimeout(searchTimer);
+    };
+  }, [searchValue]);
 
   const setupColumns = (data: Client[]) => {
     if (data.length > 0) {
@@ -203,7 +191,9 @@ const Clients = () => {
 
   const handleRefresh = () => {
     setSearchValue("");
-    fetchData();
+    fetchData(currentPage);
+    // setAlertMessage("Data refreshed successfully.");
+    setTimeout(() => setAlertMessage(null), 3000);
   };
 
   const handleAddRow = () =>

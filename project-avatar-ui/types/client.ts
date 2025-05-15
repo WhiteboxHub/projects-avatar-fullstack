@@ -7,32 +7,32 @@ export interface Client {
     status: string; // Editable, width: 90, select options
     url?: string; // Editable, width: 200, lowercase
     fax?: string; // Editable, width: 150
-    address: string; // Editable, width: 150
-    city: string; // Editable, width: 120, autocomplete
-    state: string; // Editable, width: 120, autocomplete
-    country: string; // Editable, width: 120, autocomplete
-    zip: string; // Editable, width: 120, autocomplete
+    address?: string; // Editable, width: 150
+    city?: string; // Editable, width: 120, autocomplete
+    state?: string; // Editable, width: 120, autocomplete
+    country?: string; // Editable, width: 120, autocomplete
+    zip?: string; // Editable, width: 120, autocomplete
     twitter?: string; // Editable, width: 200
     facebook?: string; // Editable, width: 200
-    linkedIn?: string; // Editable, width: 200
-    manager1Name: string; // Editable, width: 200
-    manager1Email: string; // Editable, width: 150, required
-    manager1Phone: string; // Editable, width: 90
-    hmName: string; // Editable, width: 200
-    hmEmail: string; // Editable, width: 150, required
-    hmPhone: string; // Editable, width: 90
-    hrName: string; // Editable, width: 200
-    hrEmail: string; // Editable, width: 150, required
-    hrPhone: string; // Editable, width: 90
+    linkedin?: string; // Note: it's linkedin not linkedIn
+    manager1name?: string; // Lowercase 'name'
+    manager1email?: string; // Lowercase 'email'
+    manager1phone?: string; // Lowercase 'phone'
+    hmname?: string; // Lowercase
+    hmemail?: string; // Lowercase
+    hmphone?: string; // Lowercase
+    hrname?: string; // Lowercase
+    hremail?: string; // Lowercase
+    hrphone?: string; // Lowercase
     notes?: string; // Editable, width: 400, textarea
-    lastModDateTime: string; // Not editable
+    lastmoddatetime?: string; // Renamed from lastModDateTime
     createdAt?: string; // Not editable
     updatedAt?: string; // Not editable
     isActive?: boolean; // Optional
 }
 
 // Type for creating a new client (omit auto-generated fields)
-export type ClientCreate = Omit<Client, 'id' | 'lastModDateTime' | 'createdAt' | 'updatedAt'>;
+export type ClientCreate = Omit<Client, 'id' | 'lastmoddatetime' | 'createdAt' | 'updatedAt'>;
 
 // Type for updating a client (all fields optional except id)
 export type ClientUpdate = Partial<Omit<Client, 'id'>> & { id: string };

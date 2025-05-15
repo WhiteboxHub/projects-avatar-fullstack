@@ -339,7 +339,7 @@ class Placement(Base):
     
     candidate = relationship("Candidate", back_populates="placements", viewonly=True)
     vendor = relationship("Vendor", back_populates="placements")
-    client = relationship("Client", back_populates="placements")
+    client = relationship("Client", back_populates="placements", viewonly=True, foreign_keys=[clientid])
     po_entries = relationship("PO", back_populates="placement")
 # Client.placements = relationship("Placement", back_populates="client")
 
@@ -437,8 +437,8 @@ class Client(Base):
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    placements = relationship("Placement", back_populates="client")
-    recruiters = relationship("Recruiter", back_populates="client")
+    placements = relationship("Placement", back_populates="client", viewonly=True)
+    recruiters = relationship("Recruiter", back_populates="client", viewonly=True)
 
 class ClientSearch(Base):
     __tablename__ = "client"
@@ -723,7 +723,7 @@ class Recruiter(Base):
 
     # Relationships
     vendor = relationship("Vendor", back_populates="recruiters")
-    client = relationship("Client", back_populates="recruiters")
+    client = relationship("Client", back_populates="recruiters", viewonly=True, foreign_keys=[clientid])
 
 
 
