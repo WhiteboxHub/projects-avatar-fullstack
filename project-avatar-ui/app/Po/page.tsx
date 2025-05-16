@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ViewRowModal from "../../modals/po_modals/ViewRowPo";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
+import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { jsPDF } from "jspdf";
 import { debounce } from "lodash";
@@ -14,7 +15,6 @@ import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAdd } from "react-icons/md";
 import { Po } from "@/types/index";
-import { ColDef, ValueFormatterParams, ICellRendererParams } from "ag-grid-community";
 
 import {
   AiOutlineEdit,
@@ -91,13 +91,13 @@ const PO = () => {
         headers: { AuthToken: localStorage.getItem("token") },
       });
 
-      let data = response.data || [];
+      let data = response.data?.data || [];
       if (!Array.isArray(data)) {
         data = [data];
       }
 
       setRowData(data);
-      setTotalRows(data.length);
+      setTotalRows(response.data?.totalRows || data.length);
       setupColumns(data);
     } catch (error) {
       console.error("Error searching POs:", error);
@@ -183,16 +183,6 @@ const PO = () => {
       setColumnDefs(columns);
     }
   };
-
-  // const getColumnWidth = () => {
-  //   if (windowWidth < 640) { // Mobile
-  //     return 100;
-  //   } else if (windowWidth < 1024) { // Tablet
-  //     return 120;
-  //   } else { // Desktop
-  //     return 150;
-  //   }
-  // };
 
   const handleSearch = () => {
     if (searchValue) {

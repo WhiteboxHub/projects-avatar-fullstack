@@ -459,6 +459,24 @@ class ClientSearch(Base):
     hrname = Column(String(150), nullable=True)
     lastmoddatetime = Column(TIMESTAMP, nullable=True)
 
+# class PO(Base):
+#     __tablename__ = "po"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     placementid = Column(Integer, ForeignKey("placement.id"))
+#     begindate = Column(Date, nullable=True)
+#     enddate = Column(Date, nullable=True)
+#     rate = Column(Float, nullable=True)
+#     overtimerate = Column(Float, nullable=True)
+#     freqtype = Column(String(1), nullable=True)  # M for MONTHLY, W for WEEKLY, D for DAYS
+#     frequency = Column(Integer, nullable=True)
+#     invoicestartdate = Column(Date, nullable=True)
+#     invoicenet = Column(Float, nullable=True)
+#     polink = Column(String(200), nullable=True)
+#     notes = Column(Text, nullable=True)  # Changed to Text for larger content
+
+#     placement = relationship("Placement", back_populates="po_entries")
+
 class PO(Base):
     __tablename__ = "po"
 
@@ -473,7 +491,7 @@ class PO(Base):
     invoicestartdate = Column(Date, nullable=True)
     invoicenet = Column(Float, nullable=True)
     polink = Column(String(200), nullable=True)
-    notes = Column(Text, nullable=True)  # Changed to Text for larger content
+    notes = Column(Text, nullable=True)
 
     placement = relationship("Placement", back_populates="po_entries")
 
@@ -614,6 +632,32 @@ class Overdue(Base):
     recruiteremail = Column(String, nullable=True)
     notes = Column(String, nullable=True)    
 
+# class Invoice(Base):
+#     __tablename__ = "invoice"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     invoicenumber = Column(String(45), unique=True, nullable=False)
+#     startdate = Column(Date, nullable=False)
+#     enddate = Column(Date, nullable=False)
+#     invoicedate = Column(Date, nullable=False)
+#     quantity = Column(Numeric(precision=19, scale=1), nullable=False)
+#     otquantity = Column(Numeric(precision=19, scale=1), nullable=False, default=0.0)
+#     status = Column(String(45), nullable=True)
+#     amountreceived = Column(Numeric(precision=19, scale=4), nullable=True)
+#     releaseddate = Column(Date, nullable=True)
+#     receiveddate = Column(Date, nullable=True)
+#     checknumber = Column(String(150), nullable=True)
+#     invoiceurl = Column(String(300), nullable=True)
+#     checkurl = Column(String(300), nullable=True)
+#     reminders = Column(String(1), nullable=False, default='Y')
+#     remindertype = Column(String(150), nullable=False, default='Open')
+#     emppaiddate = Column(Date, nullable=True)
+#     candpaymentstatus = Column(String(45), nullable=False, default='Open')
+#     poid = Column(Integer, ForeignKey("po.id"), nullable=False)
+#     notes = Column(Text, nullable=True)
+#     lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
+
+
 class Invoice(Base):
     __tablename__ = "invoice"
 
@@ -638,7 +682,7 @@ class Invoice(Base):
     poid = Column(Integer, ForeignKey("po.id"), nullable=False)
     notes = Column(Text, nullable=True)
     lastmoddatetime = Column(DateTime, nullable=True, default=datetime.utcnow)
-
+    
 
 # Adding recruiter model
 

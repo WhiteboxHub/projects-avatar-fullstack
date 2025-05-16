@@ -1,7 +1,7 @@
 import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Po } from "../../types/index";
+import { FREQ_TYPE_OPTIONS, Po } from "../../types/index";
 
 interface AddRowPOProps {
   isOpen: boolean;
@@ -16,17 +16,18 @@ interface PlacementOption {
 
 const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<Po>({
-    PlacementDetails: '',
-    StartDate: '',
-    EndDate: '',
-    Rate: 0,
-    OvertimeRate: null,
-    FreqType: 'M',
-    InvoiceFrequency: 0,
-    InvoiceStartDate: '',
-    InvoiceNet: 0,
-    POUrl: '',
-    Notes: '',
+    placementid: undefined,
+    begindate: '',
+    enddate: null,
+    rate: 0,
+    overtimerate: null,
+    freqtype: 'M',
+    frequency: 0,
+    invoicestartdate: '',
+    invoicenet: 0,
+    polink: null,
+    notes: null,
+    placement_details: '',
   });
 
   const [selectedPlacementId, setSelectedPlacementId] = useState<string>('');
@@ -57,18 +58,18 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     const { name, value } = e.target;
     
     // Handle numeric fields
-    if (name === 'Rate' || name === 'InvoiceNet') {
+    if (name === 'rate' || name === 'invoicenet') {
       setFormData({ ...formData, [name]: value === '' ? 0 : parseFloat(value) });
-    } else if (name === 'OvertimeRate') {
+    } else if (name === 'overtimerate') {
       setFormData({ ...formData, [name]: value === '' ? null : parseFloat(value) });
-    } else if (name === 'InvoiceFrequency') {
+    } else if (name === 'frequency') {
       setFormData({ ...formData, [name]: value === '' ? 0 : parseInt(value) });
     } else {
       setFormData({ ...formData, [name]: value });
     }
 
-    // If PlacementDetails is changed, update selectedPlacementId
-    if (name === 'PlacementDetails') {
+    // If placement_details is changed, update selectedPlacementId
+    if (name === 'placement_details') {
       const selectedPlacement = placementOptions.find(option => option.name === value);
       if (selectedPlacement) {
         setSelectedPlacementId(selectedPlacement.id);
@@ -81,16 +82,16 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
     try {
       const payload = {
         placementid: parseInt(selectedPlacementId),
-        begindate: formData.StartDate || null,
-        enddate: formData.EndDate || null,
-        rate: formData.Rate,
-        overtimerate: formData.OvertimeRate,
-        freqtype: formData.FreqType,
-        frequency: formData.InvoiceFrequency,
-        invoicestartdate: formData.InvoiceStartDate || null,
-        invoicenet: formData.InvoiceNet,
-        polink: formData.POUrl,
-        notes: formData.Notes,
+        begindate: formData.begindate || null,
+        enddate: formData.enddate || null,
+        rate: formData.rate,
+        overtimerate: formData.overtimerate,
+        freqtype: formData.freqtype,
+        frequency: formData.frequency,
+        invoicestartdate: formData.invoicestartdate || null,
+        invoicenet: formData.invoicenet,
+        polink: formData.polink,
+        notes: formData.notes,
       };
 
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/po`, payload, {
@@ -144,8 +145,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
             Placement Details <span className="text-red-500">*</span>
           </label>
           <select
-            name="PlacementDetails"
-            value={formData.PlacementDetails || ''}
+            name="placement_details"
+            value={formData.placement_details || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             required
@@ -164,8 +165,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
          </label>
          <input
             type="date"
-            name="StartDate"
-            value={typeof formData.StartDate === 'string' ? formData.StartDate : ''}
+            name="begindate"
+            value={typeof formData.begindate === 'string' ? formData.begindate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             required
@@ -176,8 +177,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <label className="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
           <input
             type="date"
-            name="EndDate"
-            value={typeof formData.EndDate === 'string' ? formData.EndDate : ''}
+            name="enddate"
+            value={typeof formData.enddate === 'string' ? formData.enddate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
@@ -190,8 +191,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <input
             type="number"
             step="0.01"
-            name="Rate"
-            value={formData.Rate || ''}
+            name="rate"
+            value={formData.rate || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter rate"
@@ -204,8 +205,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <input
             type="number"
             step="0.01"
-            name="OvertimeRate"
-            value={formData.OvertimeRate === null ? '' : formData.OvertimeRate}
+            name="overtimerate"
+            value={formData.overtimerate === null ? '' : formData.overtimerate}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter overtime rate"
@@ -217,15 +218,17 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
             Frequency Type <span className="text-red-500">*</span>
           </label>
           <select
-            name="FreqType"
-            value={formData.FreqType || 'M'}
+            name="freqtype"
+            value={formData.freqtype || 'M'}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             required
           >
-            <option value="M">MONTHLY</option>
-            <option value="W">WEEKLY</option>
-            <option value="D">DAYS</option>
+            {FREQ_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -233,8 +236,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <label className="block text-sm font-semibold text-gray-700 mb-1">Invoice Frequency</label>
           <input
             type="number"
-            name="InvoiceFrequency"
-            value={formData.InvoiceFrequency || ''}
+            name="frequency"
+            value={formData.frequency || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter invoice frequency"
@@ -249,8 +252,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           </label>
           <input
             type="date"
-            name="InvoiceStartDate"
-            value={typeof formData.InvoiceStartDate === 'string' ? formData.InvoiceStartDate : ''}
+            name="invoicestartdate"
+            value={typeof formData.invoicestartdate === 'string' ? formData.invoicestartdate : ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             required
@@ -264,8 +267,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <input
             type="number"
             step="0.01"
-            name="InvoiceNet"
-            value={formData.InvoiceNet || ''}
+            name="invoicenet"
+            value={formData.invoicenet || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter invoice net"
@@ -278,8 +281,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
           <label className="block text-sm font-semibold text-gray-700 mb-1">PO URL</label>
           <input
             type="url"
-            name="POUrl"
-            value={formData.POUrl || ''}
+            name="polink"
+            value={formData.polink || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="https://example.com"
@@ -291,8 +294,8 @@ const AddRowPO: React.FC<AddRowPOProps> = ({ isOpen, onClose, refreshData }) => 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
           <textarea
-            name="Notes"
-            value={formData.Notes || ''}
+            name="notes"
+            value={formData.notes || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             placeholder="Enter notes"

@@ -2,7 +2,7 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai";
-import { Po } from "../../types/index";
+import { FREQ_TYPE_OPTIONS, Po } from "../../types/index";
 
 interface EditRowModalProps {
   isOpen: boolean;
@@ -18,18 +18,19 @@ interface PlacementOption {
 
 const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowData, onSave }) => {
   const [formData, setFormData] = useState<Po>({
-    POID: undefined,
-    PlacementDetails: '',
-    StartDate: '',
-    EndDate: null,
-    Rate: 0,
-    OvertimeRate: null,
-    FreqType: '',
-    InvoiceFrequency: 0,
-    InvoiceStartDate: '',
-    InvoiceNet: 0,
-    POUrl: null,
-    Notes: null,
+    id: undefined,
+    placementid: undefined,
+    begindate: '',
+    enddate: null,
+    rate: 0,
+    overtimerate: null,
+    freqtype: '',
+    frequency: 0,
+    invoicestartdate: '',
+    invoicenet: 0,
+    polink: null,
+    notes: null,
+    placement_details: '',
   });
 
   const [placementOptions, setPlacementOptions] = useState<PlacementOption[]>([]);
@@ -61,21 +62,21 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
         return String(value);
       };
 
-      // Map API response fields to the form fields, checking for various property naming conventions
+      // Map API response fields to the form fields
       const updatedFormData: Po = {
-        // Try to access the field using both camelCase and PascalCase naming conventions
-        POID: rowData.POID || rowData.id,
-        PlacementDetails: toString(rowData.PlacementDetails || rowData.placement_details || ''),
-        StartDate: formatDate(rowData.StartDate || rowData.begindate),
-        EndDate: rowData.EndDate || rowData.enddate,
-        Rate: rowData.Rate || rowData.rate || 0,
-        OvertimeRate: rowData.OvertimeRate || rowData.overtimerate,
-        FreqType: toString(rowData.FreqType || rowData.freqtype || ''),
-        InvoiceFrequency: rowData.InvoiceFrequency || rowData.frequency || 0,
-        InvoiceStartDate: formatDate(rowData.InvoiceStartDate || rowData.invoicestartdate),
-        InvoiceNet: rowData.InvoiceNet || rowData.invoicenet || 0,
-        POUrl: rowData.POUrl || rowData.polink,
-        Notes: rowData.Notes || rowData.notes,
+        id: rowData.id,
+        placementid: rowData.placementid,
+        placement_details: toString(rowData.placement_details || ''),
+        begindate: formatDate(rowData.begindate),
+        enddate: rowData.enddate,
+        rate: rowData.rate || 0,
+        overtimerate: rowData.overtimerate,
+        freqtype: toString(rowData.freqtype || ''),
+        frequency: rowData.frequency || 0,
+        invoicestartdate: formatDate(rowData.invoicestartdate),
+        invoicenet: rowData.invoicenet || 0,
+        polink: rowData.polink,
+        notes: rowData.notes,
       };
       
       console.log("Setting form data to:", updatedFormData);
@@ -106,16 +107,24 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     // Handle numeric fields
-    if (name === 'Rate' || name === 'InvoiceNet') {
+    if (name === 'rate' || name === 'invoicenet') {
       setFormData(prevData => ({ ...prevData, [name]: value === '' ? 0 : parseFloat(value) }));
-    } else if (name === 'OvertimeRate') {
+    } else if (name === 'overtimerate') {
       setFormData(prevData => ({ ...prevData, [name]: value === '' ? null : parseFloat(value) }));
-    } else if (name === 'InvoiceFrequency') {
+    } else if (name === 'frequency') {
       setFormData(prevData => ({ ...prevData, [name]: value === '' ? 0 : parseInt(value) }));
+    } else if (name === 'placementid') {
+      // When placement is selected, update both placementid and placement_details
+      const selectedPlacement = placementOptions.find(option => option.id === value);
+      setFormData(prevData => ({ 
+        ...prevData, 
+        placementid: parseInt(value),
+        placement_details: selectedPlacement ? selectedPlacement.name : ''
+      }));
     } else {
       setFormData(prevData => ({ ...prevData, [name]: value }));
     }
@@ -123,22 +132,22 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (formData.POID) {
+    if (formData.id) {
       try {
         const payload = {
-          begindate: formData.StartDate,
-          enddate: formData.EndDate || null,
-          rate: formData.Rate,
-          overtimerate: formData.OvertimeRate,
-          freqtype: formData.FreqType,
-          frequency: formData.InvoiceFrequency,
-          invoicestartdate: formData.InvoiceStartDate,
-          invoicenet: formData.InvoiceNet,
-          polink: formData.POUrl,
-          notes: formData.Notes,
+          begindate: formData.begindate,
+          enddate: formData.enddate || null,
+          rate: formData.rate,
+          overtimerate: formData.overtimerate,
+          freqtype: formData.freqtype,
+          frequency: formData.frequency,
+          invoicestartdate: formData.invoicestartdate,
+          invoicenet: formData.invoicenet,
+          polink: formData.polink,
+          notes: formData.notes,
         };
 
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/update/${formData.POID}`, payload, {
+        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/po/update/${formData.id}`, payload, {
           headers: { AuthToken: localStorage.getItem('token') },
         });
         onSave();
@@ -147,7 +156,7 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
         console.error('Error updating PO:', error);
       }
     } else {
-      console.error('Error: formData.POID is undefined');
+      console.error('Error: formData.id is undefined');
     }
   };
 
@@ -192,15 +201,15 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
               Placement <span className="text-red-600">*</span>
             </label>
             <select
-              name="PlacementDetails"
-              value={formData.PlacementDetails as string}
+              name="placementid"
+              value={formData.placementid as number | undefined || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="">Select Placement</option>
               {placementOptions.map((option) => (
-                <option key={option.id} value={option.name}>
+                <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
               ))}
@@ -213,8 +222,8 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             </label>
             <input
               type="date"
-              name="StartDate"
-              value={formData.StartDate as string}
+              name="begindate"
+              value={formData.begindate as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
@@ -225,8 +234,8 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <label className="block text-gray-700">End Date</label>
             <input
               type="date"
-              name="EndDate"
-              value={formData.EndDate as string}
+              name="enddate"
+              value={formData.enddate as string || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
@@ -237,25 +246,27 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
               Rate <span className="text-red-600">*</span>
             </label>
             <input
-              type="text"
-              name="Rate"
-              value={formData.Rate as number}
+              type="number"
+              name="rate"
+              value={formData.rate as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter rate"
               required
+              step="0.01"
             />
           </div>
 
           <div>
             <label className="block text-gray-700">Overtime Rate</label>
             <input
-              type="text"
-              name="OvertimeRate"
-              value={formData.OvertimeRate as unknown as string}
+              type="number"
+              name="overtimerate"
+              value={formData.overtimerate as number || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter overtime rate"
+              step="0.01"
             />
           </div>
 
@@ -264,16 +275,18 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
               Frequency Type <span className="text-red-600">*</span>
             </label>
             <select
-              name="FreqType"
-              value={formData.FreqType as string}
+              name="freqtype"
+              value={formData.freqtype as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             >
               <option value="">Select frequency type</option>
-              <option value="M">Monthly</option>
-              <option value="W">Weekly</option>
-              <option value="D">Daily</option>
+              {FREQ_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -282,13 +295,12 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
               Invoice Frequency 
             </label>
             <input
-              type="text"
-              name="InvoiceFrequency"
-              value={formData.InvoiceFrequency as number}
+              type="number"
+              name="frequency"
+              value={formData.frequency as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter invoice frequency"
-              // required
             />
           </div>
 
@@ -298,8 +310,8 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             </label>
             <input
               type="date"
-              name="InvoiceStartDate"
-              value={formData.InvoiceStartDate as string}
+              name="invoicestartdate"
+              value={formData.invoicestartdate as string}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
@@ -311,9 +323,9 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
               Invoice Net <span className="text-red-600">*</span>
             </label>
             <input
-              type="text"
-              name="InvoiceNet"
-              value={formData.InvoiceNet as number}
+              type="number"
+              name="invoicenet"
+              value={formData.invoicenet as number}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter invoice net"
@@ -325,8 +337,8 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
             <label className="block text-gray-700">PO URL</label>
             <input
               type="text"
-              name="POUrl"
-              value={formData.POUrl as string}
+              name="polink"
+              value={formData.polink as string || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter PO URL"
@@ -335,13 +347,13 @@ const EditRowPo: React.FC<EditRowModalProps> = ({ isOpen, onRequestClose, rowDat
 
           <div>
             <label className="block text-gray-700">Notes</label>
-            <input
-              type="text"
-              name="Notes"
-              value={formData.Notes as string}
+            <textarea
+              name="notes"
+              value={formData.notes as string || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter notes"
+              rows={4}
             />
           </div>
 

@@ -442,23 +442,82 @@ class CandidateSearchBase(BaseModel):
 
 
 
+# class POSchema(BaseModel):
+#     id: int
+#     begindate: Optional[date]
+#     enddate: Optional[date]
+#     rate: Optional[float]
+#     overtimerate: Optional[float]
+#     freqtype: Optional[str]
+#     frequency: Optional[int]
+#     invoicestartdate: Optional[date]
+#     invoicenet: Optional[float]
+#     polink: Optional[str]
+#     notes: Optional[str]
+
+#     class Config:
+#         orm_mode = True
+
+# MIN_DATE = date(1000, 1, 1)
+
+# class POCreateSchema(BaseModel):
+#     placementid: int
+#     begindate: date = MIN_DATE  # Required field with default minimum date
+#     enddate: Optional[date] = None  # Can be NULL as per your schema
+#     rate: float
+#     overtimerate: Optional[float] = None
+#     freqtype: str  # M for MONTHLY, W for WEEKLY, D for DAYS
+#     frequency: int = 0
+#     invoicestartdate: date = MIN_DATE  # Required field with default minimum date
+#     invoicenet: float = 0  # Changed from int to float to match currency format
+#     polink: Optional[str] = None
+#     notes: Optional[str] = None
+
+#     @validator('begindate', 'invoicestartdate', pre=True)
+#     def convert_empty_dates(cls, v):
+#         if v in ("", "0000-00-00", None):
+#             return MIN_DATE
+#         return v
+    
+#     @validator('enddate', pre=True)
+#     def convert_empty_enddate(cls, v):
+#         if v in ("", "0000-00-00"):
+#             return None
+#         return v
+    
+#     @validator('freqtype')
+#     def validate_freqtype(cls, v):
+#         if v not in ["M", "W", "D"]:
+#             raise ValueError("Frequency type must be one of: M (MONTHLY), W (WEEKLY), D (DAYS)")
+#         return v
+    
+#     @validator('polink')
+#     def validate_url(cls, v):
+#         if v is not None and v != "":
+#             # Simple URL validation
+#             if not v.startswith(('http://', 'https://')):
+#                 raise ValueError("PO link must be a valid URL starting with http:// or https://")
+#         return v
+
 class POSchema(BaseModel):
     id: int
-    begindate: Optional[date]
-    enddate: Optional[date]
-    rate: Optional[float]
-    overtimerate: Optional[float]
-    freqtype: Optional[str]
-    frequency: Optional[int]
-    invoicestartdate: Optional[date]
-    invoicenet: Optional[float]
-    polink: Optional[str]
-    notes: Optional[str]
+    placementid: Optional[int] = None
+    begindate: Optional[date] = None
+    enddate: Optional[date] = None
+    rate: Optional[float] = None
+    overtimerate: Optional[float] = None
+    freqtype: Optional[str] = None
+    frequency: Optional[int] = None
+    invoicestartdate: Optional[date] = None
+    invoicenet: Optional[float] = None
+    polink: Optional[str] = None
+    notes: Optional[str] = None
 
     class Config:
         orm_mode = True
 
 MIN_DATE = date(1000, 1, 1)
+
 
 class POCreateSchema(BaseModel):
     placementid: int
@@ -694,21 +753,72 @@ class CurrentMarketingSchema(CurrentMarketingBase):
        
         
     
+# class OverdueUpdateSchema(BaseModel):
+#     # invoicenumber: Optional[str]
+#     invoicedate: Optional[date]
+#     quantity: Optional[int]
+#     amountreceived: Optional[float]
+#     receiveddate: Optional[date]
+#     releaseddate: Optional[date]
+#     checknumber: Optional[str]
+#     # invoiceurl: Optional[str]
+#     # checkurl: Optional[str]
+#     notes: Optional[str]
+#     status: Optional[str]
+#     remindertype: Optional[str]   
+# 
 class OverdueUpdateSchema(BaseModel):
-    # invoicenumber: Optional[str]
     invoicedate: Optional[date]
     quantity: Optional[int]
     amountreceived: Optional[float]
     receiveddate: Optional[date]
     releaseddate: Optional[date]
     checknumber: Optional[str]
-    # invoiceurl: Optional[str]
-    # checkurl: Optional[str]
     notes: Optional[str]
     status: Optional[str]
-    remindertype: Optional[str]    
+    remindertype: Optional[str]
+    
+    @validator('status')
+    def validate_status(cls, v):
+        if v:
+            valid_statuses = ["Open", "Pending", "Paid", "Void", "Closed", "Deny"]
+            if v not in valid_statuses:
+                raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+        return v
+        
+    @validator('remindertype')
+    def validate_reminder_type(cls, v):
+        if v:
+            valid_types = ["Open", "Warning", "Warn-Candidate", "Warn-Client", "Warn-CollectionAgency", "Final-Warning"]
+            if v not in valid_types:
+                raise ValueError(f"Reminder type must be one of: {', '.join(valid_types)}")
+        return v
     
        
+# class InvoiceBase(BaseModel):
+#     invoicenumber: str
+#     startdate: date
+#     enddate: Optional[date] = None
+#     invoicedate: Optional[date] = None
+#     quantity: Optional[float] = None
+#     otquantity: Optional[float] = None
+#     status: Optional[str] = None
+#     amountreceived: Optional[float] = None
+#     releaseddate: Optional[date] = None
+#     receiveddate: Optional[date] = None
+#     checknumber: Optional[str] = None
+#     invoiceurl: Optional[str] = None
+#     checkurl: Optional[str] = None
+#     reminders: str = 'Y'
+#     remindertype: str = 'Open'
+#     emppaiddate: Optional[date] = None
+#     candpaymentstatus: str = 'Open'
+#     poid: Optional[int] = None
+#     notes: Optional[str] = None
+
+# class InvoiceCreateSchema(InvoiceBase):
+#     pass
+
 class InvoiceBase(BaseModel):
     invoicenumber: str
     startdate: date
@@ -727,12 +837,41 @@ class InvoiceBase(BaseModel):
     remindertype: str = 'Open'
     emppaiddate: Optional[date] = None
     candpaymentstatus: str = 'Open'
-    poid: Optional[int] = None
+    poid: int
     notes: Optional[str] = None
 
 class InvoiceCreateSchema(InvoiceBase):
-    pass
+    @validator('invoicenumber')
+    def validate_invoice_number(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError("Invoice number is required")
+        return v
 
+    @validator('startdate', pre=True)
+    def validate_start_date(cls, v):
+        if not v:
+            raise ValueError("Start date is required")
+        return v
+        
+    @validator('poid')
+    def validate_poid(cls, v):
+        if not v:
+            raise ValueError("PO ID is required")
+        return v
+
+    @validator('status')
+    def validate_status(cls, v):
+        valid_statuses = ["Open", "Pending", "Paid", "Void", "Closed", "Deny"]
+        if v and v not in valid_statuses:
+            raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+        return v or "Open"
+
+    @validator('remindertype')
+    def validate_reminder_type(cls, v):
+        valid_types = ["Open", "Warning", "Warn-Candidate", "Warn-Client", "Warn-CollectionAgency", "Final-Warning"]
+        if v and v not in valid_types:
+            raise ValueError(f"Reminder type must be one of: {', '.join(valid_types)}")
+        return v or "Open"
 class InvoiceUpdateSchema(InvoiceBase):
     pass
 

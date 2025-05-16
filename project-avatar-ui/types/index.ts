@@ -309,39 +309,143 @@ export interface ErrorResponse {
 }
 
   // types.ts
-  export interface Po {
-    id?: number;
-    placementid?: number;
-    begindate?: string | Date;
-    enddate?: string | Date | null;
-    rate?: number;
-    overtimerate?: number | null;
-    freqtype?: string; // "M" for MONTHLY, "W" for WEEKLY, "D" for DAYS
-    frequency?: number;
-    invoicestartdate?: string | Date;
-    invoicenet?: number;
-    polink?: string | null;
-    notes?: string | null;
-    placement_details?: string; // Concatenated string of candidate name, vendor, and client
+  // export interface Po {
+  //   id?: number;
+  //   placementid?: number;
+  //   begindate?: string | Date;
+  //   enddate?: string | Date | null;
+  //   rate?: number;
+  //   overtimerate?: number | null;
+  //   freqtype?: string; // "M" for MONTHLY, "W" for WEEKLY, "D" for DAYS
+  //   frequency?: number;
+  //   invoicestartdate?: string | Date;
+  //   invoicenet?: number;
+  //   polink?: string | null;
+  //   notes?: string | null;
+  //   placement_details?: string; // Concatenated string of candidate name, vendor, and client
     
-    // For backward compatibility with existing code
-    POID?: number;
-    PlacementDetails?: string;
-    StartDate?: string | Date;
-    EndDate?: string | Date | null;
-    Rate?: number;
-    OvertimeRate?: number | null;
-    FreqType?: string;
-    InvoiceFrequency?: number;
-    InvoiceStartDate?: string | Date;
-    InvoiceNet?: number;
-    POUrl?: string | null;
-    Notes?: string | null;
-  }
+  //   // For backward compatibility with existing code
+  //   POID?: number;
+  //   PlacementDetails?: string;
+  //   StartDate?: string | Date;
+  //   EndDate?: string | Date | null;
+  //   Rate?: number;
+  //   OvertimeRate?: number | null;
+  //   FreqType?: string;
+  //   InvoiceFrequency?: number;
+  //   InvoiceStartDate?: string | Date;
+  //   InvoiceNet?: number;
+  //   POUrl?: string | null;
+  //   Notes?: string | null;
+  // }
+
+// PO Interface
+export interface Po {
+  id?: number;
+  placementid?: number;
+  begindate?: string | Date;
+  enddate?: string | Date | null;
+  rate?: number;
+  overtimerate?: number | null;
+  freqtype?: string; // "M" for MONTHLY, "W" for WEEKLY, "D" for DAYS
+  frequency?: number;
+  invoicestartdate?: string | Date;
+  invoicenet?: number;
+  polink?: string | null;
+  notes?: string | null;
+  placement_details?: string; // Concatenated string of candidate name, vendor, and client
+}
+
+
+// new invoicedata
+
+export interface InvoiceData {
+  id: number;
+  invoicenumber: string;
+  startdate: string;
+  enddate: string;
+  invoicedate: string;
+  quantity: number;
+  otquantity: number;
+  rate: number;
+  overtimerate: number;
+  status: string;
+  emppaiddate: string;
+  candpaymentstatus: string;
+  reminders: string;
+  amountexpected: number;
+  expecteddate: string;
+  amountreceived: number;
+  receiveddate: string;
+  releaseddate: string;
+  checknumber: string;
+  invoiceurl: string;
+  checkurl: string;
+  freqtype: string;
+  invoicenet: number;
+  companyname: string;
+  vendorfax: string;
+  vendorphone: string;
+  vendoremail: string;
+  timsheetemail: string;
+  hrname: string;
+  hremail: string;
+  hrphone: string;
+  managername: string;
+  manageremail: string;
+  managerphone: string;
+  secondaryname: string;
+  secondaryemail: string;
+  secondaryphone: string;
+  candidatename: string;
+  candidatephone: string;
+  candidateemail: string;
+  wrkemail: string;
+  wrkphone: string;
+  recruitername: string;
+  recruiterphone: string;
+  recruiteremail: string;
+  poid: number;
+  notes: string;
+}
+
+// PoGroup Interface for grouping invoices by PO
+export interface PoGroup {
+  poid: number;
+  name: string;
+  pos: InvoiceData[];
+  isGroup: boolean;
+  isCollapsed: boolean;
+}
+
+export interface MonthGroup {
+  invmonth: string;
+  name?: string;
+  invoices: InvoiceData[];
+  isGroup?: boolean;
+  isCollapsed?: boolean;
+  invoice_count: number;
+  summary: {
+    quantity: number;
+    otquantity: number;
+    amountexpected: number;
+    amountreceived: number;
+  };
+}
+
+// RowData interface for display in grid
+export interface RowData extends InvoiceData {
+  name?: string;
+  isGroupRow?: boolean;
+  isSummaryRow?: boolean;
+  level?: number;
+  expanded?: boolean;
+}
+
 
 
   
-  export interface Placement {
+ export interface Placement {
     id?: string;
     Candidate_Name?: string;
     Manager?: string;
@@ -573,20 +677,65 @@ export interface Vendor {
     //+++++++++++++++++++++++++++++++
 
 
+  // export interface Overdue {
+  //   id?: string;
+  //   poid?: string;
+  //   invoicenumber?: string;
+  //   invoicedate?: string;
+  //   quantity?: string;
+  //   rate?: string;
+  //   expecteddate?: string;
+  //   amountexpected?: string;
+  //   startdate?: string;
+  //   enddate?: string;
+  //   status?: string;
+  //   remindertype?: string;
+  //   amountreceived?: string;
+  //   receiveddate?: string;
+  //   releaseddate?: string;
+  //   checknumber?: string;
+  //   invoiceurl?: string;
+  //   checkurl?: string;
+  //   companyname?: string;
+  //   vendorfax?: string;
+  //   vendorphone?: string;
+  //   vendoremail?: string;
+  //   timsheetemail?: string;
+  //   hrname?: string;
+  //   hremail?: string;
+  //   hrphone?: string;
+  //   managername?: string;
+  //   manageremail?: string;
+  //   managerphone?: string;
+  //   secondaryname?: string;
+  //   secondaryemail?: string;
+  //   secondaryphone?: string;
+  //   candidatename?: string;
+  //   candidatephone?: string;
+  //   candidateemail?: string;
+  //   wrkemail?: string;
+  //   wrkphone?: string;
+  //   recruitername?: string;
+  //   recruiterphone?: string;
+  //   recruiteremail?: string;
+  //   notes?: string;
+  // }
+
+
   export interface Overdue {
-    id?: string;
+    pkid?: number;
     poid?: string;
     invoicenumber?: string;
     invoicedate?: string;
-    quantity?: string;
-    rate?: string;
+    quantity?: number;
+    rate?: number;
     expecteddate?: string;
-    amountexpected?: string;
+    amountexpected?: number;
     startdate?: string;
     enddate?: string;
     status?: string;
     remindertype?: string;
-    amountreceived?: string;
+    amountreceived?: number;
     receiveddate?: string;
     releaseddate?: string;
     checknumber?: string;
@@ -612,11 +761,50 @@ export interface Vendor {
     wrkemail?: string;
     wrkphone?: string;
     recruitername?: string;
-    recruiterphone?: string;
-    recruiteremail?: string;
-    notes?: string;
-  }
+  recruiterphone?: string;
+  recruiteremail?: string;
+  notes?: string;
+  serialNo?: number;
+}
 
+
+// Constants for form options
+export const INVOICE_STATUS_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "Open", label: "Open" },
+  { value: "Pending", label: "Pending" },
+  { value: "Paid", label: "Paid" },
+  { value: "Void", label: "Void" },
+  { value: "Closed", label: "Closed" },
+  { value: "Deny", label: "Deny" }
+];
+
+export const REMINDER_TYPE_OPTIONS = [
+  { value: "Open", label: "Open" },
+  { value: "Warning", label: "Warning" },
+  { value: "Warn-Candidate", label: "Warn-Candidate" },
+  { value: "Warn-Client", label: "Warn-Client" },
+  { value: "Warn-CollectionAgency", label: "Warn-CollectionAgency" },
+  { value: "Final-Warning", label: "Final-Warning" }
+];
+
+export const FREQ_TYPE_OPTIONS = [
+  { value: "M", label: "MONTHLY" },
+  { value: "W", label: "WEEKLY" },
+  { value: "D", label: "DAYS" }
+];
+
+export const REMINDER_OPTIONS = [
+  { value: "Y", label: "Y" },
+  { value: "N", label: "N" }
+];
+
+export const PAYMENT_STATUS_OPTIONS = [
+  { value: "Open", label: "Open" },
+  { value: "Pending", label: "Pending" },
+  { value: "Suspended", label: "Suspended" },
+  { value: "Closed", label: "Closed" }
+];
 
   // export interface CandidateMarketing {
   

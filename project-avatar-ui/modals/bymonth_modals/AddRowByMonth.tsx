@@ -2,6 +2,13 @@ import Modal from "react-modal";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+import { 
+  INVOICE_STATUS_OPTIONS, 
+  PAYMENT_STATUS_OPTIONS, 
+  REMINDER_OPTIONS, 
+  REMINDER_TYPE_OPTIONS 
+} from "../../types/index";
+
 interface InvoiceData {
   id: number;
   invoicenumber: string;
@@ -17,6 +24,7 @@ interface InvoiceData {
   emppaiddate: string;
   candpaymentstatus: string;
   reminders: string;
+  remindertype: string;
   amountexpected: number;
   expecteddate: string;
   amountreceived: number;
@@ -51,7 +59,6 @@ interface InvoiceData {
   recruiteremail: string;
   poid: number;
   notes: string;
-  placementid: number;
 }
 
 interface FormData {
@@ -63,6 +70,7 @@ interface FormData {
   quantity: string;
   otquantity: string;
   status: string;
+  remindertype: string;
   emppaiddate: string;
   candpaymentstatus: string;
   reminders: string;
@@ -92,9 +100,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
     quantity: '',
     otquantity: '',
     status: 'Open',
+    remindertype: 'Open',
     emppaiddate: '',
     candpaymentstatus: 'Open',
-    reminders: 'N',
+    reminders: 'Y',
     amountreceived: '',
     receiveddate: '',
     releaseddate: '',
@@ -124,6 +133,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
         rate: 0, 
         overtimerate: 0, 
         status: formData.status,
+        remindertype: formData.remindertype,
         emppaiddate: formData.emppaiddate,
         candpaymentstatus: formData.candpaymentstatus,
         reminders: formData.reminders,
@@ -161,7 +171,6 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
         recruiteremail: '',
         poid: Number(formData.poid) || 0,
         notes: formData.notes,
-        placementid: 0, // Added the required placementid property
       };
       
       await onSubmit(invoiceData);
@@ -245,7 +254,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
 
         <div className="modal-field">
           <label htmlFor="startdate" className="block text-sm font-semibold text-gray-700 mb-1">
-            Start Date
+            Start Date *
           </label>
           <input
             type="date"
@@ -253,6 +262,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
             name="startdate"
             value={formData.startdate}
             onChange={handleChange}
+            required
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
@@ -324,10 +334,30 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
-            <option value="Open">Open</option>
-            <option value="Closed">Closed</option>
-            <option value="Void">Void</option>
-            <option value="Delete">Delete</option>
+            {INVOICE_STATUS_OPTIONS.filter(option => option.value !== "").map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="modal-field">
+          <label htmlFor="remindertype" className="block text-sm font-semibold text-gray-700 mb-1">
+            Reminder Type *
+          </label>
+          <select
+            id="remindertype"
+            name="remindertype"
+            value={formData.remindertype}
+            onChange={handleChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+          >
+            {REMINDER_TYPE_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -356,10 +386,11 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
-            <option value="Open">Open</option>
-            <option value="Pending">Pending</option>
-            <option value="Suspended">Suspended</option>
-            <option value="Closed">Closed</option>
+            {PAYMENT_STATUS_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -374,8 +405,11 @@ const AddRowModal: React.FC<AddRowModalProps> = ({ isOpen, onClose, onSubmit, cl
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           >
-            <option value="Y">Y</option>
-            <option value="N">N</option>
+            {REMINDER_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
 

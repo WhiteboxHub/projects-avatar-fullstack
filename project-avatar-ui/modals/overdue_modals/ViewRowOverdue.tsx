@@ -1,6 +1,6 @@
-import React from 'react';
-import Modal from 'react-modal';
-import { AiOutlineClose } from 'react-icons/ai'; // Adjust the import path accordingly
+import Modal from "react-modal";
+import React from "react";
+import { AiOutlineClose } from "react-icons/ai";
 
 interface OverdueViewType {
   pkid?: number;

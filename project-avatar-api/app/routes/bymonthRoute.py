@@ -17,8 +17,8 @@ def read_invoice_months(db: Session = Depends(get_db)):
 @router.get("/api/admin/invoices/dataByMonth")
 def read_invoices_by_month(
     month: Optional[str] = Query(None),
-    page: int = Query(1),
-    page_size: int = Query(5000),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=1000),
     sort_field: str = Query("invoicedate"),
     sort_order: str = Query("desc"),
     search_poid: Optional[str] = None,
