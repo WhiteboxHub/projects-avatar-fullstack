@@ -768,15 +768,15 @@ class CurrentMarketingSchema(CurrentMarketingBase):
 #     remindertype: Optional[str]   
 # 
 class OverdueUpdateSchema(BaseModel):
-    invoicedate: Optional[date]
-    quantity: Optional[int]
-    amountreceived: Optional[float]
-    receiveddate: Optional[date]
-    releaseddate: Optional[date]
-    checknumber: Optional[str]
-    notes: Optional[str]
-    status: Optional[str]
-    remindertype: Optional[str]
+    invoicedate: Optional[date]=None
+    quantity: Optional[int]=None
+    amountreceived: Optional[float]=None
+    receiveddate: Optional[date]=None
+    releaseddate: Optional[date]=None
+    checknumber: Optional[str]=None
+    notes: Optional[str]=None
+    status: Optional[str]=None
+    remindertype: Optional[str]=None
     
     @validator('status')
     def validate_status(cls, v):
@@ -794,6 +794,9 @@ class OverdueUpdateSchema(BaseModel):
                 raise ValueError(f"Reminder type must be one of: {', '.join(valid_types)}")
         return v
     
+    @validator('amountreceived', pre=True)
+    def empty_string_to_none(cls, v):
+        return None if isinstance(v, str) and not v.strip() else v
        
 # class InvoiceBase(BaseModel):
 #     invoicenumber: str
@@ -872,8 +875,16 @@ class InvoiceCreateSchema(InvoiceBase):
         if v and v not in valid_types:
             raise ValueError(f"Reminder type must be one of: {', '.join(valid_types)}")
         return v or "Open"
+    
+    @validator('releaseddate', 'receiveddate', 'emppaiddate', pre=True)
+    def empty_string_to_none(cls, v):
+        return None if isinstance(v, str) and not v.strip() else v
 class InvoiceUpdateSchema(InvoiceBase):
     pass
+
+    @validator('releaseddate', 'receiveddate', 'emppaiddate', pre=True)
+    def empty_string_to_none(cls, v):
+        return None if isinstance(v, str) and not v.strip() else v
 
 class InvoiceSchema(InvoiceBase):
     id: int

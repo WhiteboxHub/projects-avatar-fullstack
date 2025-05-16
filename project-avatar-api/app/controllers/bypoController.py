@@ -529,11 +529,26 @@ def get_invoice_by_id(db: Session, po_id: int):
     result = db.execute(query, {'po_id': po_id}).mappings().all()
     return result
 
+# def create_invoice(db: Session, invoice_data: InvoiceCreateSchema):
+#     # Handle empty date fields to prevent validation errors
+#     data_dict = invoice_data.dict()
+    
+#     # Create new invoice record
+#     new_invoice = Invoice(**data_dict)
+#     db.add(new_invoice)
+#     db.commit()
+#     db.refresh(new_invoice)
+#     return new_invoice
+
 def create_invoice(db: Session, invoice_data: InvoiceCreateSchema):
-    # Handle empty date fields to prevent validation errors
     data_dict = invoice_data.dict()
     
-    # Create new invoice record
+    # Convert empty date strings to None
+    date_fields = ['releaseddate', 'receiveddate', 'emppaiddate']
+    for field in date_fields:
+        if field in data_dict and isinstance(data_dict[field], str) and not data_dict[field].strip():
+            data_dict[field] = None
+    
     new_invoice = Invoice(**data_dict)
     db.add(new_invoice)
     db.commit()
