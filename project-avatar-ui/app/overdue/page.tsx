@@ -11,7 +11,7 @@ import { jsPDF } from "jspdf";
 import { debounce } from "lodash";
 import { FaDownload } from "react-icons/fa";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { INVOICE_STATUS_OPTIONS, Overdue, REMINDER_TYPE_OPTIONS } from "@/types/index";
+import { Overdue } from "@/types/index";
 
 import {
   AiOutlineEdit,

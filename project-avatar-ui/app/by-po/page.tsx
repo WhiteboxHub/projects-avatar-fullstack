@@ -16,7 +16,8 @@ import { jsPDF } from "jspdf";
 import { AiOutlineEdit, AiOutlineEye, AiOutlineReload, AiOutlineSearch } from "react-icons/ai";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAdd, MdDelete } from "react-icons/md";
-import { INVOICE_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS, REMINDER_OPTIONS } from "@/types/index";
+
+// import { INVOICE_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS, REMINDER_OPTIONS } from "@/types/index";
 
 jsPDF.prototype.autoTable = autoTable;
 

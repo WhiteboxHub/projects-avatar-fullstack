@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
-import axios from 'axios';
-import { AiOutlineClose } from 'react-icons/ai';
-import { Overdue } from '@/types';
+import Modal from "react-modal";
+import React, { useState } from "react";
+import axios from "axios";
+import { AiOutlineClose } from "react-icons/ai";
+import { Overdue } from "@/types";
+
 interface AddRowOverdueProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,19 +12,18 @@ interface AddRowOverdueProps {
 
 const AddRowOverdue: React.FC<AddRowOverdueProps> = ({ isOpen, onClose, refreshData }) => {
   const [formData, setFormData] = useState<Overdue>({
-    id: '',
     poid: '',
     invoicenumber: '',
     invoicedate: '',
-    quantity: '',
-    rate: '',
+    quantity: 0,
+    rate: 0,
     expecteddate: '',
-    amountexpected: '',
+    amountexpected: 0,
     startdate: '',
     enddate: '',
     status: '',
     remindertype: '',
-    amountreceived: '',
+    amountreceived: 0,
     receiveddate: '',
     releaseddate: '',
     checknumber: '',
